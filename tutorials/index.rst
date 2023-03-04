@@ -11,6 +11,7 @@ Welcome to Tutorials's documentation!
    :caption: Contents:
 
    01-introduction
+   parabricks/01-introduction
 
 Indices and tables
 ==================
