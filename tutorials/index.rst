@@ -10,7 +10,6 @@ Welcome to Tutorials's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   01-introduction
    parabricks/01-introduction
 
 Indices and tables
