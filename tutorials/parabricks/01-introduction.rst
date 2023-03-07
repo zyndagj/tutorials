@@ -9,7 +9,7 @@ Course objectives
 As DNA sequencing has decreased in price, experiments have often been designed to use deeper coverage or more samples. This means more data is being produced and more time is spent on the bioinformatics analysis. CPU-based tools are commonly used for both read alignment and variant calling. However, significant time can be saved when GPU-accelerated tools are used. This will be demonstrated with NVIDIA Parabricks with the following steps:
 
 * DNA alignment with fq2bam
-* Calling variants with haplotypecaller
+* Calling variants with haplotypeCaller
 * Potential downstream analyses
 
 This tutorial will show you how to run our core alignment tool, FQ2BAM, which allows you to align a FASTQ file according to GATK best practices at blazing speeds. This includes the gold-standard alignment tool BWA-MEM with inbuilt co-ordinate sorting of the output file, and optionally application of base-quality-score-recalibration and marking of duplicate reads.
@@ -24,20 +24,34 @@ Requirements
   * `Apptainer <https://apptainer.org/>`_
   * `Enroot <https://github.com/NVIDIA/enroot>`_
 
+* The following containers:
+
+  * `nvcr.io/nvidia/clara/clara-parabricks:4.0.1-1 <https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/clara-parabricks>`_
+  * `biocontainers/bwa:v0.7.15_cv4 <https://hub.docker.com/r/biocontainers/bwa/tags>`_
+  * `broadinstitute/gatk:4.2.0.0 <https://hub.docker.com/r/broadinstitute/gatk/tags>`_
+  * `biocontainers/seqtk:v1.3-1-deb_cv1 <https://hub.docker.com/r/biocontainers/seqtk/tags>`_
+  * `gzynda/snpmatch:5.0.1 <https://hub.docker.com/r/gzynda/snpmatch/tags>`_
+  * `mgibio/samtools-cwl:1.16.1 <https://hub.docker.com/r/mgibio/samtools-cwl/tags>`_
+
 Data Used
 -------------------
 
-This tutorial will be using single-end reads from two strains of *Arabidopsis thaliana* from the `1001 Genomes project <https://1001genomes.org/index.html>`_:
+This tutorial will be using paried-end reads from the TDr-7 strain of *Arabidopsis thaliana* from the `1001 Genomes project <https://1001genomes.org/index.html>`_
 
-* `Bay-0 <https://1001genomes.org/data/JGI/JGIHeazlewood2008/releases/2011_11_15/TAIR10/strains/Bay-0>`_
-* `Shadahara <https://1001genomes.org/data/JGI/JGIHeazlewood2008/releases/2011_11_15/TAIR10/strains/Sha/>`_
+* `TDr-7 <https://www.ebi.ac.uk/ena/browser/view/SRR519591>`_
 
-The bam files were converted to fastq and down-sampled to 20M reads using samtools and seqtk to reduce runtime for this tutorial.
+The *A. thaliana* reference genome, `TAIR10 <https://www.arabidopsis.org/>`_, with "Chr" removed from chromosome names to match naming convention used by 1001 Genomes project.
 
 .. code-block:: shell
 
-    samtools fastq <sample>.bam > <sample>.fastq
-    seqtk sample <sample>.fastq 20000000 > <sample>_20M.fastq
+    # Download reference
+    curl https://www.arabidopsis.org/download_files/Genes/TAIR10_genome_release/TAIR10_chromosome_files/TAIR10_chr_all.fas.gz | zcat | sed -e "s/^>Chr/>/" > TAIR10_chr_all.fasta
+    # Index with samtools
+    samtools faidx TAIR10_chr_all.fasta
+
+The `SNPmatch database <https://figshare.com/articles/dataset/SNP_dataset_for_A_thaliana_1001_Genomes_project/5514403?backTo=/collections/_/3722743>`_ for the 1001 Genomes Project.
+
+All downloads can be performed by running :download:`download_data.sh <assets/download_data.sh>`
 
 Introduction to Clara Parabricks
 --------------------------------
@@ -57,7 +71,7 @@ Clara Parabricks is available as a container on NGC.
 
 https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/clara-parabricks
 
-This tutorial will be using ``v4.0.1-1`` of the container, so please pull it to your system as follows:
+This tutorial will be using ``v4.0.1-1`` of the container, and it can be pulled to your system as follows:
 
 .. code-block:: shell
 
@@ -67,19 +81,16 @@ This tutorial will be using ``v4.0.1-1`` of the container, so please pull it to 
     # apptainer
     apptainer pull docker://nvcr.io/nvidia/clara/clara-parabricks:4.0.1-1
 
-.. note::
-
-    Since there are many ways to invoke the parabricks container, all example commands will omit container runtime commands. If you are using apptainer/singularity, make sure to include the ``--nv`` flag to mount NVIDIA libraries and devices.
-
-Preparing your environment
-##########################
-
 To streamline this workshop, a modulefile was created with helper variables and functions for calling singularity containers. Please load it with:
 
 .. code-block:: shell
 
     module use /scratch/user/u.gz28467/modulefiles
     module load tutorial/latest
+
+.. note::
+
+    Since there are many ways to invoke the parabricks container, all example commands will omit container runtime commands. If you are using apptainer/singularity, make sure to include the ``--nv`` flag to mount NVIDIA libraries and devices.
 
 DNA alignment with fq2bam
 -------------------------
@@ -90,18 +101,29 @@ When fq2bam is run, reads (compressed or not) are aligned by GPU-bwa mem, alignm
 
 .. image:: https://docscontent.nvidia.com/dims4/default/07eaa76/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.amazonaws.com%2Fbrightspot%2Fsphinx%2F00000186-7a40-d64e-abe6-fa7020f90000%2Fclara%2Fparabricks%2F4.0.1%2F_images%2Ffq2bam.png
 
-Depending on how you need to process your sample, fq2bam has a `lot of options <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_fq2bam.html#fq2bam-reference>`_. Since the data used in this tutorial is single-ended, we're going to be using:
+Depending on how you need to process your sample, fq2bam has a `lot of options <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_fq2bam.html#fq2bam-reference>`_. Since the data used in this tutorial is paired-end, we're going to be using:
+
+.. code-block::
 
   --ref REF             Path to the reference file. (default: None)
-  --in-se-fq [IN_SE_FQ [IN_SE_FQ ...]]
-                        Path to the single-ended FASTQ file followed by optional read group with quotes 
+  --in-fq [IN_FQ [IN_FQ ...]]
+                        Path to the pair-ended FASTQ files followed by optional read groups with quotes
   --out-bam OUT_BAM     Path of a BAM/CRAM file after Marking Duplicates. (default: None)
   --num-gpus NUM_GPUS   Number of GPUs to use for a run. (default: number detected)
 
+Indexing the reference for fq2bam
+#################################
+
+Parabricks does require the the reference genome be indexed with bwa before it can run fq2bam. This function was not ported to GPU, so you'll need to run this with the CPU version of the code.
+
+.. code-block:: shell
+
+    bwa index TAIR10_chr_all.fasta
+
 .. note::
 
-    For the sake of time, the reference genome we'll be using was already indexed with
-    ``bwa index TAIR10_chr_all.fasta``. This will need to be done for any other genomes you use.
+    For the sake of time, the reference genome we'll be using was already indexed.
+    This will need to be done for any other genomes you use.
 
 Running fq2bam on one GPU
 ##########################
@@ -131,48 +153,47 @@ If you compare the size of the ``.bam`` files created by Parabricks and the CPU 
 .. code-block:: shell
 
     $ ls -lh *bam
-    -rw-rw-r-- 1 u.gz28467 u.gz28467 1.1G Mar  5 17:25 Bay-0_20M_pb.bam
-    -rw-rw-r-- 1 u.gz28467 u.gz28467 1.3G Mar  5 17:45 Bay-0_cpu_sorted_marked.bam
-    -rw-rw-r-- 1 u.gz28467 u.gz28467 1.1G Mar  5 18:07 Shadara_20M_pb.bam
-    -rw-rw-r-- 1 u.gz28467 u.gz28467 1.3G Mar  5 17:52 Shadara_cpu_sorted_marked.bam
+    -rw-rw-r-- 1 u.gz28467 u.gz28467 1.6G Mar  7 01:48 TDr-7_10M_cpu_sorted_marked.bam
+    -rw-rw-r-- 1 u.gz28467 u.gz28467 1.4G Mar  7 01:35 TDr-7_10M_pb.bam
 
 This is due to compression levels. If you compare the bam files with samtools, they contain the same number of alignments.
 
 .. code-block:: shell
 
-    $ samtools flagstat Bay-0_20M_pb.bam
-    20000000 + 0 in total (QC-passed reads + QC-failed reads)
+    $ samtools flagstat TDr-7_10M_pb.bam
+    20022096 + 0 in total (QC-passed reads + QC-failed reads)
     20000000 + 0 primary
     0 + 0 secondary
-    0 + 0 supplementary
-    3314936 + 0 duplicates
-    3314936 + 0 primary duplicates
-    13577887 + 0 mapped (67.89% : N/A)
-    13577887 + 0 primary mapped (67.89% : N/A)
+    22096 + 0 supplementary
+    3608170 + 0 duplicates
+    3608170 + 0 primary duplicates
+    19033358 + 0 mapped (95.06% : N/A)
+    19011262 + 0 primary mapped (95.06% : N/A)
 
-    $ samtools flagstat Bay-0_cpu_sorted_marked.bam 
-    20000000 + 0 in total (QC-passed reads + QC-failed reads)
+    $ samtools flagstat TDr-7_10M_cpu_sorted_marked.bam 
+    20022096 + 0 in total (QC-passed reads + QC-failed reads)
     20000000 + 0 primary
     0 + 0 secondary
-    0 + 0 supplementary
-    3314936 + 0 duplicates
-    3314936 + 0 primary duplicates
-    13577887 + 0 mapped (67.89% : N/A)
-    13577887 + 0 primary mapped (67.89% : N/A)
+    22096 + 0 supplementary
+    3608170 + 0 duplicates
+    3608170 + 0 primary duplicates
+    19033358 + 0 mapped (95.06% : N/A)
+    19011262 + 0 primary mapped (95.06% : N/A)
 
 Optional Exercises
 ##########################
 
 * Have you tried using a different number of GPUs?
+* What was the speedup when using a GPU?
 * What happens if your input reads are compressed?
 * Are the reads the same if you view them?
 
 Calling Variants with haplotypeCaller
--------------------------
+-------------------------------------
 
 The Parabricks haplotypeCaller is a re-implementation of the `GATK HaplotypeCaller <https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller>`_, which is used to call germline (inherited) SNPs and indels through the local re-assembly of haplotypes and identify genotypes.
 
-Like humans, `A. thaliana is diploid <https://www.pnas.org/doi/abs/10.1073/pnas.92.24.10831>`_ and has two copies of each chromosome, so at any given location across the genome, all aligned bases are the same (homozygous), or about half of the reads have one base and half have another (heterozygous). The chloroplast (ChrC) is haploid, similar to the sex chromosomes in humans, and cannot be heterozygous.
+Like humans, `A. thaliana is diploid <https://www.pnas.org/doi/abs/10.1073/pnas.92.24.10831>`_ and has two copies of each chromosome, so at any given location across the genome, all aligned bases are the same (homozygous), or about half of the reads have one base and half have another (heterozygous). The chloroplast (C) is haploid, similar to the sex chromosomes in humans, and cannot be heterozygous.
 
 .. image:: https://docscontent.nvidia.com/sphinx/00000186-7a40-d64e-abe6-fa7020f90000/clara/parabricks/4.0.1/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg
 
@@ -184,11 +205,19 @@ Similar to fq2bam, the haplotypeCaller pipeline in Parabricks has `many options 
                         Path of the vcf/g.vcf/gvcf.gz file after variant calling. The argument may also be a local folder in batch mode. (default: None)
   --num-gpus NUM_GPUS   Number of GPUs to use for a run. (default: number detected)
 
+Indexing the reference for haplotypeCaller
+##########################################
+
+Parabricks does require the the reference genome be indexed with ``gatk CreateSequenceDictionary`` and ``samtools faidx`` before it can run haplotypeCaller. This function was not ported to GPU, so you'll need to run this with the CPU version of the code.
+
+.. code-block:: shell
+
+    gatk CreateSequenceDictionary -R TAIR10_chr_all.fasta; samtools faidx TAIR10_chr_all.fasta
 
 .. note::
 
-    For the sake of time, the reference genome we'll be using was already indexed with
-    ``gatk CreateSequenceDictionary -R TAIR10_chr_all.fasta; samtools faidx TAIR10_chr_all.fasta``. This will need to be done for any other genomes you use.
+    For the sake of time, the reference genome we'll be using was already indexed.
+    This will need to be done for any other genomes you use.
 
 Running haplotypeCaller
 #######################
@@ -200,7 +229,7 @@ HaplotypeCaller takes the ``.bam`` files created by fq2bam as input, and calls v
 
 .. note::
 
-    Alternatively, both fq2bam and haplotypecaller can be run with the `germline pipeline <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_germline.html#man-germline>`_.
+    Alternatively, both fq2bam and haplotypeCaller can be run with the `germline pipeline <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_germline.html#man-germline>`_.
 
 Running the CPU equivalent
 ##########################
@@ -217,14 +246,44 @@ Optional Exercises
 * How much is runtime affected by the number of GPUs?
 * Try running `DeepVariant <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_deepvariant.html#man-deepvariant>`_
 
-Annotating and Analyzing Variant Calls
+Genotyping sample
 -------------------------
 
-.. code-block:: shell
+Now that we have a ``.vcf`` file of all variants, we're ready to perform some "tertiary" analyses. One common one is sample identification based on genotype. In humans, your specific alleles, or variants, could be used to determine your ancestry. In plants, you could determine what variety of a crop you sequenced.
 
-    tabix -p vcf 1001genomes_snp-short-indel_only_ACGTN.vcf.gz
+For our example, we're going to verify the identity of the sample we've been working with. The 1001 Genomes project actually has a web portal called `AraGeno <http://arageno.gmi.oeaw.ac.at/>`_ for identifying samples based on the called SNPs, but we're going to run `SNPmatch <https://github.com/Gregor-Mendel-Institute/SNPmatch>`_ manually.
 
+.. literalinclude:: assets/run_snpmatch.sh
+    :caption: :download:`run_snpmatch.sh <assets/run_snpmatch.sh>`
 
-https://1001genomes.org/accessions-legacy-projects.html
-https://1001genomes.org/projects/JGIHeazlewood2008/index.html
+    
+This will then create a ``.matches.json`` file, which will have an accession ID. Find this ID in the `1001 Genomes accessions list <https://1001genomes.org/accessions.html>`_ and see if it matches TDr-7.
 
+Optional Exercises
+##########################
+
+* Try genotyping another sample from `HERE <https://www.ebi.ac.uk/ena/browser/view/SRP012869>`_
+* Run your own data
+
+Next Steps
+----------
+
+Try the RNA-seq pipelines:
+
+* `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_
+* `starfusion <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_starfusion.html#man-starfusion>`_
+
+Keep an eye out for new updates making DeepVariant easier to fine-tune to your data through Parabricks!
+
+Register for NVIDIA Deep Learning Institutes:
+
+* `Training DeepVariant Models using Parabricks* [DLIT52115] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=parabricks#/session/1669934478047001d6Ot>`_
+* `Variant Calling on Whole Exome Data using Parabricks <https://www.nvidia.com/en-us/on-demand/session/gtcfall22-dlit41350/?playlistId=playList-c395267f-7c85-4a96-90bb-574392cbd162>`_
+
+`Register for GTC 2023 <https://www.nvidia.com/gtc/?ncid=GTC-NVGZYNDA>`_ and attend the following talks:
+
+* `Acceleration and Deep Learning for Genomics on GPUs [S51265] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=parabricks#/session/1666293509141001VTC4>`_
+* `Developing Rapid DNA Sequencing to Accelerate Cancer Research and Care [S51255] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=genomics#/session/1666289427192001HJQx>`_
+* `Scaling Long-Read Sequencing Throughput and Accessibility with Deep Learning and NVIDIA [S51279] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=genomics#/session/1666309017684001kNgb>`_
+* `Accelerated Computational Pipeline for Ultra-Rapid Nanopore Whole-Genome Sequencing [PS52265] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=genomics#/session/1673557481751001AhSx>`_
+* `High Performance Genome-Wide Association Study Using Mixed-Precision Ridge Regression [S51628] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=genomics#/session/1666630500231001AoOj>`_

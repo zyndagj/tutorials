@@ -2,8 +2,10 @@
 
 REF=/scratch/user/u.gz28467/input_files/TAIR10_chr_all.fasta
 
-BAY_BAM=Bay-0_20M_cpu_sorted_marked.bam
-SHA_BAM=Shadara_20M_cpu_sorted_marked.bam
+TDR_BAM=TDr-7_10M_pb.bam
+
+# Number of threads for GATK to use
+OMP_NUM_THREADS=8
 
 function haplo_se {
 	REF=$1; BAM=$2; PREFIX=$3
@@ -15,12 +17,5 @@ function haplo_se {
 		--native-pair-hmm-threads 16
 }
 
-# Index the inputs
-samtools index $BAY_BAM
-samtools index $SHA_BAM
-
-# Call variants on Bay-0 bam file (11min)
-time haplo_se $REF $BAY_BAM Bay-0_20M
-
-# Call variants on Shadra bam file (13min)
-time haplo_se $REF $SHA_BAM Shadara_20M
+# Call variants on TDr-7 bam file
+time haplo_se $REF $TDR_BAM TDr-7_10M
