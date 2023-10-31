@@ -21,14 +21,15 @@ Requirements
 * Container runtime that supports NVIDIA GPUs and Docker containers:
 
   * `Docker <https://docs.docker.com/get-docker/>`_
+  * `Singularity <https://sylabs.io/docs/>`_
   * `Apptainer <https://apptainer.org/>`_
   * `Enroot <https://github.com/NVIDIA/enroot>`_
 
 * The following containers:
 
-  * `nvcr.io/nvidia/clara/clara-parabricks:4.0.1-1 <https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/clara-parabricks>`_
+  * `nvcr.io/nvidia/clara/clara-parabricks:4.2.0-1 <https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/clara-parabricks>`_
   * `biocontainers/bwa:v0.7.15_cv4 <https://hub.docker.com/r/biocontainers/bwa/tags>`_
-  * `broadinstitute/gatk:4.2.0.0 <https://hub.docker.com/r/broadinstitute/gatk/tags>`_
+  * `broadinstitute/gatk:4.3.0.0 <https://hub.docker.com/r/broadinstitute/gatk/tags>`_
   * `biocontainers/seqtk:v1.3-1-deb_cv1 <https://hub.docker.com/r/biocontainers/seqtk/tags>`_
   * `gzynda/snpmatch:5.0.1 <https://hub.docker.com/r/gzynda/snpmatch/tags>`_
   * `mgibio/samtools-cwl:1.16.1 <https://hub.docker.com/r/mgibio/samtools-cwl/tags>`_
@@ -36,7 +37,7 @@ Requirements
 Data Used
 -------------------
 
-This tutorial will be using paried-end reads from the TDr-7 strain of *Arabidopsis thaliana* from the `1001 Genomes project <https://1001genomes.org/index.html>`_
+This tutorial will be using paired-end reads from the TDr-7 strain of *Arabidopsis thaliana* from the `1001 Genomes project <https://1001genomes.org/index.html>`_
 
 * `TDr-7 <https://www.ebi.ac.uk/ena/browser/view/SRR519591>`_
 
@@ -60,7 +61,7 @@ NVIDIA Clara™ Parabricks® is a software suite for the secondary analysis (ali
 
 .. image:: assets/analysis_steps.png
 
-Parabricks v4 supports a variety of GPU-accelerated secondary analyses: alignment, preprocessing, variant calling, QC, and even some variant annotation (which lies in tertiary analysis). The chart below shows each pipeline supported in Parabricks v4.0.1-1, but take a look at `the documentation <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/standalonetools.html>`_ for more information.
+Parabricks v4 supports a variety of GPU-accelerated secondary analyses: alignment, preprocessing, variant calling, QC, and even some variant annotation (which lies in tertiary analysis). The chart below shows each pipeline supported in Parabricks v4.2.0-1, but take a look at `the documentation <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/standalonetools.html>`_ for more information.
 
 .. image:: assets/pb_pipelines.png
 
@@ -71,37 +72,37 @@ Clara Parabricks is available as a container on NGC.
 
 https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/clara-parabricks
 
-This tutorial will be using ``v4.0.1-1`` of the container, and it can be pulled to your system as follows:
+This tutorial will be using ``v4.2.0-1`` of the container, and it can be pulled to your system as follows:
 
 .. code-block:: shell
 
     # Docker
-    docker pull nvcr.io/nvidia/clara/clara-parabricks:4.0.1-1
+    docker pull nvcr.io/nvidia/clara/clara-parabricks:4.2.0-1
 
-    # apptainer
-    apptainer pull docker://nvcr.io/nvidia/clara/clara-parabricks:4.0.1-1
+    # singularity
+    singularity pull docker://nvcr.io/nvidia/clara/clara-parabricks:4.2.0-1
 
-To streamline this workshop, a modulefile was created with helper variables and functions for calling singularity containers. Please load it with:
+To streamline this workshop on `ACES <https://hprc.tamu.edu/aces/>`_, an `LMOD <https://lmod.readthedocs.io/en/latest/>`_ modulefile was created with helper variables and functions for calling singularity containers. Please load it with:
 
 .. code-block:: shell
 
-    module use /scratch/user/u.gz28467/modulefiles
-    module load tutorial/latest
+    module use /scratch/user/u.gz28467/workshop/modules/modulefiles/
+    module load parabricks_workshop/4.2.0-1
 
 .. note::
 
-    Since there are many ways to invoke the parabricks container, all example commands will omit container runtime commands. If you are using apptainer/singularity, make sure to include the ``--nv`` flag to mount NVIDIA libraries and devices.
+    Since there are many ways to invoke the parabricks container, all example commands will omit container runtime commands. If you are using apptainer/singularity, make sure to include the ``--nv`` flag to `mount NVIDIA libraries and devices <https://docs.sylabs.io/guides/3.11/user-guide/gpu.html>`_.
 
 DNA alignment with fq2bam
 -------------------------
 
-Unless you're starting with pre-aligned reads in a ``.bam`` file, the first step to many bioinformatics pipelines is alignment. Parabricks has the `fq2bam <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_fq2bam.html#man-fq2bam>`_ pipeline for DNA (based on bwa mem) and the `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_ pipeline for RNA (based on STAR). This tutorial uses DNA inputs and will focus on fq2bam.
+Unless you're starting with pre-aligned reads in a ``.bam`` file, the first step to many bioinformatics pipelines is alignment. Parabricks has the `fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#man-fq2bam>`_ pipeline for DNA (based on bwa mem) and the `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_ pipeline for RNA (based on STAR). This tutorial uses DNA inputs and will focus on fq2bam.
 
 When fq2bam is run, reads (compressed or not) are aligned by GPU-bwa mem, alignments are sorted by coordinate, duplicates are marked, and Base Quality Score Recalibration (BQSR) is performed, and a final ``.bam`` file is output.
 
-.. image:: https://docscontent.nvidia.com/dims4/default/07eaa76/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.amazonaws.com%2Fbrightspot%2Fsphinx%2F00000186-7a40-d64e-abe6-fa7020f90000%2Fclara%2Fparabricks%2F4.0.1%2F_images%2Ffq2bam.png
+.. image:: https://docscontent.nvidia.com/dims4/default/07eaa76/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.amazonaws.com%2Fbrightspot%2Fsphinx%2F00000186-7a40-d64e-abe6-fa7020f90000%2Fclara%2Fparabricks%2F4.2.0%2F_images%2Ffq2bam.png
 
-Depending on how you need to process your sample, fq2bam has a `lot of options <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_fq2bam.html#fq2bam-reference>`_. Since the data used in this tutorial is paired-end, we're going to be using:
+Depending on how you need to process your sample, fq2bam has a `lot of options <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#fq2bam-reference>`_. Since the data used in this tutorial is paired-end, we're going to be using:
 
 .. code-block::
 
@@ -143,7 +144,7 @@ Is there a larger effect on certain phases?
 Running the CPU equivalent
 ##########################
 
-For every workflow in Clara Parabricks, an equivalent CPU workflow is provided to reproduce results. `fq2bam is no exception <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_fq2bam.html#compatible-cpu-based-bwa-mem-gatk4-commands>`_, and the below example takes those commands and wraps them in a bash function.
+For every workflow in Clara Parabricks, an equivalent CPU workflow is provided to reproduce results. `fq2bam is no exception <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#compatible-cpu-based-bwa-mem-gatk4-commands>`_, and the below example takes those commands and wraps them in a bash function.
 
 .. literalinclude:: assets/run_fq2bam_cpu.sh
     :caption: :download:`run_fq2bam_cpu.sh <assets/run_fq2bam_cpu.sh>`
@@ -195,9 +196,9 @@ The Parabricks haplotypeCaller is a re-implementation of the `GATK HaplotypeCall
 
 Like humans, `A. thaliana is diploid <https://www.pnas.org/doi/abs/10.1073/pnas.92.24.10831>`_ and has two copies of each chromosome, so at any given location across the genome, all aligned bases are the same (homozygous), or about half of the reads have one base and half have another (heterozygous). The chloroplast (C) is haploid, similar to the sex chromosomes in humans, and cannot be heterozygous.
 
-.. image:: https://docscontent.nvidia.com/sphinx/00000186-7a40-d64e-abe6-fa7020f90000/clara/parabricks/4.0.1/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg
+.. image:: https://docscontent.nvidia.com/sphinx/00000186-7a40-d64e-abe6-fa7020f90000/clara/parabricks/4.2.0/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg
 
-Similar to fq2bam, the haplotypeCaller pipeline in Parabricks has `many options <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_haplotypecaller.html#specifying-haplotype-caller-options>`_, but we'll only need to use these:
+Similar to fq2bam, the haplotypeCaller pipeline in Parabricks has `many options <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_haplotypecaller.html#specifying-haplotype-caller-options>`_, but we'll only need to use these:
 
   --ref REF             Path to the reference file. (default: None)
   --in-bam IN_BAM       Path to the input BAM/CRAM file for variant calling. The argument may also be a local folder containing several bams; each will be processed by 1 GPU in batch mode. (default: None)
@@ -229,12 +230,12 @@ HaplotypeCaller takes the ``.bam`` files created by fq2bam as input, and calls v
 
 .. note::
 
-    Alternatively, both fq2bam and haplotypeCaller can be run with the `germline pipeline <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_germline.html#man-germline>`_.
+    Alternatively, both fq2bam and haplotypeCaller can be run with the `germline pipeline <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_germline.html#man-germline>`_.
 
 Running the CPU equivalent
 ##########################
 
-The `CPU equivalent of haplotypeCaller <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_haplotypecaller.html#compatible-gatk4-command>`_ only requires a single call to GATK, but it's much more time intensive than the Parabricks version. Once again, the commands have been wrapped in a bash function for easy usage.
+The `CPU equivalent of haplotypeCaller <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_haplotypecaller.html#compatible-gatk4-command>`_ only requires a single call to GATK, but it's much more time intensive than the Parabricks version. Once again, the commands have been wrapped in a bash function for easy usage.
 
 .. literalinclude:: assets/run_cpu_haplo.sh
     :caption: :download:`run_cpu_haplo.sh <assets/run_cpu_haplo.sh>`
@@ -244,7 +245,8 @@ Optional Exercises
 
 * Run the germline pipeline
 * How much is runtime affected by the number of GPUs?
-* Try running `DeepVariant <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_deepvariant.html#man-deepvariant>`_
+* Try running `DeepVariant <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_deepvariant.html#man-deepvariant>`_
+* Try `re-training DeepVariant <https://docs.nvidia.com/clara/parabricks/4.2.0/tutorials/dvtraining.html>`_
 
 Genotyping sample
 -------------------------
@@ -270,20 +272,18 @@ Next Steps
 
 Try the RNA-seq pipelines:
 
-* `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_
-* `starfusion <https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_starfusion.html#man-starfusion>`_
-
-Keep an eye out for new updates making DeepVariant easier to fine-tune to your data through Parabricks!
+* `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_
+* `starfusion <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_starfusion.html#man-starfusion>`_
 
 Register for NVIDIA Deep Learning Institutes:
 
 * `Training DeepVariant Models using Parabricks* [DLIT52115] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=parabricks#/session/1669934478047001d6Ot>`_
 * `Variant Calling on Whole Exome Data using Parabricks <https://www.nvidia.com/en-us/on-demand/session/gtcfall22-dlit41350/?playlistId=playList-c395267f-7c85-4a96-90bb-574392cbd162>`_
 
-`Register for GTC 2023 <https://www.nvidia.com/gtc/?ncid=GTC-NVGZYNDA>`_ and attend the following talks:
+Other packages for genomics analyses:
 
-* `Acceleration and Deep Learning for Genomics on GPUs [S51265] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=parabricks#/session/1666293509141001VTC4>`_
-* `Developing Rapid DNA Sequencing to Accelerate Cancer Research and Care [S51255] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=genomics#/session/1666289427192001HJQx>`_
-* `Scaling Long-Read Sequencing Throughput and Accessibility with Deep Learning and NVIDIA [S51279] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=genomics#/session/1666309017684001kNgb>`_
-* `Accelerated Computational Pipeline for Ultra-Rapid Nanopore Whole-Genome Sequencing [PS52265] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=genomics#/session/1673557481751001AhSx>`_
-* `High Performance Genome-Wide Association Study Using Mixed-Precision Ridge Regression [S51628] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=genomics#/session/1666630500231001AoOj>`_
+* `Rapids_singlecell <https://github.com/scverse/rapids_singlecell>`_: A GPU-accelerated tool for scRNA analysis.
+* `RAPIDS <https://rapids.ai/>`_: GPU accelerated data science
+* `Metacache-GPU <https://github.com/muellan/metacache/blob/master/docs/gpu_version.md>`_: memory efficient, fast & precise taxnomomic classification system for metagenomic read mapping
+
+`Register for GTC 2024 <https://www.nvidia.com/gtc/?ncid=GTC-NVGZYNDA>`_ and look out for genomics talks!
