@@ -100,7 +100,7 @@ Unless you're starting with pre-aligned reads in a ``.bam`` file, the first step
 
 When fq2bam is run, reads (compressed or not) are aligned by GPU-bwa mem, alignments are sorted by coordinate, duplicates are marked, and Base Quality Score Recalibration (BQSR) is performed, and a final ``.bam`` file is output.
 
-.. image:: https://docscontent.nvidia.com/dims4/default/07eaa76/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.amazonaws.com%2Fbrightspot%2Fsphinx%2F00000186-7a40-d64e-abe6-fa7020f90000%2Fclara%2Fparabricks%2F4.2.0%2F_images%2Ffq2bam.png
+.. image:: https://docscontent.nvidia.com/dims4/default/b2cc884/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.us-west-2.amazonaws.com%2Fbrightspot%2Fsphinx%2F0000018b-6753-d717-adef-ffffd61b0000%2Fclara%2Fparabricks%2F4.2.0%2F_images%2Ffq2bam.png
 
 Depending on how you need to process your sample, fq2bam has a `lot of options <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#fq2bam-reference>`_. Since the data used in this tutorial is paired-end, we're going to be using:
 
@@ -196,7 +196,7 @@ The Parabricks haplotypeCaller is a re-implementation of the `GATK HaplotypeCall
 
 Like humans, `A. thaliana is diploid <https://www.pnas.org/doi/abs/10.1073/pnas.92.24.10831>`_ and has two copies of each chromosome, so at any given location across the genome, all aligned bases are the same (homozygous), or about half of the reads have one base and half have another (heterozygous). The chloroplast (C) is haploid, similar to the sex chromosomes in humans, and cannot be heterozygous.
 
-.. image:: https://docscontent.nvidia.com/sphinx/00000186-7a40-d64e-abe6-fa7020f90000/clara/parabricks/4.2.0/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg
+.. image:: https://docscontent.nvidia.com/sphinx/0000018b-6753-d717-adef-ffffd61b0000/clara/parabricks/4.2.0/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg
 
 Similar to fq2bam, the haplotypeCaller pipeline in Parabricks has `many options <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_haplotypecaller.html#specifying-haplotype-caller-options>`_, but we'll only need to use these:
 
