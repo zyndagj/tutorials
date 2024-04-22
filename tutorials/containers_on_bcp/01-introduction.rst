@@ -290,7 +290,7 @@ To make this easier, you can install packages in *editable* mode with the ``-e``
     # Uninstall package
     pip uninstall -y py_bench
     # Install in editable mode
-    pip install -e -c /root/base_constraints.txt .
+    pip install -c /root/base_constraints.txt -e .
 
 Now, edit the ``__init__.py`` and try re-running ``bench.py`` after moving it to a location that can't locally load the ``pt_bench`` module to see if those changes were propogated.
 
