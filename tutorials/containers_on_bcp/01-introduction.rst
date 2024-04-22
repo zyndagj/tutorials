@@ -285,7 +285,7 @@ Packages like ``pt_bench`` are normally installed with
 However, this copies the whole package to ``/usr/local/lib/python3.10/dist-packages/`` and you'll have to keep uninstalling and installing it when changing files.
 To make this easier, you can install packages in *editable* mode with the ``-e`` argument.
 
-.. conda-block:: shell
+.. code-block:: shell
 
     # Uninstall package
     pip uninstall -y py_bench
@@ -294,7 +294,7 @@ To make this easier, you can install packages in *editable* mode with the ``-e``
 
 Now, edit the ``__init__.py`` and try re-running ``bench.py`` after moving it to a location that can't locally load the ``pt_bench`` module to see if those changes were propogated.
 
-.. conda-block:: shell
+.. code-block:: shell
 
     # Move bench.py
     cp bench.py /mnt/bench.py
