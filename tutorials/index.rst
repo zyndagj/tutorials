@@ -11,6 +11,8 @@ Overview of my Workshops
    :caption: Contents:
 
    parabricks/01-introduction
+   multi-node_on_bcp/01-introduction
+   containers_on_bcp/01-introduction
 
 Indices and tables
 ==================
