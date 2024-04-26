@@ -1,0 +1,100 @@
+bcprun (NGC multi-node run utility) version 1.2                                                                    [61/1911]
+usage: bcprun [--nnodes <n>] [--npernode <p>] [--env <e>] [--workdir <w>] [--cmd <command-line>]
+             [--async] [--debug] [--version] [--help] [--binding <b>]             
+                                                                                                                            
+required arguments:                                                                                                         
+  -c <c>, --cmd <c>
+                    Provide a command to run. (type: string)                                                                
+                    Default value: (none)                                                                                   
+                    Example: --cmd 'python train.py'                                                                        
+                                                                                                                            
+optional arguments:                                                                                                         
+  -n <n>, --nnodes <n>                                                                                                      
+                    Number of nodes to run on. (type: integer)                       
+                    Range: min value: 1, max value: R,                                                                      
+                    where R is max number of replicas requested by the NGC job.                
+                    Default value: R                          
+                    Example: --nnodes 2
+  -p <p>, --npernode <p>
+                    Number of tasks per node to run. (type: integer)
+                    Range: min value: 1, max value: (none)
+                    Default value: environment variable NGC_NTASKS_PER_NODE, if
+                    set, otherwise 1.
+                    Example: --npernode 8
+  -e <e>, --env <e>
+                    Environment variables to set with format 'key=value'. (type: string)
+                    Each variable assignment requires a separate -e/--env flag.
+                    Default value: (none)
+                    Example: --env 'var1=value1' --env 'var2=value2'
+  -w <w>, --workdir <w>
+                    Base directory from which to run <cmd>. (type: string)
+                    May include environment variables defined with --env.
+                    Default value: environment variable PWD (current working directory)
+                    Example: --workdir '$WORK_HOME/scripts' --env 'WORK_HOME=/mnt/workspace'
+  -l <l>, --launcher <l>
+                    Run <cmd> using an external launcher program. (type: string)
+                    Supported launchers: mpirun, horovodrun
+                    - mpirun: maps to OpenMPI options (https://www.open-mpi.org/)
+                    - horovodrun: maps to Horovod options (https://horovod.ai/)
+                    Note: This option assumes the launcher exists and is in PATH.
+                    Launcher specific arguments (not part of bcprun options) can be provided as a suffix. E.g. --launcher 'mpirun --allow-run-as-root'
+                    Default value: (none)
+  -log <log>, --logdir <log>
+                    Directory that stores bcprun.log. Also, in the case of PyTorch applications, it stores the logs per rank
+ in each node. (type: string)
+                    Default value: resultset mount path per node (env: NGC_RESULT_DIR)
+  -a, --async
+                    Run with asynchronous failure support enabled, i.e. a child process of bcprun can exit on failure without halting the program.
+                    The program will continue while at least one child is running.
+                    The default semantics of bcprun is to halt the program when any child process launched by bcprun exits with error.
+   
+  -b, --binding
+                    Bind process to cpu-cores.
+
+                    The following numa binding options are available.
+                    - 'node': Processes are bound to cpus within a NUMA node. On GPU-enabled compute nodes,
+                    a process is bound to all the cpus of the affined NUMA node (mapping local rank to GPU id), and the total number of ranks is limited to the total number of GPUs.
+                    Example: Given 2 NUMA nodes N{0,1}, each with 4 GPUs and 32 CPUs C{0-31,32-63}, 8 processes P{0-7} will be mapped as: P{0-3}:N0:C{0-31}, P{4-7}:N1:C{32-63}
+
+                    - 'exclusive': Processes are bound to exclusive sets of cpus within a NUMA node.
+                    On GPU-enabled compute nodes, a process is bound to an exclusive cpu set within the affined NUMA node (mapping local rank to GPU id), and the total number of ranks is limited to the total number of GPUs.
+                    Example: Given 2 NUMA nodes N(0,1), each with 4 GPUs and 32 CPUs C{0-31,32-63},
+                    8 processes P{0-7} will be mapped as: P0:N0:C{0-7}, P1:N0:C{8-15}, P2:N0:C{16-23},
+                    P3:N0:C{24-31}, P4:N1:C{32-39}, P5:N1:C{40-47}, P6:N1:C{48-55}, P7:N1:C{56-63}
+
+                    - 'core-complex': Processes are bound to a core-complex, i.e. cpus sharing a last-level cache.
+                    On GPU-enabled compute nodes, a process is bound to a core-complex of the
+                    affined NUMA node (mapping local rank to GPU id), and
+                    the total number of ranks is limited to the total number of GPUs.
+                    Example: Given 2 NUMA nodes N{0,1}, each with 2 GPUs and 4 core-complexes X{0-3,4-7},
+                    4 processes P{0-3} will be mapped as: P0:N0:X0, P1:N0:X1, P2:N1:X4, P3:N1:X5
+
+                    - 'socket': Processes are bound to cpus within a socket. On GPU-enabled compute nodes,
+                    a process is bound to the cpus of the socket containing the affined NUMA node (mapping local rank to GPU id), and the total number of ranks is limited to the total number of GPUs.
+                    Example: Given 2 Sockets S(0,1), each with 4 GPUs and 64 CPUs C{0-63,64-127},
+                    8 processes P{0-7} will be mapped as: P{0-3}:S0:C{0-63}, P{4-7}:S1:C{64-127}
+
+                    Note:
+                    --binding option is only applicable when arraytype is PYTORCH.
+
+  -d, --debug
+                    Print debug info and enable verbose mode.
+  -j, --jsonlogs
+                    Print the per-node aggregated logs in JSON format to joblog.log
+  -no_redirect, --no_redirect
+                    Print the logs to stdout/stderr instead of logging to files
+  -v, --version
+                    Print version info.
+  -h, --help
+                    Print this help message.
+
+Note:
+1.Local rank is passed to the python script using flag argument --local-rank
+  for PyTorch version < 1.10. For all PyTorch versions >= 1.10, the --local_rank
+  flag argument will NOT be passed to the python script by default.
+  If you depend on parsing --local-rank in  your script for PyTorch versions >= 1.10,
+  you can override the default behavior by setting environment variable NGC_PYTORCH_USE_ENV=0.
+  Conversely, setting environment variable NGC_PYTORCH_USE_ENV=1 for PyTorch version < 1.10
+  will suppress passing --local-rank flag argument.
+2.Environment variable LOCAL_RANK is always set regardless of PyTorch version.
+  Reading LOCAL_RANK from environment variable is the recommended method.

@@ -12,6 +12,7 @@ Run multi-node applications using the following:
 * MPI
 * PyTorch DDP
 * PyTorch Lightning
+* PyTorch + Ray Train
 
 Requirements
 ------------
@@ -27,12 +28,17 @@ In the deep learning world, the simplest version of this is the data-distributed
 
 While DGXs and DGX Cloud were designed for multi-gpu computing, a single process can't span across computers, so code still needs to be written to coordinate the processing on each system.
 
-So you can learn some basics about working in distributed environments, lets start a 2-node job and explore
+To learn some basics about working in distributed environments, lets start a 2-node job and explore
 
 .. literalinclude:: assets/interactive_2node.sh
     :caption: :download:`interactive_2node.sh <assets/interactive_2node.sh>`
 
-Once your job is running, connect to the jupyter portal or exec into the job and work through the following:
+In this job, we'll be using ``bcprun`` to launch our distributed processes.
+
+.. literalinclude:: assets/bcprun_help.txt
+    :caption: bcprun help text
+
+Once your job is running, connect to the jupyter portal or ``ngc batch exec`` into the job and work through the following:
 
 .. literalinclude:: assets/explore_2node.sh
     :caption: :download:`explore_2node.sh <assets/explore_2node.sh>`
@@ -44,266 +50,89 @@ MPI
 
 MPI requires environment variables to be populated on each node. Schedulers like SLURM automatically populate these variables so MPI knows how many processes and threads to spawn, and how to communicate with other processes. On DGX Cloud with BCP, those variables get set by specifying the ``--array-type "MPI"`` argument when spawning a job.
 
-
-
 Multi-node or distributed computing will enable huge speedups by allowing GPUs across multiple computers, or nodes, to cooperate when working when training deep learning models by allowing your program to 
 While DGXs and DGX Cloud was designed for distributed computing, code still needs to be written to communicate
 
-Data Used
+.. code-block:: shell
+
+    mpirun --allow-run-as-root -x IBV_DRIVERS=/usr/lib/libibverbs/libmlx5 \
+        -np ${NGC_ARRAY_SIZE} -npernode 1 \
+        bash -c "all_reduce_perf_mpi -b 64M -e 4G -f 2 -c 0 -n 100 -g ${NGC_GPUS_PER_NODE}"
+
+This can also be run with ``bcprun`` as follows:
+
+.. code-block:: shell
+
+    NGC_ARRAY_TYPE=MPIJob bcprun -no_redirect \
+        --launcher 'mpirun --allow-run-as-root' \
+        -c "all_reduce_perf_mpi -b 64M -e 4G -f 2 -c 0 -n 100 -g ${NGC_GPUS_PER_NODE}"
+
+You'll notice that both the ``mpirun`` and ``bcprun`` commands are using two environment variables to help make these scripts generally applicable for jobs of various sizes.
+
+.. code-block:: shell
+
+    NGC_ARRAY_SIZE    - Number of nodes allocated to job
+    NGC_GPUS_PER_NODE - Number of GPUs allocated per node
+
+This was a 2 node job with 8 gpus per node, and we can double-check these values with
+
+.. code-block:: shell
+
+    $ env | grep -E "(NODE|SIZE)="
+    NGC_ARRAY_SIZE=2
+    NGC_GPUS_PER_NODE=8
+
+Pytorch DDP
+------------
+
+PyTorch Lightning
+-----------------
+
+
+Pytorch + Ray Train
 -------------------
 
-This tutorial will be using paired-end reads from the TDr-7 strain of *Arabidopsis thaliana* from the `1001 Genomes project <https://1001genomes.org/index.html>`_
+`Ray <https://docs.ray.io/en/latest/index.html>`_ is an open source framework to build and scale ML and Python applications.
+At it's core, it contains collective operations that can be run on Ray "clusters", or collections of worker processes.
 
-* `TDr-7 <https://www.ebi.ac.uk/ena/browser/view/SRR519591>`_
+To use Ray across multiple nodes, a Ray cluster needs to first be started across the nodes.
+I recommend using the following helper script to start these processes in a BCP environment
 
-The *A. thaliana* reference genome, `TAIR10 <https://www.arabidopsis.org/>`_, with "Chr" removed from chromosome names to match naming convention used by 1001 Genomes project.
+.. literalinclude:: assets/start_ray_cluster.sh
+    :caption: :download:`start_ray_cluster.sh <assets/start_ray_cluster.sh>`
 
-.. code-block:: shell
-
-    # Download reference
-    curl https://www.arabidopsis.org/download_files/Genes/TAIR10_genome_release/TAIR10_chromosome_files/TAIR10_chr_all.fas.gz | zcat | sed -e "s/^>Chr/>/" > TAIR10_chr_all.fasta
-    # Index with samtools
-    samtools faidx TAIR10_chr_all.fasta
-
-The `SNPmatch database <https://figshare.com/articles/dataset/SNP_dataset_for_A_thaliana_1001_Genomes_project/5514403?backTo=/collections/_/3722743>`_ for the 1001 Genomes Project.
-
-All downloads can be performed by running :download:`download_data.sh <assets/download_data.sh>`
-
-PyTorch DDP
------------
-
-
-
-Introduction to Clara Parabricks
---------------------------------
-
-NVIDIA Clara™ Parabricks® is a software suite for the secondary analysis (alignment, variant calling) of DNA and RNA from short and long reads on GPU-accelerated hardware. On the most performant platforms, Clara Parabricks can analyze a typical whole human genome dataset in about 25 minutes, instead of 30 hours for other methods. It was designed to be easy to run while also matching the output from commonly used software, which means analyses can be reproduced even without GPUs.
-
-.. image:: assets/analysis_steps.png
-
-Parabricks v4 supports a variety of GPU-accelerated secondary analyses: alignment, preprocessing, variant calling, QC, and even some variant annotation (which lies in tertiary analysis). The chart below shows each pipeline supported in Parabricks v4.2.0-1, but take a look at `the documentation <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/standalonetools.html>`_ for more information.
-
-.. image:: assets/pb_pipelines.png
-
-Getting Clara Parabricks
-########################
-
-Clara Parabricks is available as a container on NGC. 
-
-https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/clara-parabricks
-
-This tutorial will be using ``v4.2.0-1`` of the container, and it can be pulled to your system as follows:
+and the ``bcprun`` command to run the script on each node:
 
 .. code-block:: shell
 
-    # Docker
-    docker pull nvcr.io/nvidia/clara/clara-parabricks:4.2.0-1
+    bcprun -no_redirect -c 'bash start_ray_cluster.sh'
 
-    # singularity
-    singularity pull docker://nvcr.io/nvidia/clara/clara-parabricks:4.2.0-1
+This first starts the main process on the head node and then worker processes across all other nodes after sleeping for 10 seconds.
+Once the cluster is started, you're able to submit jobs for execution on the cluster simply by utilizing the Ray library.
 
-To streamline this workshop on `ACES <https://hprc.tamu.edu/aces/>`_, an `LMOD <https://lmod.readthedocs.io/en/latest/>`_ modulefile was created with helper variables and functions for calling singularity containers. Please load it with:
+To illustrate this, the `Train a PyTorch Model on Fashion MNIST <https://docs.ray.io/en/latest/train/examples/pytorch/torch_fashion_mnist_example.html>`_ example was modified to accept an argument for the number of workers
 
-.. code-block:: shell
+.. literalinclude:: assets/ray+pt.py
+    :caption: :download:`ray+pt.py <assets/ray+pt.py>`
 
-    module use /scratch/user/u.gz28467/workshop/modules/modulefiles/
-    module load parabricks_workshop/4.2.0-1
-
-.. note::
-
-    Since there are many ways to invoke the parabricks container, all example commands will omit container runtime commands. If you are using apptainer/singularity, make sure to include the ``--nv`` flag to `mount NVIDIA libraries and devices <https://docs.sylabs.io/guides/3.11/user-guide/gpu.html>`_.
-
-DNA alignment with fq2bam
--------------------------
-
-Unless you're starting with pre-aligned reads in a ``.bam`` file, the first step to many bioinformatics pipelines is alignment. Parabricks has the `fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#man-fq2bam>`_ pipeline for DNA (based on bwa mem) and the `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_ pipeline for RNA (based on STAR). This tutorial uses DNA inputs and will focus on fq2bam.
-
-When fq2bam is run, reads (compressed or not) are aligned by GPU-bwa mem, alignments are sorted by coordinate, duplicates are marked, and Base Quality Score Recalibration (BQSR) is performed, and a final ``.bam`` file is output.
-
-.. image:: https://docscontent.nvidia.com/dims4/default/b2cc884/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.us-west-2.amazonaws.com%2Fbrightspot%2Fsphinx%2F0000018b-6753-d717-adef-ffffd61b0000%2Fclara%2Fparabricks%2F4.2.0%2F_images%2Ffq2bam.png
-
-Depending on how you need to process your sample, fq2bam has a `lot of options <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#fq2bam-reference>`_. Since the data used in this tutorial is paired-end, we're going to be using:
-
-.. code-block::
-
-  --ref REF             Path to the reference file. (default: None)
-  --in-fq [IN_FQ [IN_FQ ...]]
-                        Path to the pair-ended FASTQ files followed by optional read groups with quotes
-  --out-bam OUT_BAM     Path of a BAM/CRAM file after Marking Duplicates. (default: None)
-  --num-gpus NUM_GPUS   Number of GPUs to use for a run. (default: number detected)
-
-Indexing the reference for fq2bam
-#################################
-
-Parabricks does require the the reference genome be indexed with bwa before it can run fq2bam. This function was not ported to GPU, so you'll need to run this with the CPU version of the code.
+The script can then be run across 2 nodes (16 GPUs) with the following command:
 
 .. code-block:: shell
 
-    bwa index TAIR10_chr_all.fasta
+    python ray+pt.py --num-workers=16
 
-.. note::
-
-    For the sake of time, the reference genome we'll be using was already indexed.
-    This will need to be done for any other genomes you use.
-
-Running fq2bam on one GPU
-##########################
-
-By default, Parabricks will use all GPUs detected on your system. However, that can be controlled with the ``--num-gpus`` flag. Lets start with one and see how things run.
-
-.. literalinclude:: assets/run_fq2bam.sh
-    :caption: :download:`run_fq2bam.sh <assets/run_fq2bam.sh>`
-
-Running fq2bam on two GPUs
-##########################
-
-Now run the same pipeline on two GPUs. If you only requested a single GPU through your scheduler, you may need to start a new job.
-
-Is there a larger effect on certain phases?
-
-Running the CPU equivalent
-##########################
-
-For every workflow in Clara Parabricks, an equivalent CPU workflow is provided to reproduce results. `fq2bam is no exception <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#compatible-cpu-based-bwa-mem-gatk4-commands>`_, and the below example takes those commands and wraps them in a bash function.
-
-.. literalinclude:: assets/run_fq2bam_cpu.sh
-    :caption: :download:`run_fq2bam_cpu.sh <assets/run_fq2bam_cpu.sh>`
-
-If you compare the size of the ``.bam`` files created by Parabricks and the CPU pipeline, you'll notice that the CPU pipeline are larger.
+This can also scale with your job size by using the ``NGC_*`` environment variables to calculate the number of GPUs in your job. 
 
 .. code-block:: shell
 
-    $ ls -lh *bam
-    -rw-rw-r-- 1 u.gz28467 u.gz28467 1.6G Mar  7 01:48 TDr-7_10M_cpu_sorted_marked.bam
-    -rw-rw-r-- 1 u.gz28467 u.gz28467 1.4G Mar  7 01:35 TDr-7_10M_pb.bam
+    python ray+pt.py --num-workers=$(( $NGC_ARRAY_SIZE * $NGC_GPUS_PER_NODE ))
 
-This is due to compression levels. If you compare the bam files with samtools, they contain the same number of alignments.
 
-.. code-block:: shell
-
-    $ samtools flagstat TDr-7_10M_pb.bam
-    20022096 + 0 in total (QC-passed reads + QC-failed reads)
-    20000000 + 0 primary
-    0 + 0 secondary
-    22096 + 0 supplementary
-    3608170 + 0 duplicates
-    3608170 + 0 primary duplicates
-    19033358 + 0 mapped (95.06% : N/A)
-    19011262 + 0 primary mapped (95.06% : N/A)
-
-    $ samtools flagstat TDr-7_10M_cpu_sorted_marked.bam 
-    20022096 + 0 in total (QC-passed reads + QC-failed reads)
-    20000000 + 0 primary
-    0 + 0 secondary
-    22096 + 0 supplementary
-    3608170 + 0 duplicates
-    3608170 + 0 primary duplicates
-    19033358 + 0 mapped (95.06% : N/A)
-    19011262 + 0 primary mapped (95.06% : N/A)
-
-Optional Exercises
-##########################
-
-* Have you tried using a different number of GPUs?
-* What was the speedup when using a GPU?
-* What happens if your input reads are compressed?
-* Are the reads the same if you view them?
-
-Calling Variants with haplotypeCaller
--------------------------------------
-
-The Parabricks haplotypeCaller is a re-implementation of the `GATK HaplotypeCaller <https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller>`_, which is used to call germline (inherited) SNPs and indels through the local re-assembly of haplotypes and identify genotypes.
-
-Like humans, `A. thaliana is diploid <https://www.pnas.org/doi/abs/10.1073/pnas.92.24.10831>`_ and has two copies of each chromosome, so at any given location across the genome, all aligned bases are the same (homozygous), or about half of the reads have one base and half have another (heterozygous). The chloroplast (C) is haploid, similar to the sex chromosomes in humans, and cannot be heterozygous.
-
-.. image:: https://docscontent.nvidia.com/sphinx/0000018b-6753-d717-adef-ffffd61b0000/clara/parabricks/4.2.0/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg
-
-Similar to fq2bam, the haplotypeCaller pipeline in Parabricks has `many options <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_haplotypecaller.html#specifying-haplotype-caller-options>`_, but we'll only need to use these:
-
-  --ref REF             Path to the reference file. (default: None)
-  --in-bam IN_BAM       Path to the input BAM/CRAM file for variant calling. The argument may also be a local folder containing several bams; each will be processed by 1 GPU in batch mode. (default: None)
-  --out-variants OUT_VARIANTS
-                        Path of the vcf/g.vcf/gvcf.gz file after variant calling. The argument may also be a local folder in batch mode. (default: None)
-  --num-gpus NUM_GPUS   Number of GPUs to use for a run. (default: number detected)
-
-Indexing the reference for haplotypeCaller
-##########################################
-
-Parabricks does require the the reference genome be indexed with ``gatk CreateSequenceDictionary`` and ``samtools faidx`` before it can run haplotypeCaller. This function was not ported to GPU, so you'll need to run this with the CPU version of the code.
+Once you're done, you can stop the ray cluster with
 
 .. code-block:: shell
 
-    gatk CreateSequenceDictionary -R TAIR10_chr_all.fasta; samtools faidx TAIR10_chr_all.fasta
-
-.. note::
-
-    For the sake of time, the reference genome we'll be using was already indexed.
-    This will need to be done for any other genomes you use.
-
-Running haplotypeCaller
-#######################
-
-HaplotypeCaller takes the ``.bam`` files created by fq2bam as input, and calls variants on the aligned reads.
-
-.. literalinclude:: assets/run_pb_haplo.sh
-    :caption: :download:`run_pb_haplo.sh <assets/run_pb_haplo.sh>`
-
-.. note::
-
-    Alternatively, both fq2bam and haplotypeCaller can be run with the `germline pipeline <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_germline.html#man-germline>`_.
-
-Running the CPU equivalent
-##########################
-
-The `CPU equivalent of haplotypeCaller <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_haplotypecaller.html#compatible-gatk4-command>`_ only requires a single call to GATK, but it's much more time intensive than the Parabricks version. Once again, the commands have been wrapped in a bash function for easy usage.
-
-.. literalinclude:: assets/run_cpu_haplo.sh
-    :caption: :download:`run_cpu_haplo.sh <assets/run_cpu_haplo.sh>`
-
-Optional Exercises
-##########################
-
-* Run the germline pipeline
-* How much is runtime affected by the number of GPUs?
-* Try running `DeepVariant <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_deepvariant.html#man-deepvariant>`_
-* Try `re-training DeepVariant <https://docs.nvidia.com/clara/parabricks/4.2.0/tutorials/dvtraining.html>`_
-
-Genotyping sample
--------------------------
-
-Now that we have a ``.vcf`` file of all variants, we're ready to perform some "tertiary" analyses. One common one is sample identification based on genotype. In humans, your specific alleles, or variants, could be used to determine your ancestry. In plants, you could determine what variety of a crop you sequenced.
-
-For our example, we're going to verify the identity of the sample we've been working with. The 1001 Genomes project actually has a web portal called `AraGeno <http://arageno.gmi.oeaw.ac.at/>`_ for identifying samples based on the called SNPs, but we're going to run `SNPmatch <https://github.com/Gregor-Mendel-Institute/SNPmatch>`_ manually.
-
-.. literalinclude:: assets/run_snpmatch.sh
-    :caption: :download:`run_snpmatch.sh <assets/run_snpmatch.sh>`
-
-    
-This will then create a ``.matches.json`` file, which will have an accession ID. Find this ID in the `1001 Genomes accessions list <https://1001genomes.org/accessions.html>`_ and see if it matches TDr-7.
-
-Optional Exercises
-##########################
-
-* Try genotyping another sample from `HERE <https://www.ebi.ac.uk/ena/browser/view/SRP012869>`_
-* Run your own data
+    ray stop -f
 
 Next Steps
 ----------
-
-Try the RNA-seq pipelines:
-
-* `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_
-* `starfusion <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_starfusion.html#man-starfusion>`_
-
-Register for NVIDIA Deep Learning Institutes:
-
-* `Training DeepVariant Models using Parabricks* [DLIT52115] <https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&search=parabricks#/session/1669934478047001d6Ot>`_
-* `Variant Calling on Whole Exome Data using Parabricks <https://www.nvidia.com/en-us/on-demand/session/gtcfall22-dlit41350/?playlistId=playList-c395267f-7c85-4a96-90bb-574392cbd162>`_
-
-Other packages for genomics analyses:
-
-* `Rapids_singlecell <https://github.com/scverse/rapids_singlecell>`_: A GPU-accelerated tool for scRNA analysis.
-* `RAPIDS <https://rapids.ai/>`_: GPU accelerated data science
-* `Metacache-GPU <https://github.com/muellan/metacache/blob/master/docs/gpu_version.md>`_: memory efficient, fast & precise taxnomomic classification system for metagenomic read mapping
-
-`Register for GTC 2024 <https://www.nvidia.com/gtc/?ncid=GTC-NVGZYNDA>`_ and look out for genomics talks!
