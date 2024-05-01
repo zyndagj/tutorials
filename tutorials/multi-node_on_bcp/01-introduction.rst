@@ -82,12 +82,52 @@ This was a 2 node job with 8 gpus per node, and we can double-check these values
     NGC_ARRAY_SIZE=2
     NGC_GPUS_PER_NODE=8
 
-Pytorch DDP
+PyTorch DDP
 ------------
+
+PyTorch `DistributedDataParallel <https://pytorch.org/docs/stable/nn.html#module-torch.nn.parallel>`_ (DDP) implements data parallelism at the module level, allowing training to take place across multiple devices or compute nodes.
+DDP uses collective communications in the torch.distributed package to synchronize gradients and buffers.
+
+To learn how to run PyTorch DDP training scripts and understand how scale affects the data processed by each rank, we're going to use the following code.
+
+.. literalinclude:: assets/pt_ddp_example.py
+    :caption: :download:`pt_ddp_example.py <assets/pt_ddp_example.py>`
+
+The data is random, so this is just a "noise in, noise out" model that is large enough to not instantly finish.
+
+Optional Exercises
+##########################
+
+* What happens if you run on 4 GPUs?
+* Try increasing the batch size
 
 PyTorch Lightning
 -----------------
 
+`PyTorch Lightning <https://lightning.ai/docs/pytorch/stable/>`_ is a high-level framework for building and training PyTorch models with simplicity and scalability.
+
+
+
+We can adapt the `PyTorch DDP`_ example for PyTorch Lightning as follows:
+
+.. literalinclude:: assets/ptl_ddp_example.py
+    :caption: :download:`ptl_ddp_example.py <assets/ptl_ddp_example.py>`
+
+You've probably noticed that the PyTorch Lightning version of this script is much shorter.
+PyTorch Lightning was designed to hide things like logging, distributed communication, data loading, and more in the background so it's easier to just design models, utilize accelerators, and scale.
+
+Similarly to DDP, this script can then be launched with the following:
+
+.. literalinclude:: assets/run_ptl.sh
+    :caption: :download:`run_ptl.sh <assets/run_ptl.sh>`
+
+Just notice that the main process URL, which is the hostname, needs to be set.
+
+Optional Exercises
+##########################
+
+* What happens if you run on 4 GPUs?
+* Try decreasing the batch size
 
 Pytorch + Ray Train
 -------------------
@@ -136,3 +176,5 @@ Once you're done, you can stop the ray cluster with
 
 Next Steps
 ----------
+
+* `PyTorch DDP Tutorial <https://pytorch.org/tutorials/intermediate/ddp_tutorial.html>`_

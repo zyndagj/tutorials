@@ -21,10 +21,8 @@ class MyTrainDataset(Dataset):
     def __init__(self, size):
         self.size = size
         self.data = [(torch.rand(20), torch.rand(1)) for _ in range(size)]
-
     def __len__(self):
         return self.size
-    
     def __getitem__(self, index):
         return self.data[index]
 
@@ -34,7 +32,6 @@ class Trainer:
         model: torch.nn.Module,
         train_data: DataLoader,
         optimizer: torch.optim.Optimizer,
-        save_every: int,
         snapshot_path: str,
     ) -> None:
         self.local_rank = int(os.environ["LOCAL_RANK"])
@@ -42,13 +39,8 @@ class Trainer:
         self.model = model.to(self.local_rank)
         self.train_data = train_data
         self.optimizer = optimizer
-        self.save_every = save_every
         self.epochs_run = 0
         self.snapshot_path = snapshot_path
-        #if os.path.exists(snapshot_path):
-        #    print("Loading snapshot")
-        #    self._load_snapshot(snapshot_path)
-
         self.model = DDP(self.model, device_ids=[self.local_rank])
 
     def _load_snapshot(self, snapshot_path):
@@ -74,46 +66,19 @@ class Trainer:
             targets = targets.to(self.local_rank)
             self._run_batch(source, targets)
 
-    def _save_snapshot(self, epoch):
-        snapshot = {
-            "MODEL_STATE": self.model.module.state_dict(),
-            "EPOCHS_RUN": epoch,
-        }
-        torch.save(snapshot, self.snapshot_path)
-        print(f"Epoch {epoch} | Training snapshot saved at {self.snapshot_path}")
-
     def train(self, max_epochs: int):
         for epoch in range(self.epochs_run, max_epochs):
             self._run_epoch(epoch)
-            #if self.local_rank == 0 and epoch % self.save_every == 0:
-            #    self._save_snapshot(epoch)
-
 
 def load_train_objs():
     train_set = MyTrainDataset(2048*2048)  # load your dataset
-    model = torch.nn.Sequential(
-            torch.nn.Linear(20, 128),
-            torch.nn.Linear(128,512),
-            torch.nn.Linear(512,1024),
-            torch.nn.Linear(1024,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,2048),
-            torch.nn.Linear(2048,1024),
-            torch.nn.Linear(1024,128),
-            torch.nn.Linear(128,1)) # load your model
+    # Make layers for model
+    layers = [torch.nn.Linear(20, 512),torch.nn.Linear(512,2048)]
+    layers += [torch.nn.Linear(2048,2048) for i in range(13)]
+    layers.append(torch.nn.Linear(2048, 1))
+    model = torch.nn.Sequential(*layers)
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
     return train_set, model, optimizer
-
 
 def prepare_dataloader(dataset: Dataset, batch_size: int):
     return DataLoader(
@@ -121,25 +86,23 @@ def prepare_dataloader(dataset: Dataset, batch_size: int):
         batch_size=batch_size,
         pin_memory=True,
         shuffle=False,
+        # Scales steps with number of workers
         sampler=DistributedSampler(dataset)
     )
 
-
-def main(save_every: int, total_epochs: int, batch_size: int, snapshot_path: str = "snapshot.pt"):
+def main(total_epochs: int, batch_size: int, snapshot_path: str = "snapshot.pt"):
     ddp_setup()
     dataset, model, optimizer = load_train_objs()
     train_data = prepare_dataloader(dataset, batch_size)
-    trainer = Trainer(model, train_data, optimizer, save_every, snapshot_path)
+    trainer = Trainer(model, train_data, optimizer, snapshot_path)
     trainer.train(total_epochs)
     destroy_process_group()
-
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='simple distributed training job')
-    parser.add_argument('total_epochs', type=int, help='Total epochs to train the model')
-    parser.add_argument('save_every', type=int, help='How often to save a snapshot')
+    parser.add_argument('--epochs', defaut=5, type=int, help='Total epochs to train the model')
     parser.add_argument('--batch_size', default=512, type=int, help='Input batch size on each device (default: 512)')
     args = parser.parse_args()
     
-    main(args.save_every, args.total_epochs, args.batch_size)
+    main(args.epochs, args.batch_size)
