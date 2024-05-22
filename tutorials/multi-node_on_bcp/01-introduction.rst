@@ -123,6 +123,11 @@ Similarly to DDP, this script can then be launched with the following:
 
 Just notice that the main process URL, which is the hostname, needs to be set.
 
+When run this is run on 2 nodes with 8 GPUs each, you'll see the following output
+
+.. literalinclude:: assets/ptl.log
+    
+
 Optional Exercises
 ##########################
 

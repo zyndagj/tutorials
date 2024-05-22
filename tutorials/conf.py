@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Tutorials'
-copyright = '2023, Greg Zynda'
+copyright = '2024, Greg Zynda'
 author = 'Greg Zynda'
 
 # -- RTD configuration -------------------------------------------------------
