@@ -11,6 +11,7 @@ Overview of my Workshops
    :caption: Contents:
 
    parabricks/01-introduction
+   parabricks_on_bcp/01-introduction
    multi-node_on_bcp/01-introduction
    containers_on_bcp/01-introduction
    gromacs_and_MPS/01-introduction
