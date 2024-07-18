@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REF=/scratch/user/u.gz28467/input_files/TAIR10_chr_all.fasta
+REF=input_files/TAIR10_chr_all.fasta
 
 TDR_BAM=TDr-7_10M_pb.bam
 

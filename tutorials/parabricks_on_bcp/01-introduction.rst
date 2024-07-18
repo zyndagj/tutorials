@@ -3,6 +3,8 @@ Parabricks on BCP Workshop
 
 This course introduces `NVIDIA Clara™ Parabricks® <https://www.nvidia.com/en-us/clara/genomics/>`_ for read alignment and variant calling to demonstrate the benefits of GPU acceleration.
 
+*Last updated 7/18/2024*
+
 Course objectives
 -----------------
 
@@ -28,7 +30,7 @@ NVIDIA Clara™ Parabricks® is a software suite for the secondary analysis (ali
 
 .. image:: assets/analysis_steps.png
 
-Parabricks v4 supports a variety of GPU-accelerated secondary analyses: alignment, preprocessing, variant calling, QC, and even some variant annotation (which lies in tertiary analysis). The chart below shows each pipeline supported in Parabricks v4.2.0-1, but take a look at `the documentation <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/standalonetools.html>`_ for more information.
+Parabricks v4 supports a variety of GPU-accelerated secondary analyses: alignment, preprocessing, variant calling, QC, and even some variant annotation (which lies in tertiary analysis). The chart below shows each pipeline supported in Parabricks v4.2.0-1, but take a look at `the documentation <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/standalonetools.html>`_ for more information.
 
 .. image:: assets/pb_pipelines.png
 
@@ -49,7 +51,8 @@ This tutorial will be using ``v4.3.1-1`` of the container, and it can be pulled 
 We'll also be using the CPU version of tools in Parabricks for performance comparisons,
 so I recommend incorporating them into the Parabricks container with the following Dockerfile.
 
-:download:`Dockerfile <assets/Dockerfile>`
+.. literalinclude:: assets/Dockerfile
+    :caption: :download:`Dockerfile <assets/Dockerfile>`
 
 The Dockerfile can be built as follows:
 
@@ -108,13 +111,13 @@ All downloads can be performed by running :download:`download_data.sh <assets/do
 DNA alignment with fq2bam
 -------------------------
 
-Unless you're starting with pre-aligned reads in a ``.bam`` file, the first step to many bioinformatics pipelines is alignment. Parabricks has the `fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#man-fq2bam>`_ pipeline for DNA (based on bwa mem) and the `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_ pipeline for RNA (based on STAR). This tutorial uses DNA inputs and will focus on fq2bam.
+Unless you're starting with pre-aligned reads in a ``.bam`` file, the first step to many bioinformatics pipelines is alignment. Parabricks has the `fq2bam <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_fq2bam.html#man-fq2bam>`_ pipeline for DNA (based on bwa mem) and the `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_ pipeline for RNA (based on STAR). This tutorial uses DNA inputs and will focus on fq2bam.
 
 When fq2bam is run, reads (compressed or not) are aligned by GPU-bwa mem, alignments are sorted by coordinate, duplicates are marked, and Base Quality Score Recalibration (BQSR) is performed, and a final ``.bam`` file is output.
 
 .. image:: https://docscontent.nvidia.com/dims4/default/b2cc884/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.us-west-2.amazonaws.com%2Fbrightspot%2Fsphinx%2F0000018b-6753-d717-adef-ffffd61b0000%2Fclara%2Fparabricks%2F4.2.0%2F_images%2Ffq2bam.png
 
-Depending on how you need to process your sample, fq2bam has a `lot of options <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#fq2bam-reference>`_. Since the data used in this tutorial is paired-end, we're going to be using:
+Depending on how you need to process your sample, fq2bam has a `lot of options <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_fq2bam.html#fq2bam-reference>`_. Since the data used in this tutorial is paired-end, we're going to be using:
 
 .. code-block::
 
@@ -156,7 +159,7 @@ Is there a larger effect on certain phases?
 Running the CPU equivalent
 ##########################
 
-For every workflow in Clara Parabricks, an equivalent CPU workflow is provided to reproduce results. `fq2bam is no exception <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_fq2bam.html#compatible-cpu-based-bwa-mem-gatk4-commands>`_, and the below example takes those commands and wraps them in a bash function.
+For every workflow in Clara Parabricks, an equivalent CPU workflow is provided to reproduce results. `fq2bam is no exception <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_fq2bam.html#compatible-cpu-based-bwa-mem-gatk4-commands>`_, and the below example takes those commands and wraps them in a bash function.
 
 .. literalinclude:: assets/run_fq2bam_cpu.sh
     :caption: :download:`run_fq2bam_cpu.sh <assets/run_fq2bam_cpu.sh>`
@@ -211,7 +214,7 @@ Like humans, `A. thaliana is diploid <https://www.pnas.org/doi/abs/10.1073/pnas.
 
 .. image:: https://docscontent.nvidia.com/sphinx/0000018b-6753-d717-adef-ffffd61b0000/clara/parabricks/4.2.0/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg
 
-Similar to fq2bam, the haplotypeCaller pipeline in Parabricks has `many options <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_haplotypecaller.html#specifying-haplotype-caller-options>`_, but we'll only need to use these:
+Similar to fq2bam, the haplotypeCaller pipeline in Parabricks has `many options <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_haplotypecaller.html#specifying-haplotype-caller-options>`_, but we'll only need to use these:
 
   --ref REF             Path to the reference file. (default: None)
   --in-bam IN_BAM       Path to the input BAM/CRAM file for variant calling. The argument may also be a local folder containing several bams; each will be processed by 1 GPU in batch mode. (default: None)
@@ -243,12 +246,12 @@ HaplotypeCaller takes the ``.bam`` files created by fq2bam as input, and calls v
 
 .. note::
 
-    Alternatively, both fq2bam and haplotypeCaller can be run with the `germline pipeline <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_germline.html#man-germline>`_.
+    Alternatively, both fq2bam and haplotypeCaller can be run with the `germline pipeline <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_germline.html#man-germline>`_.
 
 Running the CPU equivalent
 ##########################
 
-The `CPU equivalent of haplotypeCaller <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_haplotypecaller.html#compatible-gatk4-command>`_ only requires a single call to GATK, but it's much more time intensive than the Parabricks version. Once again, the commands have been wrapped in a bash function for easy usage.
+The `CPU equivalent of haplotypeCaller <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_haplotypecaller.html#compatible-gatk4-command>`_ only requires a single call to GATK, but it's much more time intensive than the Parabricks version. Once again, the commands have been wrapped in a bash function for easy usage.
 
 .. literalinclude:: assets/run_cpu_haplo.sh
     :caption: :download:`run_cpu_haplo.sh <assets/run_cpu_haplo.sh>`
@@ -258,8 +261,8 @@ Optional Exercises
 
 * Run the germline pipeline
 * How much is runtime affected by the number of GPUs?
-* Try running `DeepVariant <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_deepvariant.html#man-deepvariant>`_
-* Try `re-training DeepVariant <https://docs.nvidia.com/clara/parabricks/4.2.0/tutorials/dvtraining.html>`_
+* Try running `DeepVariant <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_deepvariant.html#man-deepvariant>`_
+* Try `re-training DeepVariant <https://docs.nvidia.com/clara/parabricks/4.3.1/tutorials/dvtraining.html>`_
 
 Genotyping sample
 -------------------------
@@ -285,8 +288,8 @@ Next Steps
 
 Try the RNA-seq pipelines:
 
-* `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_
-* `starfusion <https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_starfusion.html#man-starfusion>`_
+* `rna_fq2bam <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam>`_
+* `starfusion <https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_starfusion.html#man-starfusion>`_
 
 Register for NVIDIA Deep Learning Institutes:
 
