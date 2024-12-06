@@ -14,6 +14,7 @@ Overview of my Workshops
    parabricks_on_bcp/01-introduction
    multi-node_on_bcp/01-introduction
    containers_on_bcp/01-introduction
+   containers_on_slurm/01-introduction
    gromacs_and_MPS/01-introduction
 
 Indices and tables

@@ -1,0 +1,28 @@
+FROM nvcr.io/nvidia/cuda:12.4.1-devel-ubuntu22.04 AS builder
+
+# Install runtime and build dependencies
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		freeglut3-dev libgl1-mesa-dev libglu1-mesa-dev
+
+# Grab the sample code
+ADD https://github.com/NVIDIA/cuda-samples/archive/refs/tags/v12.4.1.tar.gz /root
+
+# Unpack the tarball to /root
+RUN tar -C /root -xzf /root/v12.4.1.tar.gz
+
+# Build the nbody executable
+RUN cd /root/cuda-samples-12.4.1/Samples/5_Domain_Specific/nbody \
+	&& make && mv nbody /usr/local/bin/
+
+# Change to the base image
+FROM nvcr.io/nvidia/cuda:12.4.1-base-ubuntu22.04
+
+# Install the runtime dependencies (not *-dev)
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		freeglut3 libgl1 libglu1 \
+	&& apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy the pre-build binary from our builder stage
+COPY --from=builder /usr/local/bin/nbody /usr/local/bin/nbody
