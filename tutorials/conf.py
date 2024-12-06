@@ -17,7 +17,7 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx_tabs.tabs']
+extensions = ['sphinx_tabs.tabs', 'sphinxcontrib.jquery']
 
 templates_path = ['_templates']
 #master_doc = 'index'
