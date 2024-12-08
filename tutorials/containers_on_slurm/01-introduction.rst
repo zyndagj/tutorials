@@ -1,9 +1,10 @@
-Containers on Slurm
-=====================
+GPU Containers on Slurm
+========================
 
 This tutorial introduces software containers, how to build them, and how to run them on Slurm clusters using apptainer.
+This is not meant to teach container mastery, but expose you to some best practices with containers on HPC systems.
 
-*Last updated 12/2/2024*
+Last updated: |today|
 
 **Objectives**
 
@@ -15,12 +16,12 @@ This tutorial introduces software containers, how to build them, and how to run 
 
 **Requirements**
 
-* Slurm GPU cluster with `apptainer <https://apptainer.org/>`_ or `enroot <https://github.com/NVIDIA/enroot/>`_
-* Docker/Apptainer CLI Pre-authenticated with a container registry such as:
+* Container build system - Apptainer build **OR** Docker CLI Pre-authenticated with a container registry such as:
 
    * `Docker Hub <hub.docker.com>`_
    * `nvcr.io <https://org.ngc.nvidia.com/setup/api-key>`_
-   * https://cloud.sylabs.io/library
+
+* Container runtime - Slurm GPU cluster with `apptainer <https://apptainer.org/>`_ **OR** `enroot <https://github.com/NVIDIA/enroot/>`_
 
 .. _prep:
 
@@ -41,16 +42,17 @@ This tutorial introduces software containers, how to build them, and how to run 
 Introduction to containers
 ---------------------------
 
-Containers are common method for applications, web services, development, and more.
-Containers have gained popularity because they package up an application and all dependencies, provide isolation from the host environment, and allow for consistent deployment across platforms.
-While you may have also heard of virtual machines (VMs), containers are separate and rely on namespace virtualization without emulating any hardware, so there are no performance losses.
+Containers are a common method for building, distributing, and running applications, web services, development, and more.
+Containers have gained popularity because they package up an application and all dependencies, provide isolation from the host environment, and allow for a consistent deployment across platforms.
+While you may have also heard of virtual machines (VMs), containers are separate and rely on namespace virtualization without hardware emulation, so there are no performance losses.
 
-The portability, reproducibility, and performance make them ideal packing scientific applications, so whole environments can be saved to ensure a tool can always be used over time.
+The portability and reproducibility, without sacrificing performance, make containers ideal for scientific applications. Whole environments can be saved to ensure a published tool can always be used over time.
 
-You've probably heard of `Docker <https://www.docker.com/>`_, but there are many different container runtimes that can consume Open Container Initiative (OCI) images . This tutorial will be focusing on building containers with `apptainer <https://apptainer.org/>`_ or docker, and then running containers in a shared HPC environment with apptainer or `enroot <https://github.com/NVIDIA/enroot>`_.
+`Docker <https://www.docker.com/>`_ is the most common container runtime, but there are many that can consume Open Container Initiative (OCI) images .
+This tutorial will be focusing on building containers with `apptainer <https://apptainer.org/>`_ or docker, and then running containers in a shared HPC environment with apptainer or `enroot <https://github.com/NVIDIA/enroot>`_.
 
-Running your first GPU container
---------------------------------
+Quickstart: Running your first GPU container
+----------------------------------------------
 
 Think of this as a quickstart to running GPU containers on HPC systems.
 
@@ -81,7 +83,7 @@ To run a container on HPC systems, we first need to pull the layers from the con
 Examining the CUDA environment
 ###############################
 
-To start off, take a look at the CUDA environment outside of the container
+To start off, take a look at the CUDA environment outside of the container by running the `NVIDIA System Management Interface <https://docs.nvidia.com/deploy/nvidia-smi/index.html>`_ program (``nvidia-smi``).
 
 .. code-block:: shell
 
@@ -108,6 +110,9 @@ To start off, take a look at the CUDA environment outside of the container
     |  No running processes found                                                             |
     +-----------------------------------------------------------------------------------------+
 
+Running ``nvidia-smi`` is the easiest way to see if there's a GPU on your system and what driver it is running.
+In addition to using it on your host, it works inside GPU-capable containers.
+
 .. tabs::
 
     .. group-tab:: Apptainer
@@ -126,14 +131,16 @@ This will change if the ``--nvccli`` option (nvidia container cli) is enabled on
 Optional Exercises
 ##########################
 
+* What happens if you exclude the ``--nv`` flag with ``apptainer``?
 * What happens if you run on the container on a system without a GPU?
 
 Building and testing your first GPU container
 ---------------------------------------------
 
 In this section, we'll be building the `nbody sample benchmark <https://github.com/NVIDIA/cuda-samples/tree/master/Samples/5_Domain_Specific/nbody>`_ from https://github.com/NVIDIA/cuda-samples.
+
 The nbody benchmark demonstrates efficient all-pairs simulation of a gravitational n-body simulation in CUDA and provides a GFLOP/s metric at the end.
-While this GFLOP/s metric is not meant for performance comparisons, this sample code supports multiple GPUs and is relatively easy to build.
+While this GFLOP/s metric is not meant for true performance comparisons, this sample code supports multiple GPUs and is relatively easy to build.
 
 Containers are built using recipe files like Docker's `Dockerfile <https://docs.docker.com/reference/dockerfile/>`_ or Apptainer's `Definition file <https://apptainer.org/docs/user/main/definition_files.html#>`_, which are essentially scripts for provisioning a linux environment.
 
@@ -141,13 +148,15 @@ Choosing a starting container
 #############################
 
 The first step to building any container is choosing an image to start from.
-This is often a `base ubuntu image <https://hub.docker.com/_/ubuntu>`_, which is similar to a rootfs.
-From there, you can ``apt-get`` any necessary dependencies and then add and build your software.
+This starting image is often a clean OS like this `ubuntu image <https://hub.docker.com/_/ubuntu>`_, from which you can add any necessary dependencies to build/run your software. Alternatively, you can start from an image that already contains software they're pre-installed.
 
-We're going to be building a GPU application from source, so I recommend starting from NVIDIA's `CUDA container <https://catalog.ngc.nvidia.com/orgs/nvidia/containers/cuda>`_ on NGC.
+We're going to be building and running a GPU application, so I recommend starting from NVIDIA's `CUDA container <https://catalog.ngc.nvidia.com/orgs/nvidia/containers/cuda>`_ on NGC.
 NGC is NVIDIA's container registry, where NVIDIA software, SDKs, and models are published in container format.
+Not only are these meant to make your development easier, they're also serve as a common environment for NVIDIA to reproduce and troubleshoot any issues you might encounter through `enterprise support <https://enterprise-support.nvidia.com/>`_ with `NVAIE <https://www.nvidia.com/en-us/data-center/products/ai-enterprise/>`_.
 
-Container types:
+Looking at the tags tab, you'll see many different containers.
+To help you understand the naming convention, containers usually have a ``<project>/<name>:<tag>`` format.
+If you browse through the available containers, you'll see that each container is named cuda, but tags have some common elements along with a CUDA version prefix:
 
 * ``base``: Includes the CUDA runtime (cudart)
 * ``runtime``: base + CUDA math libraries, and NCCL
@@ -168,19 +177,22 @@ There are a ton of options, so here are some recommendations on choosing a conta
 
     We'll cover multi-staged builds in container optimization
 
-Installing dependencies
-############################
+In this case, we're going to start from the ``nvcr.io/nvidia/cuda:12.4.1-devel-ubuntu22.04`` container that we already pulled and cached during the quickstart.
+
+Installing dependencies and building
+####################################
 
 Just like when trying to run an application, identifying and installing compatible dependencies is the hardest part of container development.
 If you look at the `dependencies for nbody <https://github.com/NVIDIA/cuda-samples/tree/master/Samples/5_Domain_Specific/nbody#dependencies-needed-to-buildrun>`_, X11 and GL are required to build and run.
-On an ubuntu system, we can install the development headers and libraries along with ``curl`` using:
+On an ubuntu system (notice container tag), we can install the development headers and libraries along with ``curl`` using:
 
 .. code-block:: shell
 
     apt-get update && apt-get install -y --no-install-recommends \
 		freeglut3-dev libgl1-mesa-dev libglu1-mesa-dev curl
 
-If you're figuring out how to build a container, you can prototype commands in an interactive container
+These commands won't work for non-root users because they modify the host system.
+If you're figuring out how to build a container, you can prototype commands in an interactive container:
 
 .. tabs::
 
@@ -195,23 +207,27 @@ If you're figuring out how to build a container, you can prototype commands in a
         .. literalinclude:: assets/interactive_build_docker.sh
             :caption: :download:`interactive_build_docker.sh <assets/interactive_build_docker.sh>`
 
-Building and installing application
-####################################
+Once the dependencies are installed, you can download, build, and install the nbody application with the following commands:
 
 .. code-block:: shell
 
     # Grab the sample code
     curl -sL https://github.com/NVIDIA/cuda-samples/archive/refs/tags/v12.4.1.tar.gz -o v12.4.1.tar.gz
 
-    # Unpack the tarball to /root
-    tar -C /root -xzf /root/v12.4.1.tar.gz
+    # Unpack the tarball
+    tar -xzf v12.4.1.tar.gz
 
     # Build the nbody executable
-    cd /root/cuda-samples-12.4.1/Samples/5_Domain_Specific/nbody \
+    cd cuda-samples-12.4.1/Samples/5_Domain_Specific/nbody \
 	    && make && mv nbody /usr/local/bin
 
-Wrapping it all up
-############################
+Wrapping it all up and building the container
+##############################################
+
+Your desired starting container and installation commands can be wrapped up into a single file.
+Apptainer uses `Definition files <https://apptainer.org/docs/user/main/definition_files.html>`_ and Docker uses `Dockerfiles <https://docs.docker.com/reference/dockerfile/>`_.
+
+``exit`` your interactive container instance and ``wget`` your corresponding build file.
 
 .. tabs::
 
@@ -229,8 +245,7 @@ Wrapping it all up
 
     You can either download this file directly or copy and paste into your favorite text editor
 
-Building the container
-###############################
+You can then build a container named **nbody** from your build script as follows:
 
 .. tabs::
 
@@ -252,7 +267,11 @@ Making your container more space efficient
 
 We can make this much smaller using the following techniques:
 
-#. Use a `multi-staged build <https://docs.docker.com/build/building/multi-stage/>`_
+#. Use a multi-staged build - Building in one container and copying build binaries to a runtime container
+
+   * `Docker multi-staged build documentation <https://docs.docker.com/build/building/multi-stage/>`_
+   * `Apptainer multi-staged build documentation <https://apptainer.org/docs/user/main/definition_files.html#multi-stage-builds>`_
+
 #. Only install runtime libraries in the final container
 
    #. Using the base container instead of devel
@@ -272,7 +291,7 @@ We can make this much smaller using the following techniques:
         .. literalinclude:: assets/Dockerfile.nbody-efficient
             :caption: :download:`Dockerfile.nbody-efficient <assets/Dockerfile.nbody-efficient>`
 
-Make sure to change the name of the container when building it.
+Make sure to change the name or tag of the container when building it.
 
 .. tabs::
 
@@ -295,7 +314,8 @@ Once again, lets look at the final size of the containers we built.
     -rwxr-xr-x 1 greg.zynda greg.zynda.grp 147M Dec  3 20:34 nbody-efficient.sif
     -rwxr-xr-x 1 greg.zynda greg.zynda.grp 4.2G Dec  3 08:51 nbody.sif
 
-In the case of these apptainer ``.sif`` images, you'll notice that the efficient build is much smaller: 147MB vs 4.2GB!
+In the case of these apptainer ``.sif`` images built by ``apptainer``, you'll notice that the efficient build is much smaller: 147MB vs 4.2GB!
+Not only will this take up less space on your filesystem, but it's also easier to archive with a publication.
 
 Running the nbody sample benchmark
 ###################################
@@ -331,6 +351,10 @@ When your job is done, you should see output similar to the following:
     = 1837.374 billion interactions per second
     = 36747.484 single-precision GFLOP/s at 20 flops per interaction
 
+.. note::
+
+    These performance results will change based on the GPU type your were allocated.
+
 Optional Exercises
 ##########################
 
@@ -341,8 +365,9 @@ Optional Exercises
 Best practices for building python-based containers
 ---------------------------------------------------
 
-Python packages can specify dependencies, and sometimes those dependencies can be strictly written where existing packages get changed.
-Containers on NVIDIA's NGC contain patched versions of PyTorch and matching libraries that shouldn't be altered if you're looking for optimal performance.
+One of the most common things I encounter when folks use containers with pre-existing python packages and libraries, is accidentally replacing or overwriting them with ``conda`` or ``pip``.
+NVIDIA's NGC containers have patched version of PyTorch and supporting libraries that shouldn't be altered if you're looking for optimal and verified performance.
+
 This section will focus on how to install python packages in a way that will prevent changes to the pre-installed packages.
 
 To illustrate this, try installing pytorch from the base ``pytorch:24.03-py3`` container.
@@ -360,10 +385,17 @@ To illustrate this, try installing pytorch from the base ``pytorch:24.03-py3`` c
         .. literalinclude:: assets/pip-install_docker.sh
             :caption: :download:`pip-install_docker.sh <assets/pip-install_docker.sh>`
 
-You'll notice that installing these packages installs a bunch of CUDA libraries and downgrades torch.
-This is not ideal since the pytorch containers on NGC already ship cuda libraries, so this not only breaks anything compiled against these libraries, but also needlessly increases the size of the container by replacing what already exists.
+You'll notice that installing these packages changes the toch package and installs a bunch of CUDA libraries even though both already exist.
+As you learned with our efficient builds, this greatly increases the size of the container layers while also potentially breaking any applications linked against these libaries and the "known working state".
 
-Luckily, you can lock the versions by creating a package `constraints file <https://pip.pypa.io/en/stable/user_guide/#constraints-files>`_, which is similar to a requirements file.
+Lets exit this container create a fresh overlay.
+
+.. code-block:: shell
+
+    # Be sure to exit your interactive container session
+    exit
+
+Luckily, you can lock the versions by creating a package `constraints file <https://pip.pypa.io/en/stable/user_guide/#constraints-files>`_, which has the same format as a requirements file.
 
 .. tabs::
 
@@ -378,12 +410,13 @@ Luckily, you can lock the versions by creating a package `constraints file <http
         .. literalinclude:: assets/pip-constraints_docker.sh
             :caption: :download:`pip-constraints_docker.sh <assets/pip-constraints_docker.sh>`
 
+This install should now fail because the pre-built torchaudio wheels can't be installed with the NVIDIA patched versions of torch.
+
 .. note::
 
-    This should now fail because the pre-built torchaudio wheels can't be installed with NVIDIA patched versions.
     If you actually want to install torchaudio into the Pytorch NGC container, take a look at `this recipe <https://github.com/NVIDIA/NeMo/blob/main/scripts/installers/install_torchaudio_latest.sh#L97>`_.
 
-Lets practice this constraint method by building a new container with the `PyTorch Lightning <https://lightning.ai/>`_ framework starting FROM the ``pytorch:24.03-py3`` container.
+Lets practice using this constraint method by building a new container with the `PyTorch Lightning <https://lightning.ai/>`_ framework starting FROM the ``pytorch:24.03-py3`` container.
 
 .. tabs::
 
@@ -398,7 +431,7 @@ Lets practice this constraint method by building a new container with the `PyTor
         .. literalinclude:: assets/Dockerfile.lightning
             :caption: :download:`Dockerfile.lightning <assets/Dockerfile.lightning>`
 
-And then build the container with the following commands
+After download the corresponding build script, the container can be built with the following commands.
 
 .. tabs::
 
@@ -414,9 +447,14 @@ And then build the container with the following commands
             :caption: :download:`build_lightning_docker.sh <assets/build_lightning_docker.sh>`
 
 Unlike the ``torchaudio`` install, this went fine, and no existing packages changed.
-If a package or its dependencies require a different version of PyTorch, you can either change container version based on the `NVIDIA support matrix <https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html>`_ to match the required version, or determine if the package's dependencies can be relaxed to match the package version in the container.
+If a package or its dependencies require a different version of PyTorch, you can either change the container version based on the `NVIDIA support matrix <https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html>`_ to match the required version or determine if the `package's dependencies can be relaxed <https://pip.pypa.io/en/stable/topics/dependency-resolution/#loosen-your-top-level-requirements>`_ to match the package version in the container.
 
-Developing python scripts inside a running container on BCP
+Optional Exercises
+####################
+
+* Try installing another python package
+
+Developing python scripts inside a running container
 -----------------------------------------------------------
 
 `Containers <https://www.docker.com/resources/what-container/>`_ are meant to be static, reproducible checkpoints for your code that can always be started in the same way.
@@ -470,6 +508,9 @@ Once you have that open, lets look around in the running container.
     * - What if you create a file somewhere else?
       - touch /workspace/test
       - ls /workspace
+    * - Should you be able to create files?
+      - ls -lhd /workspace
+      - ls -lhd /workspace
 
 .. note::
 
@@ -486,7 +527,8 @@ As you experienced when trying to create a test file in ``/workspace``, which is
 This means, that you can't make any changes without an overlay.
 This might be tedious for prototyping, but it's good if you're sharing a container with colleagues on a project, or if you just want to make sure you can't accidentally make changes.
 
-First, download :download:`python_dev.tar.gz <assets/python_dev.tar.gz>` to your current working directory with ``wget``. After downloading, unpack the tarball with ``tar``.
+First, download :download:`python_dev.tar.gz <assets/python_dev.tar.gz>` to your current working directory with ``wget`` (may need to use ``--no-check-certificate``).
+After downloading, unpack the tarball with ``tar``.
 
 .. code-block:: shell
 
@@ -497,23 +539,23 @@ First, download :download:`python_dev.tar.gz <assets/python_dev.tar.gz>` to your
 
     ls *
 
-The script ``self_contained.py`` doesn't require any extra python modules other than pytorch, which exists in the container, and can be run directly.
-If you take a look at the code, the ``timeit`` functions import functions from the script itself using ``__main__``.
+The script ``self_contained.py`` doesn't require any extra python modules other than PyTorch, which exists in the container, and can be run directly.
 Try running it.
 
 .. code-block:: shell
 
     python self_contained.py
 
-You'll notice that you can see the file in your other terminal outside the container, while you can run it inside the container.
-This means you can be editing scripts in your favorite editor while running them in a container all at the same time.
+Not only can you run scripts from inside the container, you can interact with them outside the container too.
+If you have your other terminal still open, find these files and open the script in your favorite editor.
+Not only can you open the files, you can edit them too - all while beign able to run them inside a container.
 
 Developing packages from inside a container
 #############################################
 
 If you're developing a whole package that needs to be updated, you either have to rely on relative imports or install the package.
 Relative imports often work, but may not depending on the complexity of the package.
-In our example python code, there's a ``pt_bench`` python module that we can test with the ``bench.py`` script that imports it.
+In our example python code, there's a ``pt_bench`` python module that gets loaded and used by ``bench.py``.
 
 .. code-block:: shell
 
@@ -522,6 +564,7 @@ In our example python code, there's a ``pt_bench`` python module that we can tes
 
     # Change directories
     cd ..
+
     # Copy bench.py to break relative imports
     cp python_dev/bench.py .
     python bench.py
@@ -529,7 +572,7 @@ In our example python code, there's a ``pt_bench`` python module that we can tes
 You can see that it's easy to go wrong with relative imports, so I often recommend fully installing the package.
 
 We already know that the container can't be modified.
-Luckily, python can install packages in a user director that usually defaults to ``$HOME/.local`` using the ``--user`` flag.
+Luckily, python can install packages in a user directory, that defaults to ``$HOME/.local``, using the ``--user`` flag.
 
 .. code-block:: shell
 
@@ -539,10 +582,11 @@ Luckily, python can install packages in a user director that usually defaults to
     # Try running bench.py again
     python bench.py
 
-You should see that ``pt_bench`` is being loaded from ``$HOME/.local``, which is where the package was installed.
+You should see that ``pt_bench`` is being loaded from ``$HOME/.local``, which is where user packages are installed.
 While this works, this location is universally shared by all python packages, which will lead to collisions between containers.
-I recommend launching the container with ``--no-home``, which will launch the container with a tmpfs /home.
-You'll be able to make changes, like installing a small package, it won't affect the container or bleed into other python environments.
+I recommend launching the container with ``-c``, which will not mount any external locations, and ``-B`` to mount the current working directory.
+Since many things require a valid ``$HOME`` for writing files, ``apptainer`` creates a temporary filesystem (tmpfs) for ``/home``.
+You'll be able to make changes, like installing a small package, and it won't affect the container or bleed into other python environments.
 
 First, lets clean our environment
 
@@ -553,6 +597,8 @@ First, lets clean our environment
 
     # Exit the container
     exit
+
+and then relaunch.
 
 .. tabs::
 
@@ -612,19 +658,40 @@ When you exit the container, make sure the pt_bench package no longer exists.
     # Make sure pt_bench doesn't exist
     find $HOME/.local/ | grep pt_bench
 
+If you're done exploring the container, feel free to exit the job in preparation for the next section.
+
+.. code-block:: shell
+
+    # Exit the job
+    exit
+
 Running multi-node containers
 --------------------------------
 
-Multi-node NCCL Test
-######################
+Multi-node, or distributed, computing is a model of computation that takes the tasks from an algorithm that can be run independently and executes them across multiple computers.
+While it's easy to spawn threads and processes on system, distributed applications need to be launched across all nodes and told how to communicate with eachother.
+
+Multi-node MPI NCCL Test
+#########################
 
 PyTorch containers from NGC ship with `NCCL tests <https://github.com/NVIDIA/nccl-tests>`_, which are useful for diagnosing MPI and bandwidth issues.
+If I'm ever questioning the performance of the compute fabric between GPUs, this is the first thing I run.
+
 These can be run as single-line jobs using ``srun`` to handle the allocation and process spawning.
 
-srun -p gpu -N 2 -n 2 --gpus-per-node 1 --mpi=pmi2 apptainer exec --nv lightning.sif all_reduce_perf_mpi -b 1G -e 4G -f 2 -g 1
+.. tabs::
 
-# If H100s are available
-srun -p gpu --mem=32G -N 2 -n 2 --gpus-per-node h100:3 --mpi=pmi2 apptainer exec --nv lightning.sif all_reduce_perf_mpi -b 1G -e 4G -f 2 -g 3
+    .. group-tab:: Apptainer
+
+        .. literalinclude:: assets/nccl-apptainer.sh
+            :language: shell
+            :caption: :download:`nccl-apptainer.sh <assets/nccl-apptainer.sh>`
+
+    .. group-tab:: Enroot
+    
+        .. literalinclude:: assets/nccl-enroot.sh
+            :caption: :download:`nccl-enroot.sh <assets/nccl-enroot.sh>`
+
 
 Multi-node PyTorch
 ######################
@@ -643,6 +710,20 @@ Download the following ``sbatch`` script as well.
 
     .. group-tab:: Enroot
     
+PyTorch needs the following variables set for multi-node runs:
+
+* MASTER_ADDR - Address of the main node
+* MASTER_PORT - Port of connect on
+* WORLD_SIZE - Total number of workers/GPUs
+
+While ``srun`` launches the initial process on each node, it calls ``torchrun``, which spawns additional processes based on the argument ``--nproc_per_node``.
+Think of ``torchrun`` as a helper script that handles a lot of the global and local rank logic.
+
+Optional variables:
+
+* LOGLEVEL - pytorch log level
+* NCCL_DEBUG - NCCL log level
+
 Submit the script with ``sbatch``, which will generate a ``.out`` file with a number corresponding to the job with all output text.
 You'll see that this runs a training job on 4 GPUs in total, distributed across 2 nodes.
 If you increase the resources allocated by the ``SBATCH`` arguements, training will scale as well.
@@ -651,6 +732,8 @@ Multi-node Pytorch Lightning
 #############################
 
 This is the same task as the `Multi-node PyTorch`_ script, just adapted to PyTorch Lightning.
+You'll notice that code is clearner because PyTorch Lightning does it's best to simplify common training tasks, including multi-GPU and multi-node trainging.
+
 Download both the training script :download:`ptl_ddp_example.py <assets/ptl_ddp_example.py>` and the ``sbatch`` script below.
 
 .. tabs::
@@ -662,6 +745,16 @@ Download both the training script :download:`ptl_ddp_example.py <assets/ptl_ddp_
             :caption: :download:`ptl_ddp_example.sbatch <assets/ptl_ddp_example.sbatch>`
 
     .. group-tab:: Enroot
+
+With PyTorch Lightning, both the ``MASTER_ADDR`` and ``MASTER_PORT`` need to be set, but also the ``NODE_RANK``, which is the 0-based index of the node the process is on.
+In this example, it's being set in a bash shell, with the ``$`` escaped so it's substituted after being launched on each node by ``srun``.
+When it's running, you'll see that Lightning has nice logging about the process pool at the start, and produces nice output during the training progress.
+
+Optional Exercises
+##########################
+
+* Try using more GPUs to see how the number of steps run by each GPU scales.
+* Try comparing training and NCCL performance on different types of nodes.
 
 Next Steps
 ----------
@@ -680,6 +773,7 @@ Container workshops/tutorials:
 
 * `Containers@TACC <https://containers-at-tacc.readthedocs.io/en/latest/>`_
 * `Getting started with Docker <https://docs.docker.com/get-started/>`_
+
 .. |br| raw:: html
 
     <br>

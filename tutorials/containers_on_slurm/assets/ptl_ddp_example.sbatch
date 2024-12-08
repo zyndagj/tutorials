@@ -18,4 +18,6 @@ export MASTER_PORT=$(expr 10000 + $(echo -n ${SLURM_JOBID} | tail -c 4))
 # Launches one container per node
 #  - Contaienr spawns multiple processes
 srun --mpi=pmi2 apptainer exec --nv lightning.sif \
-	bash -c "export NODE_RANK=\${SLURM_PROCID}; python ptl_ddp_example.py -N $SLURM_JOB_NUM_NODES -p ${SLURM_GPUS_ON_NODE}"
+	bash -c "export NODE_RANK=\${SLURM_PROCID}; python \
+		ptl_ddp_example.py -N $SLURM_JOB_NUM_NODES \
+		-p ${SLURM_GPUS_ON_NODE}"
