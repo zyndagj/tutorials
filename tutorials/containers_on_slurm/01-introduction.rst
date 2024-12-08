@@ -8,7 +8,7 @@ Last updated: |today|
 
 **Objectives**
 
-* Running GPU containers
+* Quickstart to running GPU containers
 * Building and testing your first GPU container
 * Best practices for building python-based containers
 * Developing python scripts inside a running container on BCP
