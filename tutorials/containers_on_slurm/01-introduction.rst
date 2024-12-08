@@ -668,8 +668,9 @@ If you're done exploring the container, feel free to exit the job in preparation
 Running multi-node containers
 --------------------------------
 
-Multi-node, or distributed, computing is a model of computation that takes the tasks from an algorithm that can be run independently and executes them across multiple computers.
+Multi-node, or distributed, computing is a model of computation that runs parallel tasks across multiple computers.
 While it's easy to spawn threads and processes on system, distributed applications need to be launched across all nodes and told how to communicate with eachother.
+This sounds difficult, but many frameworks make this accessible and give you near-linear speedups as more compute nodes are used.
 
 Multi-node MPI NCCL Test
 #########################
@@ -691,6 +692,10 @@ These can be run as single-line jobs using ``srun`` to handle the allocation and
     
         .. literalinclude:: assets/nccl-enroot.sh
             :caption: :download:`nccl-enroot.sh <assets/nccl-enroot.sh>`
+
+.. note::
+
+    If want to figure out how many GPUs are on a node and the type, you can run ``scontrol show node [node name]`` to see what resources are available on that node.
 
 
 Multi-node PyTorch
@@ -753,6 +758,7 @@ When it's running, you'll see that Lightning has nice logging about the process 
 Optional Exercises
 ##########################
 
+* Try using ``scontrol show node [node name]`` to see what kinds of GPUs are available on your cluster.
 * Try using more GPUs to see how the number of steps run by each GPU scales.
 * Try comparing training and NCCL performance on different types of nodes.
 
