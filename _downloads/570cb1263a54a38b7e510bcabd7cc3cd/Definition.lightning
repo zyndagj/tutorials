@@ -1,0 +1,10 @@
+# Change to the base image
+Bootstrap: docker
+From: nvcr.io/nvidia/pytorch:24.03-py3
+
+%post
+    # Save all existing packages and versions to a text file
+    pip list | awk '{print$1"=="$2}' | tail +3 > /root/base_constraints.txt
+
+    # Install any new packages without upgrading existing packages
+    pip install -c /root/base_constraints.txt lightning

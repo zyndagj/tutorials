@@ -1,0 +1,1 @@
+apptainer exec --nv cuda_12.4.1-devel-ubuntu22.04.sif nvidia-smi
