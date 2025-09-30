@@ -16,6 +16,7 @@ Overview of my Workshops
    containers_on_bcp/01-introduction
    containers_on_slurm/01-introduction
    gromacs_and_MPS/01-introduction
+   index_on_slurm/01
 
 Indices and tables
 ==================

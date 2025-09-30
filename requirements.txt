@@ -2,3 +2,4 @@ sphinx-rtd-theme
 sphinx
 sphinx-autobuild
 sphinx-tabs
+sphinx-copybutton

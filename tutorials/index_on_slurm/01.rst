@@ -1,0 +1,265 @@
+IndeX on Slurm
+=====================
+
+This tutorial introduces how to use the `NVIDIA IndeX <https://developer.nvidia.com/index>`_ viewer with various data formats.
+
+**Objectives**
+
+* Introduction to IndeX
+* Launching the IndeX viewer on a remote system
+* Learn about the IndeX viewer interface with data
+* Explore the pros/cons of different data formats:
+
+  * `ZARR <https://zarr.dev/>`_
+  * binary (RAW)
+  * VDB
+  * NanoVDB
+
+* Export visuals and create animations
+* Launch multi-node rendering
+
+**Requirements**
+
+* Recent release of NVIDIA IndeX (newer than 2020)
+* Slurm system
+
+Introduction to IndeX
+-----------------------
+
+
+
+
+Launching the IndeX viewer on a remote system
+-----------------------------------------------
+
+For this tutorial, IndeX has been installed as a system module containing:
+
+* IndeX
+* IndeX web viewer
+* IndeX plugins
+* ZARR python package (not distributed with IndeX)
+
+
+IndeX can also be run from it's release directory using a binary that compatible with your system architecture (e.g. linux-x86-64, linux-aarch64).
+You may also need to install the ZARR python library to convert your data to RAW format.
+
+After logging into your cluster, and while still on the login node, load the ``index`` module as follows:
+
+.. code-block:: shell
+  
+  # Take a look at all versions
+  module spider index
+
+  # Look at what gets set
+  module show index
+
+  # Load the default index module
+  module load index
+
+Loading the module now, means it will be inherited in any interactive jobs you run from the same session.
+
+IndeX is computationally intensive, so it should always be run inside a job from a compute node with at least one GPU.
+We also recommend that your job have at least the same amount of CPU memory as GPU memory (CPU mem >= total GPU mem).
+
+Start an interactive job with the following:
+
+.. code-block:: shell
+
+  # Start a 3 hour interactive job with 1 GPU
+  srun -p index -n 1 -G 1 --cpus-per-task 8 -t 03:00:00 --pty bash -l
+
+.. note::
+
+  You may need to tailor the partition (``-p``) and memory (``--mem-per-gpu``) for your cluster
+
+At this point, your command prompt should change from a login node to a compute node.
+
+Creating the demo environment
+###############################
+
+While on your compute node, unpack the demo environment that contains the HTML viewer demo and scenes files.
+
+.. code-block:: shell
+
+  # Copy scenes
+  cp -R /hpc/mydata/greg.zynda/index_workshop/scenes .
+  # Copy HTML viewer demo
+  cp -R $NVINDEX_DIR/demo .
+  
+  
+
+  # Start basic viewer
+  cd demo
+  bash $IDX_SCENES/scene_zebrafish_basic.sh
+
+If all goes well, you should see a long ending in the following
+
+.. code-block:: shell
+
+  Mon, 29 Sep 2025 14:32:18 -0700 VIEWER main info : **********************************************************************
+  Mon, 29 Sep 2025 14:32:18 -0700 VIEWER main info : HTTP server is running at http://gpu-sm01-08.clusternet:8080/
+  Mon, 29 Sep 2025 14:32:18 -0700 VIEWER main info : **********************************************************************
+
+If that URL works, the compute nodes for your cluster are accessible from your internal network.
+If not, you'll need to forward the IndeX viewer port to your local system.
+
+Forwarding ports
+###################
+
+There are several ways to do this, but I recommend `local port forwarding <https://www.digitalocean.com/community/tutorials/ssh-port-forwarding#local-port-forwarding-ssh-l>`_.
+Local port forwarding creates a secure tunnel between a port on your local machine and a remote server using ssh.
+
+This can be done using the same ssh command used to connect to remote servers and has the format:
+
+.. code-block:: shell
+
+  ssh -L [local_port]:[destination_address]:[destination_port] [username]@[ssh_server]
+
++---------------------+----------------------------------------------------------------------+
+| Field               | Description                                                          |
++=====================+======================================================================+
+| local_port          | The port on your local machine that you will connect to              |
++---------------------+----------------------------------------------------------------------+
+| destination_address | The address of the machine hosting the service on the remote network |
++---------------------+----------------------------------------------------------------------+
+| destination_port    | The port the remote service is listening on                          |
++---------------------+----------------------------------------------------------------------+
+| username            | Your username to connect to the system                               |
++---------------------+----------------------------------------------------------------------+
+| ssh_server          | The cluster address                                                  |
++---------------------+----------------------------------------------------------------------+
+
+
+In my case, I'm going to run the following
+
+.. code-block:: shell
+
+  ssh -L 8080:gpu-sm01-08:8080 [username]@[ssh_server]
+
+This will leave you with an active terminal session on that server.
+Closing this terminal will stop the port forwarding, so please leave it open for the duration of the tutorial.
+
+You should now be able to visit http://localhost:8080 in your browser and see the following
+
+.. image:: assets/index_basic.png
+  
+Exploring IndeX viewer interface
+--------------------------------------------
+
+Starting from
+
+.. image:: assets/index_basic.png
+
+Scene Graph
+###############
+
+We're going to start with the Scene Graph in the upper-right corner of the interface
+
+.. image:: assets/index_volumes.png
+  :scale: 50 %
+  :align: center
+
+Different dimensions or layers of data can be enabled for rendering by clicking the check boxes.
+We currently have two data layers:
+
+* volume_fish_t0
+* volume_fish_t100
+
+Try swapping between them.
+You will notice some lag because the data files are unloaded and loaded.
+
+Performance Statistics
+###################
+
+Scrolling down to the Basic statistics section
+
+.. image:: assets/index_basic_stats.png
+  :scale: 50 %
+  :align: center
+
+you'll notice the following metrics:
+
+* rendering
+
+  * Frames per second: How quickly IndeX can render the data
+  * Cluster Size: Number of nodes running IndeX
+
+* video streaming
+
+  * Streaming FPS: How quickly frames can be transmitted to your computer
+
+If you expand the Detailed Statistics section, you can also see detailed information about memory utilization.
+
+.. image:: assets/index_detailed_stats.png
+  :scale: 50 %
+  :align: center
+
+Moving around the scene
+##########################
+
+This visualization is interactive and your view can change based on the following actions:
+
+========= =================
+Motion    Action
+========= =================
+Rotate    Click+Drag
+Zoom      Shit+Click+Drag
+Moving    CMD+Click+Drag
+========= =================
+
+Colormap
+#############
+
+View the colormap by clicking the plus (+) button from the scene list
+
+.. image:: assets/index_scene_colormap.png
+  :scale: 50 %
+  :align: center
+
+Looking at the pane that shows up
+
+.. image:: assets/index_colormap.png
+  :scale: 50 %
+  :align: center
+
+The x-axis of the colormap graph is the data value, and y-axis of the graph is the opacity.
+For this color map, low values are mapped to red, and transition to blue as the value increases.
+By default, low values are almost transparent while mid to high transitions to opaque.
+
+Try clicking around on the color map to see what happens.
+After you start to understand how this changes your view of the data, try the following:
+
+* View the lower 30% of the data
+* Exclude the lower 30% of the data
+* Highlight middle values of data
+
+If you end up creating a color map that you love, you can copy the config to your clipboard or export it to a file.
+Alternatively, if you want to get back to the default colormap, just restart the viewer.
+
+Slicing the data view
+########################
+
+.. image:: assets/index_roi.png
+  :scale: 50 %
+  :align: center
+
+Data can also be sliced to a specific region using the by specifying a global region of interest in the rendering configuration.
+If you experiment with these values, you'll notice the visualization get clipped based on the bounds you choose.
+
+Shutting down the viewer
+###########################
+
+If you need to restart the view or you're just done interacting with data, the viewer service can be shut down by:
+
+* Pressing Ctrl+C on the CLI
+* Choosing "Shutdown Viewer" from the hamburger (☰) menu
+
+Exploring different data formats
+---------------------------------
+
+IndeX can accept several different input types through the scene (``.prj``) files.
+Some are native, while others use plug-ins.
+
+
+
+This original demo was using binary (RAW) format with uint16 values.
