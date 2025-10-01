@@ -20,14 +20,14 @@ This tutorial introduces how to use the `NVIDIA IndeX <https://developer.nvidia.
 
 **Requirements**
 
-* Recent release of NVIDIA IndeX (newer than 2020)
+* Recent release of NVIDIA IndeX SDK (newer than 2020)
 * Slurm system
 
 Introduction to IndeX
 -----------------------
 
-
-
+NVIDIA IndeX is a powerful 3D volumetric visualization SDK designed for interactive exploration of massive scientific datasets.
+It enables researchers, scientists, and engineers to visualize and analyze extremely large volumetric data in real-time, leveraging the parallel processing capabilities of NVIDIA GPUs.
 
 Launching the IndeX viewer on a remote system
 -----------------------------------------------
@@ -56,7 +56,7 @@ After logging into your cluster, and while still on the login node, load the ``i
   # Load the default index module
   module load index
 
-Loading the module now, means it will be inherited in any interactive jobs you run from the same session.
+Loading the module now allows it to be inherited in any interactive jobs you run from the same session.
 
 IndeX is computationally intensive, so it should always be run inside a job from a compute node with at least one GPU.
 We also recommend that your job have at least the same amount of CPU memory as GPU memory (CPU mem >= total GPU mem).
@@ -92,7 +92,11 @@ While on your compute node, unpack the demo environment that contains the HTML v
   cd demo
   bash $IDX_SCENES/scene_zebrafish_basic.sh
 
-If all goes well, you should see a long ending in the following
+Like many NVIDIA products, IndeX is meant to be used as an API.
+We're going to be running everything from the demo directory because it's a demonstration of an HTML viewer that can be built in IndeX.
+The fact that it can be successfully used to view microscopy data is a perk.
+
+After running the final bash script, you should see a long ending in the following
 
 .. code-block:: shell
 
@@ -260,6 +264,81 @@ Exploring different data formats
 IndeX can accept several different input types through the scene (``.prj``) files.
 Some are native, while others use plug-ins.
 
-
+RAW uint16
+################
 
 This original demo was using binary (RAW) format with uint16 values.
+
+OpenVDB (.vdb)
+#################
+
+OpenVDB is a sparse volumetric data structure and file format with the ``.vdb`` extension.
+Since this is a sparse data structure, only non-zero values are stored in the file.
+This means that volumes like this, where there's a lot of empty space can be much smaller without losing any data.
+
+Data has already been converted for the tutorial today, but the ``converter_raw_to_vdb`` binary can used to convert the RAW uint16 data to VDB format.
+Be aware that this converter has a non-zero threshold, so some data is filtered out by default.
+Set this to ``-1`` if you need a lossless conversion.
+
+Lets explore this data and others by launching
+
+.. code:: shell
+
+  # From the demo directory
+  bash $IDX_SCENE/scene_zebrafish_nanovdb.sh
+
+NanoVDB (.nvdb)
+####################
+
+NanoVDB is a lightweight, GPU-friendly version of OpenVDB developed by NVIDIA.
+One of the main differences is that NanoVDB has a static, linearized memory layout with baked offsets, allowing for faster random access and better cache coherency.
+
+In addition to the sparse filtering that OpenVDB supports, NanoVDB also allows for reduced precision.
+Both of these methods are lossy, where you're either throwing out whole data points or reducing the precision of them.
+Our data has a maximum of 0.003, so this is important to think about.
+
+After comparing the performance of the formats, take a look at the size with
+
+.. code:: shell
+
+  ls -lh $IDX_DATA/zebrafish-sample/*
+
+In the ``nvdb`` directory, you can see the effect of different precision levels with ``fp`` and the effect of different filtering thresholds with the ``ts-*_``.
+
+ZARR
+#########
+
+ZARR files can also be loaded directly.
+Launch this with:
+
+.. code:: shell
+
+  bash $IDX_SCENE/scene_zebrafish_zarr.sh
+
+Comparison
+##############
+
+Using a single A10 GPU, performance was recorded
+
+========== ===================== =======================
+Format     Rendering FPS (idle)  File Size (GB)
+========== ===================== =======================
+RAW uint16 10                    4.4
+VDB        16                    1
+NVDB fp16  30                    2.2
+NVDB fp8   37                    1.2
+ZARR       14                    202 (all time steps)
+========== ===================== =======================
+
+Exporting visuals and create animations
+-----------------------------------------
+
+
+
+Launching multi-node rendering jobs
+-------------------------------------
+
+.. code:: shell
+
+  # After loading the index module
+  srun -p gpu -N 2 -n 4 -G 4 --cpus-per-task 16 -t 00:30:00 nvindex-slurm $IDX_SCENE/scene_zebrafish_basic.sh
