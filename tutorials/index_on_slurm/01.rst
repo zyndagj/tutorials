@@ -91,7 +91,7 @@ While on your compute node, unpack the demo environment that contains the HTML v
 
   # Source the environment
   . idx.env
-  
+
   # Start basic viewer
   cd demo
   bash $IDX_SCENES/scene_zebrafish_basic.sh
@@ -318,6 +318,8 @@ Launch this with:
 .. code:: shell
 
   bash $IDX_SCENE/scene_zebrafish_zarr.sh
+
+You'll notice that loading the file takes longer, so iterating across time steps will take longer as well.
 
 Comparison
 ##############
