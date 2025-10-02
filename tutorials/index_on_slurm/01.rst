@@ -81,13 +81,17 @@ While on your compute node, unpack the demo environment that contains the HTML v
 
 .. code-block:: shell
 
-  # Copy scenes
-  cp -R /hpc/mydata/greg.zynda/index_workshop/scenes .
-  # Copy HTML viewer demo
-  cp -R $NVINDEX_DIR/demo .
+  # Copy and unpack data for today (choose your location)
+  cp /hpc/mydata/greg.zynda/index_workshop.tar.gz .
+  tar -xzf index_workshop.tar.gz .
   
-  
+  # Edit paths in the idx.env file
+  cd index_workshop
+  vim idx.env
 
+  # Source the environment
+  . idx.env
+  
   # Start basic viewer
   cd demo
   bash $IDX_SCENES/scene_zebrafish_basic.sh
