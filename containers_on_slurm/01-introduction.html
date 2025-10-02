@@ -1,0 +1,1147 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPU Containers on Slurm &mdash; Tutorials  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=26c4c002" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/tabs.js?v=3030b3cb"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GROMACS and MPS" href="../gromacs_and_MPS/01-introduction.html" />
+    <link rel="prev" title="Containers on BCP" href="../containers_on_bcp/01-introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Tutorials
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../parabricks/01-introduction.html">Parabricks Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parabricks_on_bcp/01-introduction.html">Parabricks on BCP Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multi-node_on_bcp/01-introduction.html">Multi-Node on BCP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_bcp/01-introduction.html">Containers on BCP</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GPU Containers on Slurm</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-to-containers">Introduction to containers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quickstart-running-your-first-gpu-container">Quickstart: Running your first GPU container</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pulling-the-container">Pulling the container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examining-the-cuda-environment">Examining the CUDA environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-exercises">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#building-and-testing-your-first-gpu-container">Building and testing your first GPU container</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#choosing-a-starting-container">Choosing a starting container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-dependencies-and-building">Installing dependencies and building</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wrapping-it-all-up-and-building-the-container">Wrapping it all up and building the container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#making-your-container-more-space-efficient">Making your container more space efficient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-nbody-sample-benchmark">Running the nbody sample benchmark</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices-for-building-python-based-containers">Best practices for building python-based containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-python-scripts-inside-a-running-container">Developing python scripts inside a running container</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-external-scripts">Running external scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#developing-packages-from-inside-a-container">Developing packages from inside a container</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-multi-node-containers">Running multi-node containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#multi-node-mpi-nccl-test">Multi-node MPI NCCL Test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-node-pytorch">Multi-node PyTorch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-node-pytorch-lightning">Multi-node Pytorch Lightning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gromacs_and_MPS/01-introduction.html">GROMACS and MPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index_on_slurm/01.html">IndeX on Slurm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Tutorials</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">GPU Containers on Slurm</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/containers_on_slurm/01-introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gpu-containers-on-slurm">
+<h1>GPU Containers on Slurm<a class="headerlink" href="#gpu-containers-on-slurm" title="Link to this heading">¶</a></h1>
+<p>This tutorial introduces software containers, how to build them, and how to run them on Slurm clusters using apptainer.
+This is not meant to teach container mastery, but expose you to some best practices with containers on HPC systems.</p>
+<p>Last updated: Oct 02, 2025</p>
+<p><strong>Objectives</strong></p>
+<ul class="simple">
+<li><p>Quickstart to running GPU containers</p></li>
+<li><p>Building and testing your first GPU container</p></li>
+<li><p>Best practices for building python-based containers</p></li>
+<li><p>Developing python scripts inside a running container on BCP</p></li>
+<li><p>Running multi-node containers</p></li>
+</ul>
+<p><strong>Requirements</strong></p>
+<ul>
+<li><p>Container build system - Apptainer build <strong>OR</strong> Docker CLI Pre-authenticated with a container registry such as:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="hub.docker.com">Docker Hub</a></p></li>
+<li><p><a class="reference external" href="https://org.ngc.nvidia.com/setup/api-key">nvcr.io</a></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Container runtime - Slurm GPU cluster with <a class="reference external" href="https://apptainer.org/">apptainer</a> <strong>OR</strong> <a class="reference external" href="https://github.com/NVIDIA/enroot/">enroot</a></p></li>
+</ul>
+<p id="prep"><strong>Prepare your environment</strong></p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-0-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-0-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-0-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-0-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-0-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/5a91d36dd60c07e0005a6d85f9ff93fc/prep_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">prep_apptainer.sh</span></code></a></span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Start a 3 hour interactive job with 1 GPU
+srun -p interactive -n 1 -G 1 --cpus-per-task 16 -t 03:00:00 --pty bash -l
+
+# Change cachedir to /tmp
+export APPTAINER_CACHEDIR=/tmp/${USER}_apptainer_cache
+
+# Create workspace for tutorial
+mkdir -p ${MYDATA}/containers
+
+# Change to your workspace
+#  - This is a good place to store containers
+#  - Keep definition files on $HOME
+cd ${MYDATA}/containers
+
+# Pull the container
+apptainer pull docker://nvcr.io/nvidia/pytorch:24.03-py3
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-0-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-0-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/6632e160c0725614a32bab6eef0c447b/prep_docker.sh"><code class="xref download docutils literal notranslate"><span class="pre">prep_docker.sh</span></code></a></span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pull the container</span>
+<span class="n">docker</span> <span class="n">pull</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">pytorch</span><span class="p">:</span><span class="mf">24.03</span><span class="o">-</span><span class="n">py3</span>
+</pre></div>
+</div>
+</div>
+</div></div>
+<section id="introduction-to-containers">
+<h2>Introduction to containers<a class="headerlink" href="#introduction-to-containers" title="Link to this heading">¶</a></h2>
+<p>Containers are a common method for building, distributing, and running applications, web services, development, and more.
+Containers have gained popularity because they package up an application and all dependencies, provide isolation from the host environment, and allow for a consistent deployment across platforms.
+While you may have also heard of virtual machines (VMs), containers are separate and rely on namespace virtualization without hardware emulation, so there are no performance losses.</p>
+<p>The portability and reproducibility, without sacrificing performance, make containers ideal for scientific applications. Whole environments can be saved to ensure a published tool can always be used over time.</p>
+<p><a class="reference external" href="https://www.docker.com/">Docker</a> is the most common container runtime, but there are many that can consume Open Container Initiative (OCI) images .
+This tutorial will be focusing on building containers with <a class="reference external" href="https://apptainer.org/">apptainer</a> or docker, and then running containers in a shared HPC environment with apptainer or <a class="reference external" href="https://github.com/NVIDIA/enroot">enroot</a>.</p>
+</section>
+<section id="quickstart-running-your-first-gpu-container">
+<h2>Quickstart: Running your first GPU container<a class="headerlink" href="#quickstart-running-your-first-gpu-container" title="Link to this heading">¶</a></h2>
+<p>Think of this as a quickstart to running GPU containers on HPC systems.</p>
+<section id="pulling-the-container">
+<h3>Pulling the container<a class="headerlink" href="#pulling-the-container" title="Link to this heading">¶</a></h3>
+<p>Containers should only be run on a compute node inside a job, so I recommend starting a job on a GPU node.
+If you’re not already on one, take a look at how to <a class="reference internal" href="#prep">prepare your environment</a> or the <code class="docutils literal notranslate"><span class="pre">srun</span></code> command below if you’re using <code class="docutils literal notranslate"><span class="pre">enroot</span></code>.</p>
+<p>To run a container on HPC systems, we first need to pull the layers from the container registry and then convert them into a single image.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-1-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-1-RW5yb290" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-1-RW5yb290" name="RW5yb290" role="tab" tabindex="-1">Enroot</button></div><div aria-labelledby="tab-1-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-1-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/67cf92eee8c237e9937842e6f43209b2/pull_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">pull_apptainer.sh</span></code></a></span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pull the container</span>
+<span class="n">apptainer</span> <span class="n">pull</span> <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-1-RW5yb290" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-1-RW5yb290" name="RW5yb290" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/9572e77cf20c39f9c849a567b8892ff6/pull_enroot.sh"><code class="xref download docutils literal notranslate"><span class="pre">pull_enroot.sh</span></code></a></span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start a 2 hour interactive job with 1 GPU</span>
+<span class="n">srun</span> <span class="o">-</span><span class="n">p</span> <span class="n">gpu</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">G</span> <span class="mi">1</span> <span class="o">--</span><span class="n">cpus</span><span class="o">-</span><span class="n">per</span><span class="o">-</span><span class="n">task</span> <span class="mi">16</span> <span class="o">-</span><span class="n">t</span> <span class="mi">03</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span> <span class="o">--</span><span class="n">pty</span> <span class="n">bash</span> <span class="o">-</span><span class="n">l</span>
+
+<span class="c1"># Pull the container</span>
+<span class="n">enroot</span> <span class="kn">import</span><span class="w"> </span><span class="nn">docker</span><span class="p">:</span><span class="o">//</span><span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="c1">#nvidia/cuda:12.4.1-devel-ubuntu22.04</span>
+</pre></div>
+</div>
+</div>
+</div></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Keep this job running for the rest of this tutorial</p>
+</div>
+</section>
+<section id="examining-the-cuda-environment">
+<h3>Examining the CUDA environment<a class="headerlink" href="#examining-the-cuda-environment" title="Link to this heading">¶</a></h3>
+<p>To start off, take a look at the CUDA environment outside of the container by running the <a class="reference external" href="https://docs.nvidia.com/deploy/nvidia-smi/index.html">NVIDIA System Management Interface</a> program (<code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code>).</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>nvidia-smi
+
+Tue<span class="w"> </span>Dec<span class="w">  </span><span class="m">3</span><span class="w"> </span><span class="m">18</span>:46:40<span class="w"> </span><span class="m">2024</span>
++-----------------------------------------------------------------------------------------+
+<span class="p">|</span><span class="w"> </span>NVIDIA-SMI<span class="w"> </span><span class="m">565</span>.57.01<span class="w">              </span>Driver<span class="w"> </span>Version:<span class="w"> </span><span class="m">565</span>.57.01<span class="w">      </span>CUDA<span class="w"> </span>Version:<span class="w"> </span><span class="m">12</span>.7<span class="w">     </span><span class="p">|</span>
+<span class="p">|</span>-----------------------------------------+------------------------+----------------------+
+<span class="p">|</span><span class="w"> </span>GPU<span class="w">  </span>Name<span class="w">                 </span>Persistence-M<span class="w"> </span><span class="p">|</span><span class="w"> </span>Bus-Id<span class="w">          </span>Disp.A<span class="w"> </span><span class="p">|</span><span class="w"> </span>Volatile<span class="w"> </span>Uncorr.<span class="w"> </span>ECC<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>Fan<span class="w">  </span>Temp<span class="w">   </span>Perf<span class="w">          </span>Pwr:Usage/Cap<span class="w"> </span><span class="p">|</span><span class="w">           </span>Memory-Usage<span class="w"> </span><span class="p">|</span><span class="w"> </span>GPU-Util<span class="w">  </span>Compute<span class="w"> </span>M.<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w">                                         </span><span class="p">|</span><span class="w">                        </span><span class="p">|</span><span class="w">               </span>MIG<span class="w"> </span>M.<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="o">=========================================</span>+<span class="o">========================</span>+<span class="o">======================</span><span class="p">|</span>
+<span class="p">|</span><span class="w">   </span><span class="m">0</span><span class="w">  </span>NVIDIA<span class="w"> </span>L40S<span class="w">                    </span>Off<span class="w"> </span><span class="p">|</span><span class="w">   </span><span class="m">00000000</span>:41:00.0<span class="w"> </span>Off<span class="w"> </span><span class="p">|</span><span class="w">                    </span><span class="m">0</span><span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>N/A<span class="w">   </span>36C<span class="w">    </span>P8<span class="w">             </span>35W<span class="w"> </span>/<span class="w">  </span>350W<span class="w"> </span><span class="p">|</span><span class="w">       </span>1MiB<span class="w"> </span>/<span class="w">  </span>46068MiB<span class="w"> </span><span class="p">|</span><span class="w">      </span><span class="m">0</span>%<span class="w">      </span>Default<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w">                                         </span><span class="p">|</span><span class="w">                        </span><span class="p">|</span><span class="w">                  </span>N/A<span class="w"> </span><span class="p">|</span>
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+<span class="p">|</span><span class="w"> </span>Processes:<span class="w">                                                                              </span><span class="p">|</span>
+<span class="p">|</span><span class="w">  </span>GPU<span class="w">   </span>GI<span class="w">   </span>CI<span class="w">        </span>PID<span class="w">   </span>Type<span class="w">   </span>Process<span class="w"> </span>name<span class="w">                              </span>GPU<span class="w"> </span>Memory<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w">        </span>ID<span class="w">   </span>ID<span class="w">                                                               </span>Usage<span class="w">      </span><span class="p">|</span>
+<span class="p">|</span><span class="o">=========================================================================================</span><span class="p">|</span>
+<span class="p">|</span><span class="w">  </span>No<span class="w"> </span>running<span class="w"> </span>processes<span class="w"> </span>found<span class="w">                                                             </span><span class="p">|</span>
++-----------------------------------------------------------------------------------------+
+</pre></div>
+</div>
+<p>Running <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> is the easiest way to see if there’s a GPU on your system and what driver it is running.
+In addition to using it on your host, it works inside GPU-capable containers.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-2-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-2-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-2-RW5yb290" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-2-RW5yb290" name="RW5yb290" role="tab" tabindex="-1">Enroot</button></div><div aria-labelledby="tab-2-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-2-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/e509a807d59dfda7fa51ed85b7e98ed2/nvidia-smi_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">nvidia-smi_apptainer.sh</span></code></a></span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apptainer</span> <span class="n">exec</span> <span class="o">--</span><span class="n">nv</span> <span class="n">cuda_12</span><span class="mf">.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span><span class="o">.</span><span class="n">sif</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">smi</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-2-RW5yb290" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-2-RW5yb290" name="RW5yb290" role="tabpanel" tabindex="0"></div></div>
+<p>If you’re running <code class="docutils literal notranslate"><span class="pre">aptainer</span></code>, you’ll notice that the CUDA version doesn’t change with the <code class="docutils literal notranslate"><span class="pre">--nv</span></code> flag.
+This will change if the <code class="docutils literal notranslate"><span class="pre">--nvccli</span></code> option (nvidia container cli) is enabled on your system.</p>
+</section>
+<section id="optional-exercises">
+<h3>Optional Exercises<a class="headerlink" href="#optional-exercises" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>What happens if you exclude the <code class="docutils literal notranslate"><span class="pre">--nv</span></code> flag with <code class="docutils literal notranslate"><span class="pre">apptainer</span></code>?</p></li>
+<li><p>What happens if you run on the container on a system without a GPU?</p></li>
+</ul>
+</section>
+</section>
+<section id="building-and-testing-your-first-gpu-container">
+<h2>Building and testing your first GPU container<a class="headerlink" href="#building-and-testing-your-first-gpu-container" title="Link to this heading">¶</a></h2>
+<p>In this section, we’ll be building the <a class="reference external" href="https://github.com/NVIDIA/cuda-samples/tree/master/Samples/5_Domain_Specific/nbody">nbody sample benchmark</a> from <a class="reference external" href="https://github.com/NVIDIA/cuda-samples">https://github.com/NVIDIA/cuda-samples</a>.</p>
+<p>The nbody benchmark demonstrates efficient all-pairs simulation of a gravitational n-body simulation in CUDA and provides a GFLOP/s metric at the end.
+While this GFLOP/s metric is not meant for true performance comparisons, this sample code supports multiple GPUs and is relatively easy to build.</p>
+<p>Containers are built using recipe files like Docker’s <a class="reference external" href="https://docs.docker.com/reference/dockerfile/">Dockerfile</a> or Apptainer’s <a class="reference external" href="https://apptainer.org/docs/user/main/definition_files.html#">Definition file</a>, which are essentially scripts for provisioning a linux environment.</p>
+<section id="choosing-a-starting-container">
+<h3>Choosing a starting container<a class="headerlink" href="#choosing-a-starting-container" title="Link to this heading">¶</a></h3>
+<p>The first step to building any container is choosing an image to start from.
+This starting image is often a clean OS like this <a class="reference external" href="https://hub.docker.com/_/ubuntu">ubuntu image</a>, from which you can add any necessary dependencies to build/run your software. Alternatively, you can start from an image that already contains software they’re pre-installed.</p>
+<p>We’re going to be building and running a GPU application, so I recommend starting from NVIDIA’s <a class="reference external" href="https://catalog.ngc.nvidia.com/orgs/nvidia/containers/cuda">CUDA container</a> on NGC.
+NGC is NVIDIA’s container registry, where NVIDIA software, SDKs, and models are published in container format.
+Not only are these meant to make your development easier, they’re also serve as a common environment for NVIDIA to reproduce and troubleshoot any issues you might encounter through <a class="reference external" href="https://enterprise-support.nvidia.com/">enterprise support</a> with <a class="reference external" href="https://www.nvidia.com/en-us/data-center/products/ai-enterprise/">NVAIE</a>.</p>
+<p>Looking at the tags tab, you’ll see many different containers.
+To help you understand the naming convention, containers usually have a <code class="docutils literal notranslate"><span class="pre">&lt;project&gt;/&lt;name&gt;:&lt;tag&gt;</span></code> format.
+If you browse through the available containers, you’ll see that each container is named cuda, but tags have some common elements along with a CUDA version prefix:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">base</span></code>: Includes the CUDA runtime (cudart)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">runtime</span></code>: base + CUDA math libraries, and NCCL</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">devel</span></code>: runtime + headers, development tools for compiling CUDA applications</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cudnn-</span></code>: (prefix) any of the above + cuDNN libraries</p></li>
+</ul>
+<p>There are a ton of options, so here are some recommendations on choosing a container:</p>
+<ul>
+<li><p>Latest CUDA version (unless a specific one is needed)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Newer libraries work on older drivers</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">base</span></code> for simple CUDA applications</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">devel</span></code> for multi-staged builds</p></li>
+<li><p>Choose an OS with a package manager you’re familiar with</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We’ll cover multi-staged builds in container optimization</p>
+</div>
+<p>In this case, we’re going to start from the <code class="docutils literal notranslate"><span class="pre">nvcr.io/nvidia/cuda:12.4.1-devel-ubuntu22.04</span></code> container that we already pulled and cached during the quickstart.</p>
+</section>
+<section id="installing-dependencies-and-building">
+<h3>Installing dependencies and building<a class="headerlink" href="#installing-dependencies-and-building" title="Link to this heading">¶</a></h3>
+<p>Just like when trying to run an application, identifying and installing compatible dependencies is the hardest part of container development.
+If you look at the <a class="reference external" href="https://github.com/NVIDIA/cuda-samples/tree/master/Samples/5_Domain_Specific/nbody#dependencies-needed-to-buildrun">dependencies for nbody</a>, X11 and GL are required to build and run.
+On an ubuntu system (notice container tag), we can install the development headers and libraries along with <code class="docutils literal notranslate"><span class="pre">curl</span></code> using:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--no-install-recommends<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>freeglut3-dev<span class="w"> </span>libgl1-mesa-dev<span class="w"> </span>libglu1-mesa-dev<span class="w"> </span>curl
+</pre></div>
+</div>
+<p>These commands won’t work for non-root users because they modify the host system.
+If you’re figuring out how to build a container, you can prototype commands in an interactive container:</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-3-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-3-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-3-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-3-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-3-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-3-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/414a8127151c007860aec8126bb86e0c/interactive_build_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">interactive_build_apptainer.sh</span></code></a></span><a class="headerlink" href="#id11" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create an overlay directory</span>
+<span class="c1">#   - The base container is never changed, just the overlay</span>
+<span class="c1">#   - Overlay only works with a single image</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="si">${</span><span class="nv">APPTAINER_CACHEDIR</span><span class="si">}</span>/cuda-devel_overlay
+
+<span class="c1"># Launch a shell in the cuda devel container with</span>
+<span class="c1">#   - fakeroot - appear to be root in the container</span>
+<span class="c1">#   - overlay - allow modifications to be written to overlay directory</span>
+apptainer<span class="w"> </span>shell<span class="w"> </span>--fakeroot<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--overlay<span class="w"> </span><span class="si">${</span><span class="nv">APPTAINER_CACHEDIR</span><span class="si">}</span>/cuda-devel_overlay<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>cuda_12.4.1-devel-ubuntu22.04.sif
+
+<span class="c1"># Your cluster may also support overlay images instead of directories</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-3-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-3-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/827ca366c24692bfc14bedeceb585268/interactive_build_docker.sh"><code class="xref download docutils literal notranslate"><span class="pre">interactive_build_docker.sh</span></code></a></span><a class="headerlink" href="#id12" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pull the container</span>
+<span class="n">docker</span> <span class="n">pull</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+
+<span class="c1"># Enter the container and delete any modifications (--rm)</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">it</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span> <span class="n">bash</span> <span class="o">-</span><span class="n">l</span>
+</pre></div>
+</div>
+</div>
+</div></div>
+<p>Once the dependencies are installed, you can download, build, and install the nbody application with the following commands:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Grab the sample code</span>
+curl<span class="w"> </span>-sL<span class="w"> </span>https://github.com/NVIDIA/cuda-samples/archive/refs/tags/v12.4.1.tar.gz<span class="w"> </span>-o<span class="w"> </span>v12.4.1.tar.gz
+
+<span class="c1"># Unpack the tarball</span>
+tar<span class="w"> </span>-xzf<span class="w"> </span>v12.4.1.tar.gz
+
+<span class="c1"># Build the nbody executable</span>
+<span class="nb">cd</span><span class="w"> </span>cuda-samples-12.4.1/Samples/5_Domain_Specific/nbody<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mv<span class="w"> </span>nbody<span class="w"> </span>/usr/local/bin
+</pre></div>
+</div>
+</section>
+<section id="wrapping-it-all-up-and-building-the-container">
+<h3>Wrapping it all up and building the container<a class="headerlink" href="#wrapping-it-all-up-and-building-the-container" title="Link to this heading">¶</a></h3>
+<p>Your desired starting container and installation commands can be wrapped up into a single file.
+Apptainer uses <a class="reference external" href="https://apptainer.org/docs/user/main/definition_files.html">Definition files</a> and Docker uses <a class="reference external" href="https://docs.docker.com/reference/dockerfile/">Dockerfiles</a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">exit</span></code> your interactive container instance and <code class="docutils literal notranslate"><span class="pre">wget</span></code> your corresponding build file.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-4-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-4-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-4-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-4-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-4-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-4-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/c7fedcbe47824418a98441b00efb0fec/Definition.nbody"><code class="xref download docutils literal notranslate"><span class="pre">Definition.nbody</span></code></a></span><a class="headerlink" href="#id13" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Bootstrap</span><span class="p">:</span> <span class="n">docker</span>
+<span class="n">From</span><span class="p">:</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+
+<span class="o">%</span><span class="n">post</span>
+	<span class="c1"># Install dependencies</span>
+	<span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span><span class="o">-</span><span class="n">dev</span> <span class="n">libgl1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">libglu1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">curl</span>
+
+	<span class="c1"># Grab the sample code</span>
+	<span class="n">curl</span> <span class="o">-</span><span class="n">sL</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NVIDIA</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">refs</span><span class="o">/</span><span class="n">tags</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+	<span class="c1"># Unpack the tarball to /root</span>
+	<span class="n">tar</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">root</span> <span class="o">-</span><span class="n">xzf</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+	<span class="c1"># Build the nbody executable</span>
+	<span class="n">cd</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">-</span><span class="mf">12.4.1</span><span class="o">/</span><span class="n">Samples</span><span class="o">/</span><span class="mi">5</span><span class="n">_Domain_Specific</span><span class="o">/</span><span class="n">nbody</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">make</span> <span class="o">&amp;&amp;</span> <span class="n">mv</span> <span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-4-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-4-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/a9aa36778ade9e7806c3e23c86614629/Dockerfile.nbody"><code class="xref download docutils literal notranslate"><span class="pre">Dockerfile.nbody</span></code></a></span><a class="headerlink" href="#id14" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+
+<span class="c1"># Install dependencies</span>
+<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span><span class="o">-</span><span class="n">dev</span> <span class="n">libgl1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">libglu1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">curl</span>
+
+<span class="c1"># Grab the sample code</span>
+<span class="n">RUN</span> <span class="n">curl</span> <span class="o">-</span><span class="n">sL</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NVIDIA</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">refs</span><span class="o">/</span><span class="n">tags</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+<span class="c1"># Unpack the tarball to /root</span>
+<span class="n">RUN</span> <span class="n">tar</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">root</span> <span class="o">-</span><span class="n">xzf</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+<span class="c1"># Build the nbody executable</span>
+<span class="n">RUN</span> <span class="n">cd</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">-</span><span class="mf">12.4.1</span><span class="o">/</span><span class="n">Samples</span><span class="o">/</span><span class="mi">5</span><span class="n">_Domain_Specific</span><span class="o">/</span><span class="n">nbody</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">make</span> <span class="o">&amp;&amp;</span> <span class="n">mv</span> <span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span>
+</pre></div>
+</div>
+</div>
+</div></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can either download this file directly or copy and paste into your favorite text editor</p>
+</div>
+<p>You can then build a container named <strong>nbody</strong> from your build script as follows:</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-5-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-5-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-5-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-5-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-5-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-5-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/0adb02040a567c40a8f586d29baf53e5/build_nbody_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">build_nbody_apptainer.sh</span></code></a></span><a class="headerlink" href="#id15" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># You should already be on a compute node</span>
+<span class="c1"># srun -p gpu -n 1 -G 1 --cpus-per-task 16 -t 03:00:00 --pty bash -l</span>
+
+<span class="c1"># build the container</span>
+<span class="n">apptainer</span> <span class="n">build</span> <span class="n">nbody</span><span class="o">.</span><span class="n">sif</span> <span class="n">Definition</span><span class="o">.</span><span class="n">nbody</span>
+
+<span class="c1"># Look at image size</span>
+<span class="n">ls</span> <span class="o">-</span><span class="n">lh</span> <span class="n">nbody</span><span class="o">.</span><span class="n">sif</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-5-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-5-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/54508222befc0a1b3efb5680891f30c5/build_nbody_docker.sh"><code class="xref download docutils literal notranslate"><span class="pre">build_nbody_docker.sh</span></code></a></span><a class="headerlink" href="#id16" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Your Docker hub username
+HUB_USER=
+
+# build the container
+docker build -t ${HUB_USER}/nbody -f Dockerfile.nbody .
+
+# Look at image size
+docker images | grep nbody
+</pre></div>
+</div>
+</div>
+</div></div>
+<p>This is a relatively large image, so not only does it take up a lot of space on the filesystem, but it also would take a while to upload to a remote registry for sharing or archive.
+Lets instead figure out how to make our final image more space efficient.</p>
+</section>
+<section id="making-your-container-more-space-efficient">
+<h3>Making your container more space efficient<a class="headerlink" href="#making-your-container-more-space-efficient" title="Link to this heading">¶</a></h3>
+<p>We can make this much smaller using the following techniques:</p>
+<ol class="arabic simple">
+<li><p>Use a multi-staged build - Building in one container and copying build binaries to a runtime container</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.docker.com/build/building/multi-stage/">Docker multi-staged build documentation</a></p></li>
+<li><p><a class="reference external" href="https://apptainer.org/docs/user/main/definition_files.html#multi-stage-builds">Apptainer multi-staged build documentation</a></p></li>
+</ul>
+</li>
+<li><p>Only install runtime libraries in the final container</p>
+<ol class="arabic simple">
+<li><p>Using the base container instead of devel</p></li>
+<li><p>Not installing <code class="docutils literal notranslate"><span class="pre">*-devel</span></code> packages from apt</p></li>
+</ol>
+</li>
+<li><p>Copy the finished binary instead of the full source repo</p></li>
+</ol>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-6-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-6-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-6-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-6-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-6-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-6-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/954bf5cae7a4c1d3c2911532ed8bf115/Definition.nbody-efficient"><code class="xref download docutils literal notranslate"><span class="pre">Definition.nbody-efficient</span></code></a></span><a class="headerlink" href="#id17" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Bootstrap</span><span class="p">:</span> <span class="n">docker</span>
+<span class="n">From</span><span class="p">:</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+<span class="n">Stage</span><span class="p">:</span> <span class="n">builder</span>
+
+<span class="o">%</span><span class="n">post</span>
+	<span class="c1"># Install dependencies</span>
+	<span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span><span class="o">-</span><span class="n">dev</span> <span class="n">libgl1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">libglu1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">curl</span>
+
+	<span class="c1"># Grab the sample code</span>
+	<span class="n">curl</span> <span class="o">-</span><span class="n">sL</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NVIDIA</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">refs</span><span class="o">/</span><span class="n">tags</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+	<span class="c1"># Unpack the tarball to /root</span>
+	<span class="n">tar</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">root</span> <span class="o">-</span><span class="n">xzf</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+	<span class="c1"># Build the nbody executable</span>
+	<span class="n">cd</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">-</span><span class="mf">12.4.1</span><span class="o">/</span><span class="n">Samples</span><span class="o">/</span><span class="mi">5</span><span class="n">_Domain_Specific</span><span class="o">/</span><span class="n">nbody</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">make</span> <span class="o">&amp;&amp;</span> <span class="n">mv</span> <span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span>
+
+<span class="c1"># Change to the base image</span>
+<span class="n">Bootstrap</span><span class="p">:</span> <span class="n">docker</span>
+<span class="n">From</span><span class="p">:</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">base</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+
+<span class="o">%</span><span class="n">post</span>
+	<span class="c1"># Only install the runtime libraries</span>
+	<span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span> <span class="n">libgl1</span> <span class="n">libglu1</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">clean</span> <span class="o">&amp;&amp;</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">lists</span><span class="o">/*</span>
+
+<span class="c1"># Copy the pre-build binary from our builder stage</span>
+<span class="o">%</span><span class="n">files</span> <span class="kn">from</span><span class="w"> </span><span class="nn">builder</span>
+	<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nbody</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-6-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-6-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id18">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/7e22448c92cf9ae2bf7a879814f3f911/Dockerfile.nbody-efficient"><code class="xref download docutils literal notranslate"><span class="pre">Dockerfile.nbody-efficient</span></code></a></span><a class="headerlink" href="#id18" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span> <span class="n">AS</span> <span class="n">builder</span>
+
+<span class="c1"># Install runtime and build dependencies</span>
+<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span><span class="o">-</span><span class="n">dev</span> <span class="n">libgl1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">libglu1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span>
+
+<span class="c1"># Grab the sample code</span>
+<span class="n">ADD</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NVIDIA</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">refs</span><span class="o">/</span><span class="n">tags</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">/</span><span class="n">root</span>
+
+<span class="c1"># Unpack the tarball to /root</span>
+<span class="n">RUN</span> <span class="n">tar</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">root</span> <span class="o">-</span><span class="n">xzf</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+<span class="c1"># Build the nbody executable</span>
+<span class="n">RUN</span> <span class="n">cd</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">-</span><span class="mf">12.4.1</span><span class="o">/</span><span class="n">Samples</span><span class="o">/</span><span class="mi">5</span><span class="n">_Domain_Specific</span><span class="o">/</span><span class="n">nbody</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">make</span> <span class="o">&amp;&amp;</span> <span class="n">mv</span> <span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span>
+
+<span class="c1"># Change to the base image</span>
+<span class="n">FROM</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">base</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+
+<span class="c1"># Install the runtime dependencies (not *-dev)</span>
+<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span> <span class="n">libgl1</span> <span class="n">libglu1</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">clean</span> <span class="o">&amp;&amp;</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">lists</span><span class="o">/*</span>
+
+<span class="c1"># Copy the pre-build binary from our builder stage</span>
+<span class="n">COPY</span> <span class="o">--</span><span class="n">from</span><span class="o">=</span><span class="n">builder</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nbody</span>
+</pre></div>
+</div>
+</div>
+</div></div>
+<p>Make sure to change the name or tag of the container when building it.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-7-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-7-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-7-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-7-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-7-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-7-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id19">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/61a251d7c1a6276a70cce35fed6c066d/build_nbody-efficient_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">build_nbody-efficient_apptainer.sh</span></code></a></span><a class="headerlink" href="#id19" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># build the container</span>
+<span class="n">apptainer</span> <span class="n">build</span> <span class="n">nbody</span><span class="o">-</span><span class="n">efficient</span><span class="o">.</span><span class="n">sif</span> <span class="n">Definition</span><span class="o">.</span><span class="n">nbody</span><span class="o">-</span><span class="n">efficient</span>
+
+<span class="c1"># Look at image size</span>
+<span class="n">ls</span> <span class="o">-</span><span class="n">lh</span> <span class="n">nbody</span><span class="o">-</span><span class="n">efficient</span><span class="o">.</span><span class="n">sif</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-7-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-7-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id20">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/c2aa7258f3e3ab92071bd4abaa044114/build_nbody-efficient_docker.sh"><code class="xref download docutils literal notranslate"><span class="pre">build_nbody-efficient_docker.sh</span></code></a></span><a class="headerlink" href="#id20" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Your Docker hub username
+HUB_USER=
+
+# build the container
+docker build -t ${HUB_USER}/nbody:efficient -f Dockerfile.nbody-efficient .
+
+# Look at image size
+docker images | grep nbody
+
+# Push the container
+docker push ${HUB_USER}/nbody:efficient
+</pre></div>
+</div>
+</div>
+</div></div>
+<p>Once again, lets look at the final size of the containers we built.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>ls<span class="w"> </span>-lh<span class="w"> </span>nbody*sif
+
+-rwxr-xr-x<span class="w"> </span><span class="m">1</span><span class="w"> </span>greg.zynda<span class="w"> </span>greg.zynda.grp<span class="w"> </span>147M<span class="w"> </span>Dec<span class="w">  </span><span class="m">3</span><span class="w"> </span><span class="m">20</span>:34<span class="w"> </span>nbody-efficient.sif
+-rwxr-xr-x<span class="w"> </span><span class="m">1</span><span class="w"> </span>greg.zynda<span class="w"> </span>greg.zynda.grp<span class="w"> </span><span class="m">4</span>.2G<span class="w"> </span>Dec<span class="w">  </span><span class="m">3</span><span class="w"> </span><span class="m">08</span>:51<span class="w"> </span>nbody.sif
+</pre></div>
+</div>
+<p>In the case of these apptainer <code class="docutils literal notranslate"><span class="pre">.sif</span></code> images built by <code class="docutils literal notranslate"><span class="pre">apptainer</span></code>, you’ll notice that the efficient build is much smaller: 147MB vs 4.2GB!
+Not only will this take up less space on your filesystem, but it’s also easier to archive with a publication.</p>
+</section>
+<section id="running-the-nbody-sample-benchmark">
+<h3>Running the nbody sample benchmark<a class="headerlink" href="#running-the-nbody-sample-benchmark" title="Link to this heading">¶</a></h3>
+<p>You should already be inside a job with an allocated GPU, so you can run the benchmark with the following:</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-8-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-8-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-8-RW5yb290" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-8-RW5yb290" name="RW5yb290" role="tab" tabindex="-1">Enroot</button></div><div aria-labelledby="tab-8-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-8-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id21">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/17cb52b317c207db38f4899bfef6361f/run_nbody_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_nbody_apptainer.sh</span></code></a></span><a class="headerlink" href="#id21" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check that GPU is still detected</span>
+<span class="n">apptainer</span> <span class="n">exec</span> <span class="o">--</span><span class="n">nv</span> <span class="n">nbody</span><span class="o">-</span><span class="n">efficient</span><span class="o">.</span><span class="n">sif</span> <span class="n">nvidia</span><span class="o">-</span><span class="n">smi</span>
+
+<span class="c1"># Run nbody benchmark</span>
+<span class="n">apptainer</span> <span class="n">exec</span> <span class="o">--</span><span class="n">nv</span> <span class="n">nbody</span><span class="o">-</span><span class="n">efficient</span><span class="o">.</span><span class="n">sif</span> <span class="n">nbody</span> <span class="o">-</span><span class="n">benchmark</span> <span class="o">-</span><span class="n">numbodies</span><span class="o">=</span><span class="mi">2000000</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-8-RW5yb290" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-8-RW5yb290" name="RW5yb290" role="tabpanel" tabindex="0"></div></div>
+<p>When your job is done, you should see output similar to the following:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span>Windowed<span class="w"> </span>mode
+&gt;<span class="w"> </span>Simulation<span class="w"> </span>data<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span>video<span class="w"> </span>memory
+&gt;<span class="w"> </span>Single<span class="w"> </span>precision<span class="w"> </span>floating<span class="w"> </span>point<span class="w"> </span>simulation
+&gt;<span class="w"> </span><span class="m">1</span><span class="w"> </span>Devices<span class="w"> </span>used<span class="w"> </span><span class="k">for</span><span class="w"> </span>simulation
+GPU<span class="w"> </span>Device<span class="w"> </span><span class="m">0</span>:<span class="w"> </span><span class="s2">&quot;Ada&quot;</span><span class="w"> </span>with<span class="w"> </span>compute<span class="w"> </span>capability<span class="w"> </span><span class="m">8</span>.9
+
+&gt;<span class="w"> </span>Compute<span class="w"> </span><span class="m">8</span>.9<span class="w"> </span>CUDA<span class="w"> </span>device:<span class="w"> </span><span class="o">[</span>NVIDIA<span class="w"> </span>L40S<span class="o">]</span>
+Warning:<span class="w"> </span><span class="s2">&quot;number of bodies&quot;</span><span class="w"> </span>specified<span class="w"> </span><span class="m">2000000</span><span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span>a<span class="w"> </span>multiple<span class="w"> </span>of<span class="w"> </span><span class="m">256</span>.
+Rounding<span class="w"> </span>up<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>nearest<span class="w"> </span>multiple:<span class="w"> </span><span class="m">2000128</span>.
+<span class="m">2000128</span><span class="w"> </span>bodies,<span class="w"> </span>total<span class="w"> </span><span class="nb">time</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="m">10</span><span class="w"> </span>iterations:<span class="w"> </span><span class="m">21772</span>.984<span class="w"> </span><span class="nv">ms</span>
+<span class="o">=</span><span class="w"> </span><span class="m">1837</span>.374<span class="w"> </span>billion<span class="w"> </span>interactions<span class="w"> </span>per<span class="w"> </span><span class="nv">second</span>
+<span class="o">=</span><span class="w"> </span><span class="m">36747</span>.484<span class="w"> </span>single-precision<span class="w"> </span>GFLOP/s<span class="w"> </span>at<span class="w"> </span><span class="m">20</span><span class="w"> </span>flops<span class="w"> </span>per<span class="w"> </span>interaction
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These performance results will change based on the GPU type your were allocated.</p>
+</div>
+</section>
+<section id="id3">
+<h3>Optional Exercises<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Looking at the help text, try using a different number of GPUs (requires new job)</p></li>
+<li><p>Try increasing the number of bodies in the simulation</p></li>
+<li><p>Try using double precision</p></li>
+</ul>
+</section>
+</section>
+<section id="best-practices-for-building-python-based-containers">
+<h2>Best practices for building python-based containers<a class="headerlink" href="#best-practices-for-building-python-based-containers" title="Link to this heading">¶</a></h2>
+<p>One of the most common things I encounter when folks use containers with pre-existing python packages and libraries, is accidentally replacing or overwriting them with <code class="docutils literal notranslate"><span class="pre">conda</span></code> or <code class="docutils literal notranslate"><span class="pre">pip</span></code>.
+NVIDIA’s NGC containers have patched version of PyTorch and supporting libraries that shouldn’t be altered if you’re looking for optimal and verified performance.</p>
+<p>This section will focus on how to install python packages in a way that will prevent changes to the pre-installed packages.</p>
+<p>To illustrate this, try installing pytorch from the base <code class="docutils literal notranslate"><span class="pre">pytorch:24.03-py3</span></code> container.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-9-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-9-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-9-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-9-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-9-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-9-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id22">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/97dd32eda1d1c2f6f07bcc877a16e795/pip-install_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">pip-install_apptainer.sh</span></code></a></span><a class="headerlink" href="#id22" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create an overlay directory</span>
+<span class="c1">#   - The base container is never changed, just the overlay</span>
+<span class="c1">#   - Overlay only works with a single image</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="si">${</span><span class="nv">APPTAINER_CACHEDIR</span><span class="si">}</span>/pytorch_24.03_overlay
+
+<span class="c1"># Launch a shell in the cuda devel container with</span>
+<span class="c1">#   - fakeroot - appear to be root in the container</span>
+<span class="c1">#   - overlay - allow modifications to be written to overlay directory</span>
+apptainer<span class="w"> </span>shell<span class="w"> </span>--fakeroot<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--overlay<span class="w"> </span><span class="si">${</span><span class="nv">APPTAINER_CACHEDIR</span><span class="si">}</span>/pytorch_24.03_overlay<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>pytorch_24.03-py3.sif
+
+<span class="c1"># Pip install pytorch inside the running container</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-9-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-9-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id23">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/58ca19249c4433749360cf811c635a5f/pip-install_docker.sh"><code class="xref download docutils literal notranslate"><span class="pre">pip-install_docker.sh</span></code></a></span><a class="headerlink" href="#id23" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Launch pytorch container on your host</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">rm</span> <span class="o">-</span><span class="n">it</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">pytorch</span><span class="p">:</span><span class="mf">24.03</span><span class="o">-</span><span class="n">py3</span> <span class="n">bash</span> <span class="o">-</span><span class="n">l</span>
+
+<span class="c1"># Pip install pytorch inside the running container</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">torch</span> <span class="n">torchvision</span> <span class="n">torchaudio</span>
+</pre></div>
+</div>
+</div>
+</div></div>
+<p>You’ll notice that installing these packages changes the toch package and installs a bunch of CUDA libraries even though both already exist.
+As you learned with our efficient builds, this greatly increases the size of the container layers while also potentially breaking any applications linked against these libaries and the “known working state”.</p>
+<p>Lets exit this container create a fresh overlay.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Be sure to exit your interactive container session</span>
+<span class="nb">exit</span>
+</pre></div>
+</div>
+<p>Luckily, you can lock the versions by creating a package <a class="reference external" href="https://pip.pypa.io/en/stable/user_guide/#constraints-files">constraints file</a>, which has the same format as a requirements file.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-10-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-10-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-10-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-10-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-10-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-10-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id24">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/c6c8dce00a491f449e542bb61ea9f0b4/pip-constraints_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">pip-constraints_apptainer.sh</span></code></a></span><a class="headerlink" href="#id24" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Delete old overlay and recreate</span>
+rm<span class="w"> </span>-rf<span class="w"> </span><span class="si">${</span><span class="nv">APPTAINER_CACHEDIR</span><span class="si">}</span>/pytorch_24.03_overlay
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="si">${</span><span class="nv">APPTAINER_CACHEDIR</span><span class="si">}</span>/pytorch_24.03_overlay
+
+<span class="c1"># Launch a shell in the cuda devel container with</span>
+<span class="c1">#   - fakeroot - appear to be root in the container</span>
+<span class="c1">#   - overlay - allow modifications to be written to overlay directory</span>
+apptainer<span class="w"> </span>shell<span class="w"> </span>--fakeroot<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--overlay<span class="w"> </span><span class="si">${</span><span class="nv">APPTAINER_CACHEDIR</span><span class="si">}</span>/pytorch_24.03_overlay<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>pytorch_24.03-py3.sif
+
+<span class="c1"># Save all existing packages and versions to a text file</span>
+pip<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print$1&quot;==&quot;$2}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>+3<span class="w"> </span>&gt;<span class="w"> </span>/root/base_constraints.txt
+
+<span class="c1"># Install any new packages without upgrading existing packages</span>
+pip<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>/root/base_constraints.txt<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-10-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-10-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"></div></div>
+<p>This install should now fail because the pre-built torchaudio wheels can’t be installed with the NVIDIA patched versions of torch.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you actually want to install torchaudio into the Pytorch NGC container, take a look at <a class="reference external" href="https://github.com/NVIDIA/NeMo/blob/main/scripts/installers/install_torchaudio_latest.sh#L97">this recipe</a>.</p>
+</div>
+<p>Lets practice using this constraint method by building a new container with the <a class="reference external" href="https://lightning.ai/">PyTorch Lightning</a> framework starting FROM the <code class="docutils literal notranslate"><span class="pre">pytorch:24.03-py3</span></code> container.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-11-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-11-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-11-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-11-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-11-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-11-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id25">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/570cb1263a54a38b7e510bcabd7cc3cd/Definition.lightning"><code class="xref download docutils literal notranslate"><span class="pre">Definition.lightning</span></code></a></span><a class="headerlink" href="#id25" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Change to the base image</span>
+Bootstrap:<span class="w"> </span>docker
+From:<span class="w"> </span>nvcr.io/nvidia/pytorch:24.03-py3
+
+%post
+<span class="w">    </span><span class="c1"># Save all existing packages and versions to a text file</span>
+<span class="w">    </span>pip<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print$1&quot;==&quot;$2}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>+3<span class="w"> </span>&gt;<span class="w"> </span>/root/base_constraints.txt
+
+<span class="w">    </span><span class="c1"># Install any new packages without upgrading existing packages</span>
+<span class="w">    </span>pip<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>/root/base_constraints.txt<span class="w"> </span>lightning
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-11-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-11-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id26">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/8e69334eafed56b24693f57c29372c7a/Dockerfile.lightning"><code class="xref download docutils literal notranslate"><span class="pre">Dockerfile.lightning</span></code></a></span><a class="headerlink" href="#id26" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">pytorch</span><span class="p">:</span><span class="mf">24.03</span><span class="o">-</span><span class="n">py3</span>
+
+<span class="c1"># Save all existing packages and versions to a text file</span>
+<span class="n">RUN</span> <span class="n">pip</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">awk</span> <span class="s1">&#39;{print$1&quot;==&quot;$2}&#39;</span> <span class="o">|</span> <span class="n">tail</span> <span class="o">+</span><span class="mi">3</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">base_constraints</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="c1"># Install any new packages without upgrading existing packages</span>
+<span class="n">RUN</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">base_constraints</span><span class="o">.</span><span class="n">txt</span> <span class="n">lightning</span>
+</pre></div>
+</div>
+</div>
+</div></div>
+<p>After download the corresponding build script, the container can be built with the following commands.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-12-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-12-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-12-RG9ja2Vy" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-12-RG9ja2Vy" name="RG9ja2Vy" role="tab" tabindex="-1">Docker</button></div><div aria-labelledby="tab-12-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-12-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id27">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/b8ca1142d7df3900b8145592b48abcee/build_lightning_apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">build_lightning_apptainer.sh</span></code></a></span><a class="headerlink" href="#id27" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># build the container</span>
+apptainer<span class="w"> </span>build<span class="w"> </span>lightning.sif<span class="w"> </span>Definition.lightning
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-12-RG9ja2Vy" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-12-RG9ja2Vy" name="RG9ja2Vy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id28">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/4fb35e8c7ea82d4e6b0e23e47995fb0f/build_lightning_docker.sh"><code class="xref download docutils literal notranslate"><span class="pre">build_lightning_docker.sh</span></code></a></span><a class="headerlink" href="#id28" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Your Docker hub username
+HUB_USER=
+
+# build the container
+docker build -t ${HUB_USER}/lighting:latest -f Dockerfile.lightning .
+
+# Push the container
+docker push ${HUB_USER}/nbody:efficient
+</pre></div>
+</div>
+</div>
+</div></div>
+<p>Unlike the <code class="docutils literal notranslate"><span class="pre">torchaudio</span></code> install, this went fine, and no existing packages changed.
+If a package or its dependencies require a different version of PyTorch, you can either change the container version based on the <a class="reference external" href="https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html">NVIDIA support matrix</a> to match the required version or determine if the <a class="reference external" href="https://pip.pypa.io/en/stable/topics/dependency-resolution/#loosen-your-top-level-requirements">package’s dependencies can be relaxed</a> to match the package version in the container.</p>
+<section id="id4">
+<h3>Optional Exercises<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Try installing another python package</p></li>
+</ul>
+</section>
+</section>
+<section id="developing-python-scripts-inside-a-running-container">
+<h2>Developing python scripts inside a running container<a class="headerlink" href="#developing-python-scripts-inside-a-running-container" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://www.docker.com/resources/what-container/">Containers</a> are meant to be static, reproducible checkpoints for your code that can always be started in the same way.
+This makes them ideal for porting software to different systems, reproducing results, archiving software, and more.
+However, since containers <em>shouldn’t</em> change once they’re built (because that would break reproducibility), developing software in them is not always intuitive.</p>
+<p>If you try to incorporate all your code in the container and rebuilding as it evolves, this can get tedious - especially if you’re pushing and pulling these containers between a registry.
+Instead, I recommend making a container with most or all of your dependencies, and mounting your code into the container at runtime.</p>
+<p>To explore these concepts, lets launch an interactive environment with our lightning container.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-13-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-13-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-13-RW5yb290" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-13-RW5yb290" name="RW5yb290" role="tab" tabindex="-1">Enroot</button></div><div aria-labelledby="tab-13-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-13-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id29">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/6c8cb43d21ede2cd24c75c595a466d50/lightning_interactive-apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">lightning_interactive-apptainer.sh</span></code></a></span><a class="headerlink" href="#id29" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run nbody benchmark</span>
+<span class="c1">#   - Include GPU support with --nv</span>
+apptainer<span class="w"> </span>shell<span class="w"> </span>--nv<span class="w"> </span>lightning.sif
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-13-RW5yb290" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-13-RW5yb290" name="RW5yb290" role="tabpanel" tabindex="0"></div></div>
+<p>First, lets open another terminal to the cluster.
+That could be another tmux pane or a whole new terminal connection from your local system.
+Once you have that open, lets look around in the running container.</p>
+<table class="docutils align-default" id="id30">
+<caption><span class="caption-text">Exploring Environment</span><a class="headerlink" href="#id30" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 30.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Container shell</p></th>
+<th class="head"><p>Second shell</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Who are you running as?</p></td>
+<td><p>whoami</p></td>
+<td><p>whoami</p></td>
+</tr>
+<tr class="row-odd"><td><p>Where are you running from?</p></td>
+<td><p>pwd</p></td>
+<td><p>cd $MYDATA/containers</p></td>
+</tr>
+<tr class="row-even"><td><p>Do files match?</p></td>
+<td><p>ls -lh</p></td>
+<td><p>ls -lh</p></td>
+</tr>
+<tr class="row-odd"><td><p>Do changes propogate?</p></td>
+<td><p>echo “hello” &gt; container.txt</p></td>
+<td><p>cat container.txt</p></td>
+</tr>
+<tr class="row-even"><td><p>What else is in the container by default?</p></td>
+<td><p>ls -lh $HOME; ls -lh /tmp</p></td>
+<td><p>ls -lh $HOME; ls -lh /tmp</p></td>
+</tr>
+<tr class="row-odd"><td><p>What if you create a file somewhere else?</p></td>
+<td><p>touch /workspace/test</p></td>
+<td><p>ls /workspace</p></td>
+</tr>
+<tr class="row-even"><td><p>Should you be able to create files?</p></td>
+<td><p>ls -lhd /workspace</p></td>
+<td><p>ls -lhd /workspace</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">$MYDATA/containers</span></code> was available in the container because the container mounts our current working directory at runtime.
+If you need additional locations available in the container, you can make them available with (similar to Docker’s <code class="docutils literal notranslate"><span class="pre">-v</span></code>):</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://apptainer.org/docs/user/main/bind_paths_and_mounts.html">apptainer - bind paths</a> (-B)</p></li>
+<li><p><a class="reference external" href="https://github.com/NVIDIA/enroot/blob/master/doc/cmd/start.md">enroot - mount</a> (-m)</p></li>
+</ul>
+</div>
+<section id="running-external-scripts">
+<h3>Running external scripts<a class="headerlink" href="#running-external-scripts" title="Link to this heading">¶</a></h3>
+<p>As you experienced when trying to create a test file in <code class="docutils literal notranslate"><span class="pre">/workspace</span></code>, which is open for writing, you discovered that the container has a read-only filesystem.
+This means, that you can’t make any changes without an overlay.
+This might be tedious for prototyping, but it’s good if you’re sharing a container with colleagues on a project, or if you just want to make sure you can’t accidentally make changes.</p>
+<p>First, download <a class="reference download internal" download="" href="../_downloads/f71e67773324cd33e1e10af568903952/python_dev.tar.gz"><code class="xref download docutils literal notranslate"><span class="pre">python_dev.tar.gz</span></code></a> to your current working directory with <code class="docutils literal notranslate"><span class="pre">wget</span></code> (may need to use <code class="docutils literal notranslate"><span class="pre">--no-check-certificate</span></code>).
+After downloading, unpack the tarball with <code class="docutils literal notranslate"><span class="pre">tar</span></code>.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Unpack</span>
+tar<span class="w"> </span>-xzf<span class="w"> </span>python_dev.tar.gz
+
+<span class="nb">cd</span><span class="w"> </span>python_dev
+
+ls<span class="w"> </span>*
+</pre></div>
+</div>
+<p>The script <code class="docutils literal notranslate"><span class="pre">self_contained.py</span></code> doesn’t require any extra python modules other than PyTorch, which exists in the container, and can be run directly.
+Try running it.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>self_contained.py
+</pre></div>
+</div>
+<p>Not only can you run scripts from inside the container, you can interact with them outside the container too.
+If you have your other terminal still open, find these files and open the script in your favorite editor.
+Not only can you open the files, you can edit them too - all while beign able to run them inside a container.</p>
+</section>
+<section id="developing-packages-from-inside-a-container">
+<h3>Developing packages from inside a container<a class="headerlink" href="#developing-packages-from-inside-a-container" title="Link to this heading">¶</a></h3>
+<p>If you’re developing a whole package that needs to be updated, you either have to rely on relative imports or install the package.
+Relative imports often work, but may not depending on the complexity of the package.
+In our example python code, there’s a <code class="docutils literal notranslate"><span class="pre">pt_bench</span></code> python module that gets loaded and used by <code class="docutils literal notranslate"><span class="pre">bench.py</span></code>.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Prints where pt_bench was loaded from</span>
+python<span class="w"> </span>bench.py
+
+<span class="c1"># Change directories</span>
+<span class="nb">cd</span><span class="w"> </span>..
+
+<span class="c1"># Copy bench.py to break relative imports</span>
+cp<span class="w"> </span>python_dev/bench.py<span class="w"> </span>.
+python<span class="w"> </span>bench.py
+</pre></div>
+</div>
+<p>You can see that it’s easy to go wrong with relative imports, so I often recommend fully installing the package.</p>
+<p>We already know that the container can’t be modified.
+Luckily, python can install packages in a user directory, that defaults to <code class="docutils literal notranslate"><span class="pre">$HOME/.local</span></code>, using the <code class="docutils literal notranslate"><span class="pre">--user</span></code> flag.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install pt_bench using our constraint file</span>
+pip<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>/root/base_constraints.txt<span class="w"> </span>--user<span class="w"> </span>python_dev/
+
+<span class="c1"># Try running bench.py again</span>
+python<span class="w"> </span>bench.py
+</pre></div>
+</div>
+<p>You should see that <code class="docutils literal notranslate"><span class="pre">pt_bench</span></code> is being loaded from <code class="docutils literal notranslate"><span class="pre">$HOME/.local</span></code>, which is where user packages are installed.
+While this works, this location is universally shared by all python packages, which will lead to collisions between containers.
+I recommend launching the container with <code class="docutils literal notranslate"><span class="pre">-c</span></code>, which will not mount any external locations, and <code class="docutils literal notranslate"><span class="pre">-B</span></code> to mount the current working directory.
+Since many things require a valid <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> for writing files, <code class="docutils literal notranslate"><span class="pre">apptainer</span></code> creates a temporary filesystem (tmpfs) for <code class="docutils literal notranslate"><span class="pre">/home</span></code>.
+You’ll be able to make changes, like installing a small package, and it won’t affect the container or bleed into other python environments.</p>
+<p>First, lets clean our environment</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># remove pt_bench</span>
+pip<span class="w"> </span>uninstall<span class="w"> </span>-y<span class="w"> </span>pt_bench
+
+<span class="c1"># Exit the container</span>
+<span class="nb">exit</span>
+</pre></div>
+</div>
+<p>and then relaunch.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-14-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-14-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-14-RW5yb290" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-14-RW5yb290" name="RW5yb290" role="tab" tabindex="-1">Enroot</button></div><div aria-labelledby="tab-14-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-14-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id31">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/11e200e46c35b09dee675b303f406438/lightning_interactive_nohome-apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">lightning_interactive_nohome-apptainer.sh</span></code></a></span><a class="headerlink" href="#id31" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run nbody benchmark</span>
+<span class="c1">#   - Include GPU support (--nv)</span>
+<span class="c1">#   - Exclude $HOME mount (-c)</span>
+<span class="c1">#   - Mount CWD (-B)</span>
+apptainer<span class="w"> </span>shell<span class="w"> </span>--nv<span class="w"> </span>-c<span class="w"> </span>-B<span class="w"> </span><span class="nv">$PWD</span>:<span class="nv">$PWD</span><span class="w"> </span>lightning.sif
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-14-RW5yb290" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-14-RW5yb290" name="RW5yb290" role="tabpanel" tabindex="0"></div></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make sure home is empty</span>
+ls<span class="w"> </span><span class="nv">$HOME</span>
+
+<span class="c1"># Change to container directory</span>
+<span class="nb">cd</span><span class="w"> </span><span class="nv">$MYDATA</span>/containers
+
+<span class="c1"># Try running bench.py</span>
+python<span class="w"> </span>bench.py
+<span class="c1"># Install wasn&#39;t found</span>
+
+<span class="c1"># Do a local install in $HOME tmpfs</span>
+pip<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>/root/base_constraints.txt<span class="w"> </span>--user<span class="w"> </span>python_dev/
+
+<span class="c1"># Run bench.py</span>
+python<span class="w"> </span>bench.py
+</pre></div>
+</div>
+<p>Lastly, if you’re making changes to the package, you can do an <a class="reference external" href="https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs">editable install</a> with <cite>-e</cite>.
+This means that when the package is installed, it’s really just linked to it’s current location instead of copying files.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># remove pt_bench</span>
+pip<span class="w"> </span>uninstall<span class="w"> </span>-y<span class="w"> </span>pt_bench
+
+<span class="c1"># Editable install (-e)</span>
+pip<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>/root/base_constraints.txt<span class="w"> </span>--user<span class="w"> </span>-e<span class="w"> </span>python_dev/
+
+<span class="c1"># Make a change to a package file</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;print(&#39;New Change&#39;)&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>python_dev/pt_bench/__init__.py
+
+<span class="c1"># Run bench, and see if change works</span>
+python<span class="w"> </span>bench.py
+</pre></div>
+</div>
+<p>When you exit the container, make sure the pt_bench package no longer exists.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Exit the container</span>
+<span class="nb">exit</span>
+
+<span class="c1"># Make sure pt_bench doesn&#39;t exist</span>
+find<span class="w"> </span><span class="nv">$HOME</span>/.local/<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>pt_bench
+</pre></div>
+</div>
+<p>If you’re done exploring the container, feel free to exit the job in preparation for the next section.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Exit the job</span>
+<span class="nb">exit</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="running-multi-node-containers">
+<h2>Running multi-node containers<a class="headerlink" href="#running-multi-node-containers" title="Link to this heading">¶</a></h2>
+<p>Multi-node, or distributed, computing is a model of computation that runs parallel tasks across multiple computers.
+While it’s easy to spawn threads and processes on system, distributed applications need to be launched across all nodes and told how to communicate with eachother.
+This sounds difficult, but many frameworks make this accessible and give you near-linear speedups as more compute nodes are used.</p>
+<section id="multi-node-mpi-nccl-test">
+<h3>Multi-node MPI NCCL Test<a class="headerlink" href="#multi-node-mpi-nccl-test" title="Link to this heading">¶</a></h3>
+<p>PyTorch containers from NGC ship with <a class="reference external" href="https://github.com/NVIDIA/nccl-tests">NCCL tests</a>, which are useful for diagnosing MPI and bandwidth issues.
+If I’m ever questioning the performance of the compute fabric between GPUs, this is the first thing I run.</p>
+<p>These can be run as single-line jobs using <code class="docutils literal notranslate"><span class="pre">srun</span></code> to handle the allocation and process spawning.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-15-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-15-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-15-RW5yb290" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-15-RW5yb290" name="RW5yb290" role="tab" tabindex="-1">Enroot</button></div><div aria-labelledby="tab-15-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-15-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id32">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/c056221a15f2cfa736555fa063f04724/nccl-apptainer.sh"><code class="xref download docutils literal notranslate"><span class="pre">nccl-apptainer.sh</span></code></a></span><a class="headerlink" href="#id32" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run on 2 GPUs of any type</span>
+<span class="c1">#  (-g) argument sets how many GPUs each process will use</span>
+srun<span class="w"> </span>-p<span class="w"> </span>gpu<span class="w"> </span>-N<span class="w"> </span><span class="m">2</span><span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>--gpus-per-node<span class="w"> </span><span class="m">1</span><span class="w"> </span>--mpi<span class="o">=</span>pmi2<span class="w"> </span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>--nv<span class="w"> </span>lightning.sif<span class="w"> </span>all_reduce_perf_mpi<span class="w"> </span>-b<span class="w"> </span>1G<span class="w"> </span>-e<span class="w"> </span>4G<span class="w"> </span>-f<span class="w"> </span><span class="m">2</span><span class="w"> </span>-g<span class="w"> </span><span class="m">1</span>
+
+<span class="c1"># Run on 4 H100 GPUs across 2 nodes</span>
+srun<span class="w"> </span>-p<span class="w"> </span>gpu<span class="w"> </span>--mem<span class="o">=</span>32G<span class="w"> </span>-N<span class="w"> </span><span class="m">2</span><span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>--gpus-per-node<span class="w"> </span>h100:2<span class="w"> </span>--mpi<span class="o">=</span>pmi2<span class="w"> </span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>--nv<span class="w"> </span>lightning.sif<span class="w"> </span>all_reduce_perf_mpi<span class="w"> </span>-b<span class="w"> </span>1G<span class="w"> </span>-e<span class="w"> </span>4G<span class="w"> </span>-f<span class="w"> </span><span class="m">2</span><span class="w"> </span>-g<span class="w"> </span><span class="m">2</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-15-RW5yb290" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-15-RW5yb290" name="RW5yb290" role="tabpanel" tabindex="0"></div></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If want to figure out how many GPUs are on a node and the type, you can run <code class="docutils literal notranslate"><span class="pre">scontrol</span> <span class="pre">show</span> <span class="pre">node</span> <span class="pre">[node</span> <span class="pre">name]</span></code> to see what resources are available on that node.</p>
+</div>
+</section>
+<section id="multi-node-pytorch">
+<h3>Multi-node PyTorch<a class="headerlink" href="#multi-node-pytorch" title="Link to this heading">¶</a></h3>
+<p>Using <code class="docutils literal notranslate"><span class="pre">wget</span></code>, download <a class="reference download internal" download="" href="../_downloads/1928fa5f67778a806dc9e3c1ca457cbf/pt_ddp_example.py"><code class="xref download docutils literal notranslate"><span class="pre">pt_ddp_example.py</span></code></a>, which is a simple script to demonstrate strong scaling using <a class="reference external" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html">PyTorch DDP</a>.
+We’ll be skipping over PyTorch specifics to focus on how to launch multi-node PyTorch containers with Slurm.
+Download the following <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> script as well.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-16-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-16-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-16-RW5yb290" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-16-RW5yb290" name="RW5yb290" role="tab" tabindex="-1">Enroot</button></div><div aria-labelledby="tab-16-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-16-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id33">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/9386d432f813e2120f540ad1206c39a5/pt_ddp_example.sbatch"><code class="xref download docutils literal notranslate"><span class="pre">pt_ddp_example.sbatch</span></code></a></span><a class="headerlink" href="#id33" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --job-name=pt_ddp_example</span>
+<span class="c1">#SBATCH --nodes=2             # Set number of nodes</span>
+<span class="c1">#SBATCH --gpus-per-node=2     # Set number of GPUs per node</span>
+<span class="c1">#SBATCH --mem=32GB            # Set memory limits (consider --exclusive)</span>
+<span class="c1">#SBATCH --tasks-per-node=1</span>
+<span class="c1">#SBATCH --output=%x-%j.out</span>
+<span class="c1">#SBATCH --cpus-per-task=8</span>
+<span class="c1">#SBATCH --partition=gpu</span>
+<span class="c1">#SBATCH --time=00:30:00</span>
+
+<span class="c1"># Job debug info</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Launching on </span><span class="si">${</span><span class="nv">SLURM_JOB_NUM_NODES</span><span class="si">}</span><span class="s2"> nodes&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Launching on: &quot;</span><span class="w"> </span><span class="si">${</span><span class="nv">SLURM_JOB_NODELIST</span><span class="si">}</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Launching </span><span class="si">${</span><span class="nv">SLURM_NTASKS_PER_NODE</span><span class="si">}</span><span class="s2"> tasks per node&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Using </span><span class="si">${</span><span class="nv">SLURM_GPUS_ON_NODE</span><span class="si">}</span><span class="s2"> GPUs per task&quot;</span>
+
+<span class="c1"># Optional debug logging</span>
+<span class="c1">#export LOGLEVEL=INFO</span>
+<span class="c1">#export NCCL_DEBUG=INFO</span>
+
+<span class="c1">##### No need to edit these #########################################################</span>
+<span class="c1"># main address is detected by first name in nodelist</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MASTER_ADDR</span><span class="o">=</span><span class="k">$(</span>scontrol<span class="w"> </span>show<span class="w"> </span>hostnames<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SLURM_JOB_NODELIST</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="k">)</span>
+<span class="c1"># port is chosen by jobID (prevents collisions if nodes are shared)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MASTER_PORT</span><span class="o">=</span><span class="k">$(</span>expr<span class="w"> </span><span class="m">10000</span><span class="w"> </span>+<span class="w"> </span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span>-n<span class="w"> </span><span class="si">${</span><span class="nv">SLURM_JOBID</span><span class="si">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="k">))</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">WORLD_SIZE</span><span class="o">=</span><span class="k">$((</span><span class="si">${</span><span class="nv">SLURM_NNODES</span><span class="si">}</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="si">${</span><span class="nv">SLURM_GPUS_ON_NODE</span><span class="si">}</span><span class="k">))</span>
+<span class="c1">#####################################################################################</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Training on </span><span class="si">${</span><span class="nv">WORLD_SIZE</span><span class="si">}</span><span class="s2"> GPUs - </span><span class="si">${</span><span class="nv">MASTER_ADDR</span><span class="si">}</span><span class="s2">:</span><span class="si">${</span><span class="nv">MASTER_PORT</span><span class="si">}</span><span class="s2">&quot;</span>
+
+srun<span class="w"> </span>--mpi<span class="o">=</span>pmi2<span class="w"> </span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>--nv<span class="w"> </span>lightning.sif<span class="w"> </span>torchrun<span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--nnodes<span class="w"> </span><span class="si">${</span><span class="nv">SLURM_JOB_NUM_NODES</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--nproc_per_node<span class="w"> </span><span class="si">${</span><span class="nv">SLURM_GPUS_ON_NODE</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--rdzv_id<span class="w"> </span><span class="nv">$RANDOM</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--rdzv_backend<span class="w"> </span>c10d<span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--rdzv_endpoint<span class="w"> </span><span class="nv">$MASTER_ADDR</span>:<span class="si">${</span><span class="nv">MASTER_PORT</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>pt_ddp_example.py
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-16-RW5yb290" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-16-RW5yb290" name="RW5yb290" role="tabpanel" tabindex="0"></div></div>
+<p>PyTorch needs the following variables set for multi-node runs:</p>
+<ul class="simple">
+<li><p>MASTER_ADDR - Address of the main node</p></li>
+<li><p>MASTER_PORT - Port of connect on</p></li>
+<li><p>WORLD_SIZE - Total number of workers/GPUs</p></li>
+</ul>
+<p>While <code class="docutils literal notranslate"><span class="pre">srun</span></code> launches the initial process on each node, it calls <code class="docutils literal notranslate"><span class="pre">torchrun</span></code>, which spawns additional processes based on the argument <code class="docutils literal notranslate"><span class="pre">--nproc_per_node</span></code>.
+Think of <code class="docutils literal notranslate"><span class="pre">torchrun</span></code> as a helper script that handles a lot of the global and local rank logic.</p>
+<p>Optional variables:</p>
+<ul class="simple">
+<li><p>LOGLEVEL - pytorch log level</p></li>
+<li><p>NCCL_DEBUG - NCCL log level</p></li>
+</ul>
+<p>Submit the script with <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>, which will generate a <code class="docutils literal notranslate"><span class="pre">.out</span></code> file with a number corresponding to the job with all output text.
+You’ll see that this runs a training job on 4 GPUs in total, distributed across 2 nodes.
+If you increase the resources allocated by the <code class="docutils literal notranslate"><span class="pre">SBATCH</span></code> arguements, training will scale as well.</p>
+</section>
+<section id="multi-node-pytorch-lightning">
+<h3>Multi-node Pytorch Lightning<a class="headerlink" href="#multi-node-pytorch-lightning" title="Link to this heading">¶</a></h3>
+<p>This is the same task as the <a class="reference internal" href="#multi-node-pytorch">Multi-node PyTorch</a> script, just adapted to PyTorch Lightning.
+You’ll notice that code is clearner because PyTorch Lightning does it’s best to simplify common training tasks, including multi-GPU and multi-node trainging.</p>
+<p>Download both the training script <a class="reference download internal" download="" href="../_downloads/5f020cdda221cccad87ed403ed072711/ptl_ddp_example.py"><code class="xref download docutils literal notranslate"><span class="pre">ptl_ddp_example.py</span></code></a> and the <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> script below.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-17-QXBwdGFpbmVy" aria-selected="true" class="sphinx-tabs-tab group-tab" id="tab-17-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tab" tabindex="0">Apptainer</button><button aria-controls="panel-17-RW5yb290" aria-selected="false" class="sphinx-tabs-tab group-tab" id="tab-17-RW5yb290" name="RW5yb290" role="tab" tabindex="-1">Enroot</button></div><div aria-labelledby="tab-17-QXBwdGFpbmVy" class="sphinx-tabs-panel group-tab" id="panel-17-QXBwdGFpbmVy" name="QXBwdGFpbmVy" role="tabpanel" tabindex="0"><div class="literal-block-wrapper docutils container" id="id34">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/83ea1e67318f14af433b312cfbb4e8dd/ptl_ddp_example.sbatch"><code class="xref download docutils literal notranslate"><span class="pre">ptl_ddp_example.sbatch</span></code></a></span><a class="headerlink" href="#id34" title="Link to this code">¶</a></div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --job-name=ptl_ddp_example</span>
+<span class="c1">#SBATCH --nodes=2             # Set number of nodes</span>
+<span class="c1">#SBATCH --tasks-per-node=2    # Set number of GPUs per node</span>
+<span class="c1">#SBATCH --gpus-per-node=2     #   - set to the same</span>
+<span class="c1">#SBATCH --mem=16GB            # Set memory limits (consider --exclusive)</span>
+<span class="c1">#SBATCH --cpus-per-task=8</span>
+<span class="c1">#SBATCH --output=%x-%j.out</span>
+<span class="c1">#SBATCH --partition=gpu</span>
+<span class="c1">#SBATCH --time=00:30:00</span>
+
+<span class="c1">#export LOGLEVEL=INFO</span>
+<span class="c1">#export NCCL_DEBUG=INFO</span>
+
+<span class="nb">export</span><span class="w"> </span><span class="nv">MASTER_ADDR</span><span class="o">=</span><span class="k">$(</span>scontrol<span class="w"> </span>show<span class="w"> </span>hostnames<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SLURM_JOB_NODELIST</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="k">)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">MASTER_PORT</span><span class="o">=</span><span class="k">$(</span>expr<span class="w"> </span><span class="m">10000</span><span class="w"> </span>+<span class="w"> </span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span>-n<span class="w"> </span><span class="si">${</span><span class="nv">SLURM_JOBID</span><span class="si">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="k">))</span>
+
+<span class="c1"># Launches one container per node</span>
+<span class="c1">#  - Contaienr spawns multiple processes</span>
+srun<span class="w"> </span>--mpi<span class="o">=</span>pmi2<span class="w"> </span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>--nv<span class="w"> </span>lightning.sif<span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;export NODE_RANK=\${SLURM_PROCID}; python \</span>
+<span class="s2">		ptl_ddp_example.py -N </span><span class="nv">$SLURM_JOB_NUM_NODES</span><span class="s2"> \</span>
+<span class="s2">		-p </span><span class="si">${</span><span class="nv">SLURM_GPUS_ON_NODE</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</div>
+</div><div aria-labelledby="tab-17-RW5yb290" class="sphinx-tabs-panel group-tab" hidden="true" id="panel-17-RW5yb290" name="RW5yb290" role="tabpanel" tabindex="0"></div></div>
+<p>With PyTorch Lightning, both the <code class="docutils literal notranslate"><span class="pre">MASTER_ADDR</span></code> and <code class="docutils literal notranslate"><span class="pre">MASTER_PORT</span></code> need to be set, but also the <code class="docutils literal notranslate"><span class="pre">NODE_RANK</span></code>, which is the 0-based index of the node the process is on.
+In this example, it’s being set in a bash shell, with the <code class="docutils literal notranslate"><span class="pre">$</span></code> escaped so it’s substituted after being launched on each node by <code class="docutils literal notranslate"><span class="pre">srun</span></code>.
+When it’s running, you’ll see that Lightning has nice logging about the process pool at the start, and produces nice output during the training progress.</p>
+</section>
+<section id="id5">
+<h3>Optional Exercises<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Try using <code class="docutils literal notranslate"><span class="pre">scontrol</span> <span class="pre">show</span> <span class="pre">node</span> <span class="pre">[node</span> <span class="pre">name]</span></code> to see what kinds of GPUs are available on your cluster.</p></li>
+<li><p>Try using more GPUs to see how the number of steps run by each GPU scales.</p></li>
+<li><p>Try comparing training and NCCL performance on different types of nodes.</p></li>
+</ul>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
+<p>Apptainer/Singularity is a well known container runtime in the world of HPC, but NVIDIA <a class="reference external" href="https://github.com/NVIDIA/enroot/issues/25">recommends using enroot</a> as a container runtime for several reasons.
+Enroot doesn’t have a build functionality, but can consume OCI images built by Docker or buildah and can be combined with <a class="reference external" href="https://github.com/NVIDIA/pyxis">pyxis</a> for Slurm support.
+I also highly recommend checking out Docker for building containers due to the size of the community and support availability.</p>
+<p>NVIDIA Containers:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://catalog.ngc.nvidia.com/containers">NGC Container Catalog</a></p></li>
+<li><p><a class="reference external" href="https://docs.nvidia.com/deeplearning/frameworks/user-guide/index.html">Containers for DL Frameworks</a></p></li>
+<li><p><a class="reference external" href="https://learn.nvidia.com/courses/course-detail?course_id=course-v1:DLI+L-AC-25+V1">HPC with Containers DLI</a></p></li>
+</ul>
+<p>Container workshops/tutorials:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://containers-at-tacc.readthedocs.io/en/latest/">Containers&#64;TACC</a></p></li>
+<li><p><a class="reference external" href="https://docs.docker.com/get-started/">Getting started with Docker</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../containers_on_bcp/01-introduction.html" class="btn btn-neutral float-left" title="Containers on BCP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gromacs_and_MPS/01-introduction.html" class="btn btn-neutral float-right" title="GROMACS and MPS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Greg Zynda.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

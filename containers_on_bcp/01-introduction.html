@@ -1,0 +1,487 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Containers on BCP &mdash; Tutorials  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=26c4c002" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GPU Containers on Slurm" href="../containers_on_slurm/01-introduction.html" />
+    <link rel="prev" title="Multi-Node on BCP" href="../multi-node_on_bcp/01-introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Tutorials
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../parabricks/01-introduction.html">Parabricks Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parabricks_on_bcp/01-introduction.html">Parabricks on BCP Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multi-node_on_bcp/01-introduction.html">Multi-Node on BCP</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Containers on BCP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#objectives">Objectives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-and-testing-your-first-gpu-container">Building and testing your first GPU container</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-dockerfile-to-build-the-nbody-sample">A Dockerfile to build the nbody sample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#find-your-org-and-team-on-bcp">Find your ORG and TEAM on BCP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-your-first-gpu-container">Building your first GPU container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#making-your-container-more-space-efficient">Making your container more space efficient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-nbody-sample-benchmark">Running the nbody sample benchmark</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-exercises">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices-for-building-python-based-containers">Best practices for building python-based containers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developing-python-scripts-inside-a-running-container-on-bcp">Developing python scripts inside a running container on BCP</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#developing-scripts-from-inside-a-container">Developing scripts from inside a container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#developing-packages-from-inside-a-container">Developing packages from inside a container</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_slurm/01-introduction.html">GPU Containers on Slurm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gromacs_and_MPS/01-introduction.html">GROMACS and MPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index_on_slurm/01.html">IndeX on Slurm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Tutorials</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Containers on BCP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/containers_on_bcp/01-introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="containers-on-bcp">
+<h1>Containers on BCP<a class="headerlink" href="#containers-on-bcp" title="Link to this heading">¶</a></h1>
+<p>This tutorial introduces how to locally build python-based containers and how to run them on <a class="reference external" href="https://docs.nvidia.com/base-command-platform/user-guide/latest/index.html">NVIDIA Base Command Platform</a> (BCP). This is not meant to teach container building mastery, just important topics and how to run on BCP.</p>
+<p><em>Last updated 4/21/2024</em></p>
+<section id="objectives">
+<h2>Objectives<a class="headerlink" href="#objectives" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Building and testing your first GPU container</p></li>
+<li><p>Best practices for building python-based containers</p></li>
+<li><p>Developing python scripts inside a running container on BCP</p></li>
+</ul>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.nvidia.com/en-us/data-center/dgx-cloud/">DGX Cloud</a> instance running BCP</p></li>
+<li><p>Pre-authenticated <a class="reference external" href="https://docs.nvidia.com/base-command-platform/user-guide/latest/index.html#introduction-to-the-ngc-cli">NGC CLI</a></p></li>
+<li><p><a class="reference external" href="https://org.ngc.nvidia.com/setup/api-key">Docker CLI Pre-authenticated with nvcr.io</a></p></li>
+</ul>
+</section>
+<section id="building-and-testing-your-first-gpu-container">
+<h2>Building and testing your first GPU container<a class="headerlink" href="#building-and-testing-your-first-gpu-container" title="Link to this heading">¶</a></h2>
+<p>In this section, we’ll be building the <a class="reference external" href="https://github.com/NVIDIA/cuda-samples/tree/master/Samples/5_Domain_Specific/nbody">nbody sample benchmark</a> from <a class="reference external" href="https://github.com/NVIDIA/cuda-samples">https://github.com/NVIDIA/cuda-samples</a>.
+The nbody benchmark demonstrates efficient all-pairs simulation of a gravitational n-body simulation in CUDA and provides a GFLOP/s metric at the end.
+While this GFLOP/s metric is not meant for performance comparisons, this sample code supports multiple GPUs and is relatively easy to build.</p>
+<p>One of the most popular ways to build containers is with <a class="reference external" href="https://www.docker.com/">Docker</a>, using a <a class="reference external" href="https://docs.docker.com/reference/dockerfile/">Dockerfile</a>.
+The Dockerfile is a text file that contains all the commands a user could call to to assemble an image, and feels like making a brand new linux environment ready for development.</p>
+<section id="a-dockerfile-to-build-the-nbody-sample">
+<h3>A Dockerfile to build the nbody sample<a class="headerlink" href="#a-dockerfile-to-build-the-nbody-sample" title="Link to this heading">¶</a></h3>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/ed8f1ec270c411cad0a44767f19cdd5d/Dockerfile.nbody"><code class="xref download docutils literal notranslate"><span class="pre">Dockerfile.nbody</span></code></a></span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+
+<span class="c1"># Install dependencies</span>
+<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span><span class="o">-</span><span class="n">dev</span> <span class="n">libgl1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">libglu1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span>
+
+<span class="c1"># Grab the sample code</span>
+<span class="n">ADD</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NVIDIA</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">refs</span><span class="o">/</span><span class="n">tags</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">/</span><span class="n">root</span>
+
+<span class="c1"># Unpack the tarball to /root</span>
+<span class="n">RUN</span> <span class="n">tar</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">root</span> <span class="o">-</span><span class="n">xzf</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+<span class="c1"># Build the nbody executable</span>
+<span class="n">RUN</span> <span class="n">cd</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">-</span><span class="mf">12.4.1</span><span class="o">/</span><span class="n">Samples</span><span class="o">/</span><span class="mi">5</span><span class="n">_Domain_Specific</span><span class="o">/</span><span class="n">nbody</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">make</span> <span class="o">&amp;&amp;</span> <span class="n">mv</span> <span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="find-your-org-and-team-on-bcp">
+<h3>Find your ORG and TEAM on BCP<a class="headerlink" href="#find-your-org-and-team-on-bcp" title="Link to this heading">¶</a></h3>
+<p>When building a docker container, it’s best practice to <a class="reference external" href="https://docs.docker.com/reference/cli/docker/image/build/#tag">tag it at the same time</a> with the <code class="docutils literal notranslate"><span class="pre">-t</span></code> argument so it’s named in your image list. We’ll be pushing to our private repositories on <code class="docutils literal notranslate"><span class="pre">nvcr.io</span></code>, which have the following URL format:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nvcr.io/&lt;org&gt;/&lt;team&gt;/&lt;container<span class="w"> </span>name&gt;:&lt;tag&gt;
+</pre></div>
+</div>
+<p>To find your specific <code class="docutils literal notranslate"><span class="pre">&lt;org&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;team&gt;</span></code>, print out your current NGC config using</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ngc<span class="w"> </span>config<span class="w"> </span>current
+
++-------------+----------------------+---------------+
+<span class="p">|</span><span class="w"> </span>key<span class="w">         </span><span class="p">|</span><span class="w"> </span>value<span class="w">                </span><span class="p">|</span><span class="w"> </span><span class="nb">source</span><span class="w">        </span><span class="p">|</span>
++-------------+----------------------+---------------+
+<span class="p">|</span><span class="w"> </span>apikey<span class="w">      </span><span class="p">|</span><span class="w"> </span>********************<span class="w"> </span><span class="p">|</span><span class="w"> </span>user<span class="w"> </span>settings<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w">             </span><span class="p">|</span><span class="w"> </span>********************<span class="w"> </span><span class="p">|</span><span class="w">               </span><span class="p">|</span>
+<span class="p">|</span><span class="w">             </span><span class="p">|</span><span class="w"> </span>********************<span class="w"> </span><span class="p">|</span><span class="w">               </span><span class="p">|</span>
+<span class="p">|</span><span class="w">             </span><span class="p">|</span><span class="w"> </span>********************<span class="w"> </span><span class="p">|</span><span class="w">               </span><span class="p">|</span>
+<span class="p">|</span><span class="w">             </span><span class="p">|</span><span class="w"> </span>ZWRk<span class="w">                 </span><span class="p">|</span><span class="w">               </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>format_type<span class="w"> </span><span class="p">|</span><span class="w"> </span>ascii<span class="w">                </span><span class="p">|</span><span class="w"> </span>user<span class="w"> </span>settings<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>org<span class="w">         </span><span class="p">|</span><span class="w"> </span>SA-NVEX<span class="w">              </span><span class="p">|</span><span class="w"> </span>user<span class="w"> </span>settings<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w">             </span><span class="p">|</span><span class="w"> </span><span class="o">(</span>r2kuatviomfd<span class="o">)</span><span class="w">       </span><span class="p">|</span><span class="w">               </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>team<span class="w">        </span><span class="p">|</span><span class="w"> </span>internal-sandbox<span class="w">     </span><span class="p">|</span><span class="w"> </span>user<span class="w"> </span>settings<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>ace<span class="w">         </span><span class="p">|</span><span class="w"> </span>sa-nvex-scus-ace<span class="w">     </span><span class="p">|</span><span class="w"> </span>user<span class="w"> </span>settings<span class="w"> </span><span class="p">|</span>
++-------------+----------------------+---------------+
+</pre></div>
+</div>
+<p>Lets set some environment variables to help remember your ORG and TEAM values (and make this tutorial generally applicable).</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># This should be the hash value</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">ORG</span><span class="o">=</span>r2kuatviomfd
+<span class="c1"># Include a slash so we can handle cases without teams</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TEAM</span><span class="o">=</span>/internal-sandbox
+</pre></div>
+</div>
+<p>Make sure to use your own values for these variables, and if you don’t have a TEAM, just set it to be empty.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">TEAM</span><span class="o">=</span>
+</pre></div>
+</div>
+</section>
+<section id="building-your-first-gpu-container">
+<h3>Building your first GPU container<a class="headerlink" href="#building-your-first-gpu-container" title="Link to this heading">¶</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>Dockerfile.nbody<span class="w"> </span>-t<span class="w"> </span>nvcr.io/<span class="si">${</span><span class="nv">ORG</span><span class="si">}${</span><span class="nv">TEAM</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>_nbody:simple<span class="w"> </span>.
+</pre></div>
+</div>
+<p>Lets look at the size of the finished image.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>images
+</pre></div>
+</div>
+<p>This is a relatively large image that would take a while to push from a local system.
+Lets instead figure out how to make our final image more space efficient so it takes up less room and requires less time to push.</p>
+</section>
+<section id="making-your-container-more-space-efficient">
+<h3>Making your container more space efficient<a class="headerlink" href="#making-your-container-more-space-efficient" title="Link to this heading">¶</a></h3>
+<p>We can make this much smaller using the following techniques:</p>
+<ol class="arabic simple">
+<li><p>Use a <a class="reference external" href="https://docs.docker.com/build/building/multi-stage/">multi-staged build</a></p></li>
+<li><p>Only install runtime libraries in the final container</p>
+<ol class="arabic simple">
+<li><p>Using the base container instead of devel</p></li>
+<li><p>Not installing <code class="docutils literal notranslate"><span class="pre">*-devel</span></code> packages.</p></li>
+</ol>
+</li>
+<li><p>Copy the finished binary instead of the full source repo</p></li>
+</ol>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/8e50232f76a84f3a9d5b38137e4b06e1/Dockerfile.nbody-efficient"><code class="xref download docutils literal notranslate"><span class="pre">Dockerfile.nbody-efficient</span></code></a></span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">devel</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span> <span class="n">AS</span> <span class="n">builder</span>
+
+<span class="c1"># Install runtime and build dependencies</span>
+<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span><span class="o">-</span><span class="n">dev</span> <span class="n">libgl1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span> <span class="n">libglu1</span><span class="o">-</span><span class="n">mesa</span><span class="o">-</span><span class="n">dev</span>
+
+<span class="c1"># Grab the sample code</span>
+<span class="n">ADD</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NVIDIA</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">refs</span><span class="o">/</span><span class="n">tags</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">/</span><span class="n">root</span>
+
+<span class="c1"># Unpack the tarball to /root</span>
+<span class="n">RUN</span> <span class="n">tar</span> <span class="o">-</span><span class="n">C</span> <span class="o">/</span><span class="n">root</span> <span class="o">-</span><span class="n">xzf</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">v12</span><span class="mf">.4.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+
+<span class="c1"># Build the nbody executable</span>
+<span class="n">RUN</span> <span class="n">cd</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">cuda</span><span class="o">-</span><span class="n">samples</span><span class="o">-</span><span class="mf">12.4.1</span><span class="o">/</span><span class="n">Samples</span><span class="o">/</span><span class="mi">5</span><span class="n">_Domain_Specific</span><span class="o">/</span><span class="n">nbody</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">make</span> <span class="o">&amp;&amp;</span> <span class="n">mv</span> <span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span>
+
+<span class="c1">#FROM nvcr.io/nvidia/cuda:12.4.1-runtime-ubuntu22.04</span>
+<span class="n">FROM</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">cuda</span><span class="p">:</span><span class="mf">12.4.1</span><span class="o">-</span><span class="n">base</span><span class="o">-</span><span class="n">ubuntu22</span><span class="mf">.04</span>
+
+<span class="c1"># Install the runtime dependencies (not *-dev)</span>
+<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">recommends</span> \
+		<span class="n">freeglut3</span> <span class="n">libgl1</span> <span class="n">libglu1</span> \
+	<span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">clean</span> <span class="o">&amp;&amp;</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">lists</span><span class="o">/*</span>
+
+<span class="c1"># Copy the pre-build binary from our builder stage</span>
+<span class="n">COPY</span> <span class="o">--</span><span class="n">from</span><span class="o">=</span><span class="n">builder</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nbody</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">nbody</span>
+</pre></div>
+</div>
+</div>
+<p>Download that Dockerfile and build it on your system.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>Dockerfile.nbody-efficient<span class="w"> </span>-t<span class="w"> </span>nvcr.io/<span class="si">${</span><span class="nv">ORG</span><span class="si">}${</span><span class="nv">TEAM</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>_nbody:efficient<span class="w"> </span>.
+</pre></div>
+</div>
+<p>Once again, lets look at the final size of that image.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>images
+
+REPOSITORY<span class="w">                                            </span>TAG<span class="w">        </span>IMAGE<span class="w"> </span>ID<span class="w">       </span>CREATED<span class="w">          </span>SIZE
+nvcr.io/r2kuatviomfd/internal-sandbox/gzynda_nbody<span class="w">    </span>simple<span class="w">     </span>3765675fad29<span class="w">   </span><span class="m">17</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span><span class="m">8</span>.26GB
+nvcr.io/r2kuatviomfd/internal-sandbox/gzynda_nbody<span class="w">    </span>efficient<span class="w">  </span>d8c9e8efef45<span class="w">   </span><span class="m">8</span><span class="w"> </span>minutes<span class="w"> </span>ago<span class="w">    </span>443MB
+</pre></div>
+</div>
+<p>You’ll notice it’s much smaller: 443MB vs 8.26GB!</p>
+<p>Lets push that container to NGC so we can test it.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>push<span class="w"> </span>nvcr.io/<span class="si">${</span><span class="nv">ORG</span><span class="si">}${</span><span class="nv">TEAM</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>_nbody:efficient
+</pre></div>
+</div>
+</section>
+<section id="running-the-nbody-sample-benchmark">
+<h3>Running the nbody sample benchmark<a class="headerlink" href="#running-the-nbody-sample-benchmark" title="Link to this heading">¶</a></h3>
+<p>Now that it’s pushed, lets run a sample job.
+To give you an idea for how it should be run, you test it out locally with <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code>.
+You’ll notice that you’ll get help text, but the actual benchmark won’t run unless you have a GPU.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span>nvcr.io/<span class="si">${</span><span class="nv">ORG</span><span class="si">}${</span><span class="nv">TEAM</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>_nbody:efficient<span class="w"> </span>bash<span class="w"> </span>-l
+
+root@f5e06e291d60:/#<span class="w"> </span>nbody<span class="w"> </span>-h
+Run<span class="w"> </span><span class="s2">&quot;nbody -benchmark [-numbodies=&lt;numBodies&gt;]&quot;</span><span class="w"> </span>to<span class="w"> </span>measure<span class="w"> </span>performanc
+e.
+<span class="w">        </span>-fullscreen<span class="w">       </span><span class="o">(</span>run<span class="w"> </span>n-body<span class="w"> </span>simulation<span class="w"> </span><span class="k">in</span><span class="w"> </span>fullscreen<span class="w"> </span>mode<span class="o">)</span>
+<span class="w">        </span>-fp64<span class="w">             </span><span class="o">(</span>use<span class="w"> </span>double<span class="w"> </span>precision<span class="w"> </span>floating<span class="w"> </span>point<span class="w"> </span>values
+<span class="k">for</span><span class="w"> </span>simulation<span class="o">)</span>
+<span class="w">        </span>-hostmem<span class="w">          </span><span class="o">(</span>stores<span class="w"> </span>simulation<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span>host<span class="w"> </span>memory<span class="o">)</span>
+<span class="w">        </span>-benchmark<span class="w">        </span><span class="o">(</span>run<span class="w"> </span>benchmark<span class="w"> </span>to<span class="w"> </span>measure<span class="w"> </span>performance<span class="o">)</span>
+<span class="w">        </span>-numbodies<span class="o">=</span>&lt;N&gt;<span class="w">    </span><span class="o">(</span>number<span class="w"> </span>of<span class="w"> </span>bodies<span class="w"> </span><span class="o">(</span>&gt;<span class="o">=</span><span class="w"> </span><span class="m">1</span><span class="o">)</span><span class="w"> </span>to<span class="w"> </span>run<span class="w"> </span><span class="k">in</span><span class="w"> </span>simulati
+on<span class="o">)</span>
+<span class="w">        </span>-device<span class="o">=</span>&lt;d&gt;<span class="w">       </span><span class="o">(</span>where<span class="w"> </span><span class="nv">d</span><span class="o">=</span><span class="m">0</span>,1,2....<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>CUDA<span class="w"> </span>device<span class="w"> </span>to<span class="w"> </span>u
+se<span class="o">)</span>
+<span class="w">        </span>-numdevices<span class="o">=</span>&lt;i&gt;<span class="w">   </span><span class="o">(</span>where<span class="w"> </span><span class="nv">i</span><span class="o">=(</span>number<span class="w"> </span>of<span class="w"> </span>CUDA<span class="w"> </span>devices<span class="w"> </span>&gt;<span class="w"> </span><span class="m">0</span><span class="o">)</span><span class="w"> </span>to<span class="w"> </span>us
+e<span class="w"> </span><span class="k">for</span><span class="w"> </span>simulation<span class="o">)</span>
+<span class="w">        </span>-compare<span class="w">          </span><span class="o">(</span>compares<span class="w"> </span>simulation<span class="w"> </span>results<span class="w"> </span>running<span class="w"> </span>once<span class="w"> </span>o
+n<span class="w"> </span>the<span class="w"> </span>default<span class="w"> </span>GPU<span class="w"> </span>and<span class="w"> </span>once<span class="w"> </span>on<span class="w"> </span>the<span class="w"> </span>CPU<span class="o">)</span>
+<span class="w">        </span>-cpu<span class="w">              </span><span class="o">(</span>run<span class="w"> </span>n-body<span class="w"> </span>simulation<span class="w"> </span>on<span class="w"> </span>the<span class="w"> </span>CPU<span class="o">)</span>
+<span class="w">        </span>-tipsy<span class="o">=</span>&lt;file.bin&gt;<span class="w"> </span><span class="o">(</span>load<span class="w"> </span>a<span class="w"> </span>tipsy<span class="w"> </span>model<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>simulation<span class="o">)</span>
+
+NOTE:<span class="w"> </span>The<span class="w"> </span>CUDA<span class="w"> </span>Samples<span class="w"> </span>are<span class="w"> </span>not<span class="w"> </span>meant<span class="w"> </span><span class="k">for</span><span class="w"> </span>performance<span class="w"> </span>measurements.<span class="w"> </span>Re
+sults<span class="w"> </span>may<span class="w"> </span>vary<span class="w"> </span>when<span class="w"> </span>GPU<span class="w"> </span>Boost<span class="w"> </span>is<span class="w"> </span>enabled.
+
+Error:<span class="w"> </span>only<span class="w"> </span><span class="m">0</span><span class="w"> </span>Devices<span class="w"> </span>available,<span class="w"> </span><span class="m">1</span><span class="w"> </span>requested.<span class="w">  </span>Exiting.
+</pre></div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/8bc3080f923148730d4403d3371d6a53/nbody_2M_1gpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">Dockerfile.nbody_2M_1gpu.sh</span></code></a></span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="n">ngc</span> <span class="n">batch</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="s2">&quot;nbody-test-2M-1gpu&quot;</span> \
+	<span class="o">--</span><span class="n">total</span><span class="o">-</span><span class="n">runtime</span> <span class="mi">1200</span><span class="n">s</span> <span class="o">--</span><span class="n">instance</span> <span class="n">dgxa100</span><span class="mf">.80</span><span class="n">g</span><span class="mf">.1</span><span class="o">.</span><span class="n">norm</span> \
+	<span class="o">--</span><span class="n">commandline</span> <span class="s2">&quot;nbody -benchmark -numbodies=2000000&quot;</span> \
+	<span class="o">--</span><span class="n">result</span> <span class="o">/</span><span class="n">results</span> \
+	<span class="o">--</span><span class="n">image</span> <span class="s2">&quot;nvcr.io/$</span><span class="si">{ORG}</span><span class="s2">$</span><span class="si">{TEAM}</span><span class="s2">/$</span><span class="si">{USER}</span><span class="s2">_nbody:efficient&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>When your job is done, you should see output similar to the following:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span>Windowed<span class="w"> </span>mode
+&gt;<span class="w"> </span>Simulation<span class="w"> </span>data<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span>video<span class="w"> </span>memory
+&gt;<span class="w"> </span>Single<span class="w"> </span>precision<span class="w"> </span>floating<span class="w"> </span>point<span class="w"> </span>simulation
+&gt;<span class="w"> </span><span class="m">1</span><span class="w"> </span>Devices<span class="w"> </span>used<span class="w"> </span><span class="k">for</span><span class="w"> </span>simulation
+GPU<span class="w"> </span>Device<span class="w"> </span><span class="m">0</span>:<span class="w"> </span><span class="s2">&quot;Ampere&quot;</span><span class="w"> </span>with<span class="w"> </span>compute<span class="w"> </span>capability<span class="w"> </span><span class="m">8</span>.0
+
+&gt;<span class="w"> </span>Compute<span class="w"> </span><span class="m">8</span>.0<span class="w"> </span>CUDA<span class="w"> </span>device:<span class="w"> </span><span class="o">[</span>NVIDIA<span class="w"> </span>A100-SXM4-80GB<span class="o">]</span>
+Warning:<span class="w"> </span><span class="s2">&quot;number of bodies&quot;</span><span class="w"> </span>specified<span class="w"> </span><span class="m">2000000</span><span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span>a<span class="w"> </span>multiple<span class="w"> </span>of<span class="w"> </span><span class="m">256</span>.
+Rounding<span class="w"> </span>up<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>nearest<span class="w"> </span>multiple:<span class="w"> </span><span class="m">2000128</span>.
+<span class="m">2000128</span><span class="w"> </span>bodies,<span class="w"> </span>total<span class="w"> </span><span class="nb">time</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="m">10</span><span class="w"> </span>iterations:<span class="w"> </span><span class="m">57412</span>.602<span class="w"> </span><span class="nv">ms</span>
+<span class="o">=</span><span class="w"> </span><span class="m">696</span>.800<span class="w"> </span>billion<span class="w"> </span>interactions<span class="w"> </span>per<span class="w"> </span><span class="nv">second</span>
+<span class="o">=</span><span class="w"> </span><span class="m">13936</span>.007<span class="w"> </span>single-precision<span class="w"> </span>GFLOP/s<span class="w"> </span>at<span class="w"> </span><span class="m">20</span><span class="w"> </span>flops<span class="w"> </span>per<span class="w"> </span>interaction
+</pre></div>
+</div>
+</section>
+<section id="optional-exercises">
+<h3>Optional Exercises<a class="headerlink" href="#optional-exercises" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Looking at the help text, try using a different number of GPUs</p></li>
+<li><p>Try increasing the number of bodies in the simulation</p></li>
+<li><p>Try using double precision</p></li>
+</ul>
+</section>
+</section>
+<section id="best-practices-for-building-python-based-containers">
+<h2>Best practices for building python-based containers<a class="headerlink" href="#best-practices-for-building-python-based-containers" title="Link to this heading">¶</a></h2>
+<p>Python packages can specify dependencies, and sometimes those dependencies can be strictly written where existing packages get changed.
+Containers on NVIDIA’s NGC contain patched versions of PyTorch and matching libraries that shouldn’t be altered if you’re looking for optimal performance.
+This section will focus on how to install python packages in a way that will prevent changes to the pre-installed packages.</p>
+<p>To illustrate this, try installing pytorch from the base <code class="docutils literal notranslate"><span class="pre">pytorch:24.03-py3</span></code> container.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Launch pytorch container on your host</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span>nvcr.io/nvidia/pytorch:24.03-py3<span class="w"> </span>bash<span class="w"> </span>-l
+
+<span class="c1"># Pip install pytorch inside the running container</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>torchaudio
+</pre></div>
+</div>
+<p>You’ll notice that installing these packages installs a bunch of CUDA libraries and downgrades torch.
+This is not ideal, since the pytorch containers on NGC already ship cuda libraries, so this not only breaks anything compiled against these libraries, but also needlessly increases the size of the container.</p>
+<p>Luckily, you can lock the versions by creating a package <a class="reference external" href="https://pip.pypa.io/en/stable/user_guide/#constraints-files">constraints file</a>, which is similar to a requirements file.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/e7e61a61e474b8eaefca826115c7ec59/Dockerfile.lightning"><code class="xref download docutils literal notranslate"><span class="pre">Dockerfile.lightning</span></code></a></span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">nvcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nvidia</span><span class="o">/</span><span class="n">pytorch</span><span class="p">:</span><span class="mf">24.03</span><span class="o">-</span><span class="n">py3</span>
+
+<span class="c1"># Save all existing packages and versions to a text file</span>
+<span class="n">RUN</span> <span class="n">pip</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">awk</span> <span class="s1">&#39;{print$1&quot;==&quot;$2}&#39;</span> <span class="o">|</span> <span class="n">tail</span> <span class="o">+</span><span class="mi">3</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">base_constraints</span><span class="o">.</span><span class="n">txt</span>
+
+<span class="c1"># Install any new packages without upgrading existing packages</span>
+<span class="n">RUN</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">base_constraints</span><span class="o">.</span><span class="n">txt</span> <span class="n">lightning</span>
+</pre></div>
+</div>
+</div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>Dockerfile.lightning<span class="w"> </span>-t<span class="w"> </span>nvcr.io/<span class="si">${</span><span class="nv">ORG</span><span class="si">}${</span><span class="nv">TEAM</span><span class="si">}</span>/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>_lightning:latest<span class="w"> </span>.
+</pre></div>
+</div>
+<p>If you try to do the torchvision/torchaudio install again using this recipe, it will fail, which lets you know an installation is trying to edit the base pytorch packages.
+When this happens, you can either change container version based on the <a class="reference external" href="https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html">NVIDIA support matrix</a> to match the required version, or determine if the package’s dependencies can be relaxed to match the package version in the container.</p>
+</section>
+<section id="developing-python-scripts-inside-a-running-container-on-bcp">
+<h2>Developing python scripts inside a running container on BCP<a class="headerlink" href="#developing-python-scripts-inside-a-running-container-on-bcp" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://www.docker.com/resources/what-container/">Containers</a> are meant to be static, reproducible checkpoints for your code that can always be started in the same way.
+This makes them ideal for porting software to different systems, reproducing results, archiving software, and more.
+However, since containers <em>shouldn’t</em> change once their built (because that would break reproducibility), developing software in them is not always intuitive.</p>
+<p>If you try to incorporate all your code in the container as it evolves, this can get tedious - especially if you’re pushing these containers to DGX Cloud.
+Instead, I recommend making a container with most or all of your dependencies, and mounting your code into the container at runtime.</p>
+<p>To explore these concepts, lets launch an interactive environment.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/81539cc5909d762cbfe25ebb0e2b46fa/interactive.sh"><code class="xref download docutils literal notranslate"><span class="pre">interactive.sh</span></code></a></span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+# Create a workspace
+ngc workspace create --name ${USER}_containers
+
+# Launch job and mount workspace
+ngc batch run --name &quot;python-devel&quot; --result /results \
+	--total-runtime 1h --instance dgxa100.80g.1.norm \
+        --commandline &quot;jupyter lab --ip=0.0.0.0 --allow-root --no-browser --NotebookApp.token=&#39;&#39; --notebook-dir=/ --NotebookApp.allow_origin=&#39;*&#39;&quot; \
+        --port 8888 --workspace ${USER}_containers:/mnt/workspace:RW \
+	--image &quot;nvcr.io/nvidia/pytorch:24.03-py3&quot;
+</pre></div>
+</div>
+</div>
+<p>Once that job is running, open up the jupyter environment and <code class="docutils literal notranslate"><span class="pre">wget</span></code> (or upload) the file <a class="reference download internal" download="" href="../_downloads/277b4e5fae30b758f048da16713c5360/python_dev.tar.gz"><code class="xref download docutils literal notranslate"><span class="pre">python_dev.tar.gz</span></code></a> to <code class="docutils literal notranslate"><span class="pre">/mnt/workspace</span></code>.</p>
+<section id="developing-scripts-from-inside-a-container">
+<h3>Developing scripts from inside a container<a class="headerlink" href="#developing-scripts-from-inside-a-container" title="Link to this heading">¶</a></h3>
+<p>Normally, whenever files are created or edited <strong>inside a continer</strong> on BCP, such as in <code class="docutils literal notranslate"><span class="pre">/usr/local/lib</span></code> where python installs packages, those files are lost between jobs because they didn’t exist in the container that was uploaded to NGC.
+If you want files to persist, they need to be written to a workspace outside of the container.
+In the case of the job we launched, any changes you make to files in <cite>/mnt/workspace</cite> will persist between jobs because the <code class="docutils literal notranslate"><span class="pre">${USER}_containers</span></code> workspace was mounted to this path.</p>
+<p>If you head over to the workspace and unpack <code class="docutils literal notranslate"><span class="pre">python_dev.tar.gz</span></code>, we can explore some quirks.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/mnt/workspace
+tar<span class="w"> </span>-xzf<span class="w"> </span>python_dev.tar.gz
+</pre></div>
+</div>
+<p>First, you’ll see the <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file.
+If you have a script that depends on any python modules, you can list them out along with any versions (ideally not strictly) and install them at runtime.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print$1&quot;==&quot;$2}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>+3<span class="w"> </span>&gt;<span class="w"> </span>/root/base_constraints.txt
+pip<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>/root/base_constraints.txt<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>After any dependencies are installed, you can develop and run your script as necessary in your job.
+After you’re done, you’ll just need to download the files through jupyter or with a <code class="docutils literal notranslate"><span class="pre">ngc</span> <span class="pre">workspace</span> <span class="pre">download</span></code>.</p>
+</section>
+<section id="developing-packages-from-inside-a-container">
+<h3>Developing packages from inside a container<a class="headerlink" href="#developing-packages-from-inside-a-container" title="Link to this heading">¶</a></h3>
+<p>Packages like <code class="docutils literal notranslate"><span class="pre">pt_bench</span></code> are normally installed with</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>/root/base_constraints.txt<span class="w"> </span>.
+</pre></div>
+</div>
+<p>However, this copies the whole package to <code class="docutils literal notranslate"><span class="pre">/usr/local/lib/python3.10/dist-packages/</span></code> and you’ll have to keep uninstalling and installing it when changing files.
+To make this easier, you can install packages in <em>editable</em> mode with the <code class="docutils literal notranslate"><span class="pre">-e</span></code> argument.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uninstall package</span>
+pip<span class="w"> </span>uninstall<span class="w"> </span>-y<span class="w"> </span>py_bench
+<span class="c1"># Install in editable mode</span>
+pip<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>/root/base_constraints.txt<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+<p>Now, edit the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> and try re-running <code class="docutils literal notranslate"><span class="pre">bench.py</span></code> after moving it to a location that can’t locally load the <code class="docutils literal notranslate"><span class="pre">pt_bench</span></code> module to see if those changes were propogated.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Move bench.py</span>
+cp<span class="w"> </span>bench.py<span class="w"> </span>/mnt/bench.py
+<span class="c1"># Run from the new location</span>
+<span class="nb">cd</span><span class="w"> </span>/mnt<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>bench.py
+</pre></div>
+</div>
+<p>Once again, you can download any modified through jupyter or with a <code class="docutils literal notranslate"><span class="pre">ngc</span> <span class="pre">workspace</span> <span class="pre">download</span></code>.</p>
+<p>Hopefully this helps improve your development workflow!</p>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
+<p>NVIDIA Containers:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://catalog.ngc.nvidia.com/containers">NGC Container Catalog</a></p></li>
+<li><p><a class="reference external" href="https://docs.nvidia.com/deeplearning/frameworks/user-guide/index.html">Containers for DL Frameworks</a></p></li>
+<li><p><a class="reference external" href="https://learn.nvidia.com/courses/course-detail?course_id=course-v1:DLI+L-AC-25+V1">HPC with Containers DLI</a></p></li>
+</ul>
+<p>Container workshops/tutorials:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://containers-at-tacc.readthedocs.io/en/latest/">Containers&#64;TACC</a></p></li>
+<li><p><a class="reference external" href="https://docs.docker.com/get-started/">Getting started with Docker</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../multi-node_on_bcp/01-introduction.html" class="btn btn-neutral float-left" title="Multi-Node on BCP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../containers_on_slurm/01-introduction.html" class="btn btn-neutral float-right" title="GPU Containers on Slurm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Greg Zynda.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

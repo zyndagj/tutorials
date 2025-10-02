@@ -1,0 +1,469 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IndeX on Slurm &mdash; Tutorials  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=26c4c002" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="GROMACS and MPS" href="../gromacs_and_MPS/01-introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Tutorials
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../parabricks/01-introduction.html">Parabricks Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parabricks_on_bcp/01-introduction.html">Parabricks on BCP Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multi-node_on_bcp/01-introduction.html">Multi-Node on BCP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_bcp/01-introduction.html">Containers on BCP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_slurm/01-introduction.html">GPU Containers on Slurm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gromacs_and_MPS/01-introduction.html">GROMACS and MPS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">IndeX on Slurm</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-to-index">Introduction to IndeX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#launching-the-index-viewer-on-a-remote-system">Launching the IndeX viewer on a remote system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-the-demo-environment">Creating the demo environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#forwarding-ports">Forwarding ports</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exploring-index-viewer-interface">Exploring IndeX viewer interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scene-graph">Scene Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-statistics">Performance Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#moving-around-the-scene">Moving around the scene</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#colormap">Colormap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slicing-the-data-view">Slicing the data view</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shutting-down-the-viewer">Shutting down the viewer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exploring-different-data-formats">Exploring different data formats</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#raw-uint16">RAW uint16</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openvdb-vdb">OpenVDB (.vdb)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nanovdb-nvdb">NanoVDB (.nvdb)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">ZARR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#comparison">Comparison</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exporting-visuals-and-creating-animations">Exporting visuals and creating animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#launching-multi-node-rendering-jobs">Launching multi-node rendering jobs</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Tutorials</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">IndeX on Slurm</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/index_on_slurm/01.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="index-on-slurm">
+<h1>IndeX on Slurm<a class="headerlink" href="#index-on-slurm" title="Link to this heading">¶</a></h1>
+<p>This tutorial introduces how to use the <a class="reference external" href="https://developer.nvidia.com/index">NVIDIA IndeX</a> viewer with various data formats.</p>
+<p><strong>Objectives</strong></p>
+<ul class="simple">
+<li><p>Introduction to IndeX</p></li>
+<li><p>Launching the IndeX viewer on a remote system</p></li>
+<li><p>Learn about the IndeX viewer interface with data</p></li>
+<li><p>Explore the pros/cons of different data formats:</p>
+<ul>
+<li><p><a class="reference external" href="https://zarr.dev/">ZARR</a></p></li>
+<li><p>binary (RAW)</p></li>
+<li><p>VDB</p></li>
+<li><p>NanoVDB</p></li>
+</ul>
+</li>
+<li><p>Export visuals and create animations</p></li>
+<li><p>Launch multi-node rendering</p></li>
+</ul>
+<p><strong>Requirements</strong></p>
+<ul class="simple">
+<li><p>Recent release of NVIDIA IndeX SDK (newer than 2020)</p></li>
+<li><p>Slurm system</p></li>
+</ul>
+<section id="introduction-to-index">
+<h2>Introduction to IndeX<a class="headerlink" href="#introduction-to-index" title="Link to this heading">¶</a></h2>
+<p>NVIDIA IndeX is a powerful 3D volumetric visualization SDK designed for interactive exploration of massive scientific datasets.
+It enables researchers, scientists, and engineers to visualize and analyze extremely large volumetric data in real-time, leveraging the parallel processing capabilities of NVIDIA GPUs.</p>
+</section>
+<section id="launching-the-index-viewer-on-a-remote-system">
+<h2>Launching the IndeX viewer on a remote system<a class="headerlink" href="#launching-the-index-viewer-on-a-remote-system" title="Link to this heading">¶</a></h2>
+<p>For this tutorial, IndeX has been installed as a system module containing:</p>
+<ul class="simple">
+<li><p>IndeX</p></li>
+<li><p>IndeX web viewer</p></li>
+<li><p>IndeX plugins</p></li>
+<li><p>ZARR python package (not distributed with IndeX)</p></li>
+</ul>
+<p>IndeX can also be run from it’s release directory using a binary that compatible with your system architecture (e.g. linux-x86-64, linux-aarch64).
+You may also need to install the ZARR python library to convert your data to RAW format.</p>
+<p>After logging into your cluster, and while still on the login node, load the <code class="docutils literal notranslate"><span class="pre">index</span></code> module as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Take a look at all versions</span>
+module<span class="w"> </span>spider<span class="w"> </span>index
+
+<span class="c1"># Look at what gets set</span>
+module<span class="w"> </span>show<span class="w"> </span>index
+
+<span class="c1"># Load the default index module</span>
+module<span class="w"> </span>load<span class="w"> </span>index
+</pre></div>
+</div>
+<p>Loading the module now allows it to be inherited in any interactive jobs you run from the same session.</p>
+<p>IndeX is computationally intensive, so it should always be run inside a job from a compute node with at least one GPU.
+We also recommend that your job have at least the same amount of CPU memory as GPU memory (CPU mem &gt;= total GPU mem).</p>
+<p>Start an interactive job with the following:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start a 3 hour interactive job with 1 GPU</span>
+srun<span class="w"> </span>-p<span class="w"> </span>index<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span>-G<span class="w"> </span><span class="m">1</span><span class="w"> </span>--cpus-per-task<span class="w"> </span><span class="m">8</span><span class="w"> </span>-t<span class="w"> </span><span class="m">03</span>:00:00<span class="w"> </span>--pty<span class="w"> </span>bash<span class="w"> </span>-l
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may need to tailor the partition (<code class="docutils literal notranslate"><span class="pre">-p</span></code>) and memory (<code class="docutils literal notranslate"><span class="pre">--mem-per-gpu</span></code>) for your cluster</p>
+</div>
+<p>At this point, your command prompt should change from a login node to a compute node.</p>
+<section id="creating-the-demo-environment">
+<h3>Creating the demo environment<a class="headerlink" href="#creating-the-demo-environment" title="Link to this heading">¶</a></h3>
+<p>While on your compute node, unpack the demo environment that contains the HTML viewer demo and scenes files.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copy and unpack data for today (choose your location)</span>
+cp<span class="w"> </span>/hpc/mydata/greg.zynda/index_workshop.tar.gz<span class="w"> </span>.
+tar<span class="w"> </span>-xzf<span class="w"> </span>index_workshop.tar.gz<span class="w"> </span>.
+
+<span class="c1"># Edit paths in the idx.env file</span>
+<span class="nb">cd</span><span class="w"> </span>index_workshop
+vim<span class="w"> </span>idx.env
+
+<span class="c1"># Source the environment</span>
+.<span class="w"> </span>idx.env
+
+<span class="c1"># Start basic viewer</span>
+<span class="nb">cd</span><span class="w"> </span>demo
+bash<span class="w"> </span><span class="nv">$IDX_SCENES</span>/scene_zebrafish_basic.sh
+</pre></div>
+</div>
+<p>Like many NVIDIA products, IndeX is meant to be used as an API.
+We’re going to be running everything from the demo directory because it’s a demonstration of an HTML viewer that can be built in IndeX.
+The fact that it can be successfully used to view microscopy data is a perk.</p>
+<p>After running the final bash script, you should see a long ending in the following</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Mon,<span class="w"> </span><span class="m">29</span><span class="w"> </span>Sep<span class="w"> </span><span class="m">2025</span><span class="w"> </span><span class="m">14</span>:32:18<span class="w"> </span>-0700<span class="w"> </span>VIEWER<span class="w"> </span>main<span class="w"> </span>info<span class="w"> </span>:<span class="w"> </span>**********************************************************************
+Mon,<span class="w"> </span><span class="m">29</span><span class="w"> </span>Sep<span class="w"> </span><span class="m">2025</span><span class="w"> </span><span class="m">14</span>:32:18<span class="w"> </span>-0700<span class="w"> </span>VIEWER<span class="w"> </span>main<span class="w"> </span>info<span class="w"> </span>:<span class="w"> </span>HTTP<span class="w"> </span>server<span class="w"> </span>is<span class="w"> </span>running<span class="w"> </span>at<span class="w"> </span>http://gpu-sm01-08.clusternet:8080/
+Mon,<span class="w"> </span><span class="m">29</span><span class="w"> </span>Sep<span class="w"> </span><span class="m">2025</span><span class="w"> </span><span class="m">14</span>:32:18<span class="w"> </span>-0700<span class="w"> </span>VIEWER<span class="w"> </span>main<span class="w"> </span>info<span class="w"> </span>:<span class="w"> </span>**********************************************************************
+</pre></div>
+</div>
+<p>If that URL works, the compute nodes for your cluster are accessible from your internal network.
+If not, you’ll need to forward the IndeX viewer port to your local system.</p>
+</section>
+<section id="forwarding-ports">
+<h3>Forwarding ports<a class="headerlink" href="#forwarding-ports" title="Link to this heading">¶</a></h3>
+<p>There are several ways to do this, but I recommend <a class="reference external" href="https://www.digitalocean.com/community/tutorials/ssh-port-forwarding#local-port-forwarding-ssh-l">local port forwarding</a>.
+Local port forwarding creates a secure tunnel between a port on your local machine and a remote server using ssh.</p>
+<p>This can be done using the same ssh command used to connect to remote servers and has the format:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ssh<span class="w"> </span>-L<span class="w"> </span><span class="o">[</span>local_port<span class="o">]</span>:<span class="o">[</span>destination_address<span class="o">]</span>:<span class="o">[</span>destination_port<span class="o">]</span><span class="w"> </span><span class="o">[</span>username<span class="o">]</span>@<span class="o">[</span>ssh_server<span class="o">]</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>local_port</p></td>
+<td><p>The port on your local machine that you will connect to</p></td>
+</tr>
+<tr class="row-odd"><td><p>destination_address</p></td>
+<td><p>The address of the machine hosting the service on the remote network</p></td>
+</tr>
+<tr class="row-even"><td><p>destination_port</p></td>
+<td><p>The port the remote service is listening on</p></td>
+</tr>
+<tr class="row-odd"><td><p>username</p></td>
+<td><p>Your username to connect to the system</p></td>
+</tr>
+<tr class="row-even"><td><p>ssh_server</p></td>
+<td><p>The cluster address</p></td>
+</tr>
+</tbody>
+</table>
+<p>In my case, I’m going to run the following</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8080</span>:gpu-sm01-08:8080<span class="w"> </span><span class="o">[</span>username<span class="o">]</span>@<span class="o">[</span>ssh_server<span class="o">]</span>
+</pre></div>
+</div>
+<p>This will leave you with an active terminal session on that server.
+Closing this terminal will stop the port forwarding, so please leave it open for the duration of the tutorial.</p>
+<p>You should now be able to visit <a class="reference external" href="http://localhost:8080">http://localhost:8080</a> in your browser and see the following</p>
+<img alt="../_images/index_basic.png" src="../_images/index_basic.png" />
+</section>
+</section>
+<section id="exploring-index-viewer-interface">
+<h2>Exploring IndeX viewer interface<a class="headerlink" href="#exploring-index-viewer-interface" title="Link to this heading">¶</a></h2>
+<p>Starting from</p>
+<img alt="../_images/index_basic.png" src="../_images/index_basic.png" />
+<section id="scene-graph">
+<h3>Scene Graph<a class="headerlink" href="#scene-graph" title="Link to this heading">¶</a></h3>
+<p>We’re going to start with the Scene Graph in the upper-right corner of the interface</p>
+<a class="reference internal image-reference" href="../_images/index_volumes.png"><img alt="../_images/index_volumes.png" class="align-center" src="../_images/index_volumes.png" style="width: 432.0px; height: 337.0px;" />
+</a>
+<p>Different dimensions or layers of data can be enabled for rendering by clicking the check boxes.
+We currently have two data layers:</p>
+<ul class="simple">
+<li><p>volume_fish_t0</p></li>
+<li><p>volume_fish_t100</p></li>
+</ul>
+<p>Try swapping between them.
+You will notice some lag because the data files are unloaded and loaded.</p>
+</section>
+<section id="performance-statistics">
+<h3>Performance Statistics<a class="headerlink" href="#performance-statistics" title="Link to this heading">¶</a></h3>
+<p>Scrolling down to the Basic statistics section</p>
+<a class="reference internal image-reference" href="../_images/index_basic_stats.png"><img alt="../_images/index_basic_stats.png" class="align-center" src="../_images/index_basic_stats.png" style="width: 415.0px; height: 395.0px;" />
+</a>
+<p>you’ll notice the following metrics:</p>
+<ul class="simple">
+<li><p>rendering</p>
+<ul>
+<li><p>Frames per second: How quickly IndeX can render the data</p></li>
+<li><p>Cluster Size: Number of nodes running IndeX</p></li>
+</ul>
+</li>
+<li><p>video streaming</p>
+<ul>
+<li><p>Streaming FPS: How quickly frames can be transmitted to your computer</p></li>
+</ul>
+</li>
+</ul>
+<p>If you expand the Detailed Statistics section, you can also see detailed information about memory utilization.</p>
+<a class="reference internal image-reference" href="../_images/index_detailed_stats.png"><img alt="../_images/index_detailed_stats.png" class="align-center" src="../_images/index_detailed_stats.png" style="width: 400.0px; height: 468.0px;" />
+</a>
+</section>
+<section id="moving-around-the-scene">
+<h3>Moving around the scene<a class="headerlink" href="#moving-around-the-scene" title="Link to this heading">¶</a></h3>
+<p>This visualization is interactive and your view can change based on the following actions:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Motion</p></th>
+<th class="head"><p>Action</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Rotate</p></td>
+<td><p>Click+Drag</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zoom</p></td>
+<td><p>Shit+Click+Drag</p></td>
+</tr>
+<tr class="row-even"><td><p>Moving</p></td>
+<td><p>CMD+Click+Drag</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="colormap">
+<h3>Colormap<a class="headerlink" href="#colormap" title="Link to this heading">¶</a></h3>
+<p>View the colormap by clicking the plus (+) button from the scene list</p>
+<a class="reference internal image-reference" href="../_images/index_scene_colormap.png"><img alt="../_images/index_scene_colormap.png" class="align-center" src="../_images/index_scene_colormap.png" style="width: 432.0px; height: 337.0px;" />
+</a>
+<p>Looking at the pane that shows up</p>
+<a class="reference internal image-reference" href="../_images/index_colormap.png"><img alt="../_images/index_colormap.png" class="align-center" src="../_images/index_colormap.png" style="width: 409.0px; height: 455.0px;" />
+</a>
+<p>The x-axis of the colormap graph is the data value, and y-axis of the graph is the opacity.
+For this color map, low values are mapped to red, and transition to blue as the value increases.
+By default, low values are almost transparent while mid to high transitions to opaque.</p>
+<p>Try clicking around on the color map to see what happens.
+After you start to understand how this changes your view of the data, try the following:</p>
+<ul class="simple">
+<li><p>View the lower 30% of the data</p></li>
+<li><p>Exclude the lower 30% of the data</p></li>
+<li><p>Highlight middle values of data</p></li>
+</ul>
+<p>If you end up creating a color map that you love, you can copy the config to your clipboard or export it to a file.
+Alternatively, if you want to get back to the default colormap, just restart the viewer.</p>
+</section>
+<section id="slicing-the-data-view">
+<h3>Slicing the data view<a class="headerlink" href="#slicing-the-data-view" title="Link to this heading">¶</a></h3>
+<a class="reference internal image-reference" href="../_images/index_roi.png"><img alt="../_images/index_roi.png" class="align-center" src="../_images/index_roi.png" style="width: 426.0px; height: 299.0px;" />
+</a>
+<p>Data can also be sliced to a specific region using the by specifying a global region of interest in the rendering configuration.
+If you experiment with these values, you’ll notice the visualization get clipped based on the bounds you choose.</p>
+</section>
+<section id="shutting-down-the-viewer">
+<h3>Shutting down the viewer<a class="headerlink" href="#shutting-down-the-viewer" title="Link to this heading">¶</a></h3>
+<p>If you need to restart the view or you’re just done interacting with data, the viewer service can be shut down by:</p>
+<ul class="simple">
+<li><p>Pressing Ctrl+C on the CLI</p></li>
+<li><p>Choosing “Shutdown Viewer” from the hamburger (☰) menu</p></li>
+</ul>
+</section>
+</section>
+<section id="exploring-different-data-formats">
+<h2>Exploring different data formats<a class="headerlink" href="#exploring-different-data-formats" title="Link to this heading">¶</a></h2>
+<p>IndeX can accept several different input types through the scene (<code class="docutils literal notranslate"><span class="pre">.prj</span></code>) files.
+Some are native, while others use plug-ins.</p>
+<section id="raw-uint16">
+<h3>RAW uint16<a class="headerlink" href="#raw-uint16" title="Link to this heading">¶</a></h3>
+<p>This original demo was using binary (RAW) format with uint16 values.</p>
+</section>
+<section id="openvdb-vdb">
+<h3>OpenVDB (.vdb)<a class="headerlink" href="#openvdb-vdb" title="Link to this heading">¶</a></h3>
+<p>OpenVDB is a sparse volumetric data structure and file format with the <code class="docutils literal notranslate"><span class="pre">.vdb</span></code> extension.
+Since this is a sparse data structure, only non-zero values are stored in the file.
+This means that volumes like this, where there’s a lot of empty space can be much smaller without losing any data.</p>
+<p>Data has already been converted for the tutorial today, but the <code class="docutils literal notranslate"><span class="pre">converter_raw_to_vdb</span></code> binary can used to convert the RAW uint16 data to VDB format.
+Be aware that this converter has a non-zero threshold, so some data is filtered out by default.
+Set this to <code class="docutils literal notranslate"><span class="pre">-1</span></code> if you need a lossless conversion.</p>
+<p>Lets explore this data and others by launching</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># From the demo directory</span>
+bash<span class="w"> </span><span class="nv">$IDX_SCENE</span>/scene_zebrafish_nanovdb.sh
+</pre></div>
+</div>
+</section>
+<section id="nanovdb-nvdb">
+<h3>NanoVDB (.nvdb)<a class="headerlink" href="#nanovdb-nvdb" title="Link to this heading">¶</a></h3>
+<p>NanoVDB is a lightweight, GPU-friendly version of OpenVDB developed by NVIDIA.
+One of the main differences is that NanoVDB has a static, linearized memory layout with baked offsets, allowing for faster random access and better cache coherency.</p>
+<p>In addition to the sparse filtering that OpenVDB supports, NanoVDB also allows for reduced precision.
+Both of these methods are lossy, where you’re either throwing out whole data points or reducing the precision of them.
+Our data has a maximum of 0.003, so this is important to think about.</p>
+<p>After comparing the performance of the formats, take a look at the size with</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>-lh<span class="w"> </span><span class="nv">$IDX_DATA</span>/zebrafish-sample/*
+</pre></div>
+</div>
+<p>In the <code class="docutils literal notranslate"><span class="pre">nvdb</span></code> directory, you can see the effect of different precision levels with <code class="docutils literal notranslate"><span class="pre">fp</span></code> and the effect of different filtering thresholds with the <code class="docutils literal notranslate"><span class="pre">ts-*_</span></code>.</p>
+</section>
+<section id="id1">
+<h3>ZARR<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>ZARR files can also be loaded directly.
+Launch this with:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span><span class="nv">$IDX_SCENE</span>/scene_zebrafish_zarr.sh
+</pre></div>
+</div>
+<p>You’ll notice that loading the file takes longer, so iterating across time steps will take longer as well.</p>
+</section>
+<section id="comparison">
+<h3>Comparison<a class="headerlink" href="#comparison" title="Link to this heading">¶</a></h3>
+<p>Using a single A10 GPU, performance was recorded</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Format</p></th>
+<th class="head"><p>Rendering FPS (idle)</p></th>
+<th class="head"><p>File Size (GB)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>RAW uint16</p></td>
+<td><p>10</p></td>
+<td><p>4.4</p></td>
+</tr>
+<tr class="row-odd"><td><p>VDB</p></td>
+<td><p>16</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>NVDB fp16</p></td>
+<td><p>30</p></td>
+<td><p>2.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>NVDB fp8</p></td>
+<td><p>37</p></td>
+<td><p>1.2</p></td>
+</tr>
+<tr class="row-even"><td><p>ZARR</p></td>
+<td><p>14</p></td>
+<td><p>202 (all time steps)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="exporting-visuals-and-creating-animations">
+<h2>Exporting visuals and creating animations<a class="headerlink" href="#exporting-visuals-and-creating-animations" title="Link to this heading">¶</a></h2>
+<p>TBD</p>
+</section>
+<section id="launching-multi-node-rendering-jobs">
+<h2>Launching multi-node rendering jobs<a class="headerlink" href="#launching-multi-node-rendering-jobs" title="Link to this heading">¶</a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># After loading the index module</span>
+srun<span class="w"> </span>-p<span class="w"> </span>gpu<span class="w"> </span>-N<span class="w"> </span><span class="m">2</span><span class="w"> </span>-n<span class="w"> </span><span class="m">4</span><span class="w"> </span>-G<span class="w"> </span><span class="m">4</span><span class="w"> </span>--cpus-per-task<span class="w"> </span><span class="m">16</span><span class="w"> </span>-t<span class="w"> </span><span class="m">00</span>:30:00<span class="w"> </span>nvindex-slurm<span class="w"> </span><span class="nv">$IDX_SCENE</span>/scene_zebrafish_basic.sh
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gromacs_and_MPS/01-introduction.html" class="btn btn-neutral float-left" title="GROMACS and MPS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Greg Zynda.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

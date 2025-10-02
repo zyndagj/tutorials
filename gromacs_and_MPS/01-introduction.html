@@ -1,0 +1,594 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GROMACS and MPS &mdash; Tutorials  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=26c4c002" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IndeX on Slurm" href="../index_on_slurm/01.html" />
+    <link rel="prev" title="GPU Containers on Slurm" href="../containers_on_slurm/01-introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Tutorials
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../parabricks/01-introduction.html">Parabricks Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parabricks_on_bcp/01-introduction.html">Parabricks on BCP Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multi-node_on_bcp/01-introduction.html">Multi-Node on BCP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_bcp/01-introduction.html">Containers on BCP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_slurm/01-introduction.html">GPU Containers on Slurm</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GROMACS and MPS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#objectives">Objectives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-to-gromacs-benchmark">Introduction to Gromacs benchmark</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-benchmem-benchmark">The benchMEM benchmark</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-benchmem-benchmark">Running the benchMEM benchmark</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#benchmem-and-gpu-utilization">benchMEM and GPU utilization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-exercises">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#nvidia-mps-and-benefits">NVIDIA MPS and benefits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#for-and-mps">FOR and MPS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#xargs-and-mps">XARGS and MPS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#xargs-on-1-gpu">XARGS on 1 GPU</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#xargs-on-multiple-gpus">XARGS on multiple GPUs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../index_on_slurm/01.html">IndeX on Slurm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Tutorials</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">GROMACS and MPS</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/gromacs_and_MPS/01-introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gromacs-and-mps">
+<h1>GROMACS and MPS<a class="headerlink" href="#gromacs-and-mps" title="Link to this heading">¶</a></h1>
+<p>This tutorial introduces <a class="reference external" href="https://docs.nvidia.com/deploy/mps/index.html#topic_2">MPS</a> and the benefits of using it with GROMACS.</p>
+<section id="objectives">
+<h2>Objectives<a class="headerlink" href="#objectives" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Introduction to GROMACS benchmark</p></li>
+<li><p>NVIDIA MPS and benefits</p></li>
+<li><p>FOR and MPS</p></li>
+<li><p>XARGS and MPS</p></li>
+<li><p>Summary</p></li>
+<li><p>Next Steps</p></li>
+</ul>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
+<p>To run all example scripts, you’ll need</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.nvidia.com/en-us/data-center/dgx-cloud/">DGX Cloud</a> instance running BCP</p></li>
+<li><p>Pre-authenticated <a class="reference external" href="https://docs.nvidia.com/base-command-platform/user-guide/latest/index.html#introduction-to-the-ngc-cli">NGC CLI</a></p></li>
+<li><p>2 <a class="reference external" href="https://docs.nvidia.com/deploy/mps/index.html#topic_2_1_2">Volta or newer NVIDIA GPUs</a></p></li>
+</ul>
+</section>
+<section id="introduction-to-gromacs-benchmark">
+<h2>Introduction to Gromacs benchmark<a class="headerlink" href="#introduction-to-gromacs-benchmark" title="Link to this heading">¶</a></h2>
+<p>This tutorial will be using the GROMACS container built for DGX on NGC</p>
+<p><a class="reference external" href="https://catalog.ngc.nvidia.com/orgs/hpc/containers/gromacs">https://catalog.ngc.nvidia.com/orgs/hpc/containers/gromacs</a></p>
+<p>GROMACS can also be built from source, but the pre-compiled container is convenient for this tutorial since it contains all necessary libraries.</p>
+<p>First, lets kick off an interactive 2-GPU job on DGX Cloud with the <code class="docutils literal notranslate"><span class="pre">gromacs:2023.2</span></code> container:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/af31c0ea2a604159c393b4318cbbbeac/interactive_job.sh"><code class="xref download docutils literal notranslate"><span class="pre">interactive_job.sh</span></code></a></span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ngc<span class="w"> </span>batch<span class="w"> </span>run<span class="w"> </span>--name<span class="w"> </span><span class="s2">&quot;gromacs-2gpu&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--total-runtime<span class="w"> </span>7200s<span class="w"> </span>--instance<span class="w"> </span>dgxa100.80g.2.norm<span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--commandline<span class="w"> </span><span class="s2">&quot;apt update &amp;&amp; DEBIAN_FRONTEND=noninteractive apt install -y xterm curl wget zip vim-nox less &amp;&amp; sleep 2h&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--result<span class="w"> </span>/results<span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>--image<span class="w"> </span><span class="s2">&quot;nvcr.io/hpc/gromacs:2023.2&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>You’ll notice that this job script installs the following packages at runtime:</p>
+<ul class="simple">
+<li><p><strong>xterm</strong> - used to resize terminal window</p></li>
+<li><p><strong>curl</strong> - used to download benchmark data</p></li>
+<li><p><strong>wget</strong> - used to download benchmark data</p></li>
+<li><p><strong>zip</strong> - used to unzip benchmark data</p></li>
+<li><p><strong>vim-nox</strong> - used for editing files</p></li>
+<li><p><strong>less</strong> - used for viewing files</p></li>
+</ul>
+<p>The GROMACS container is meant to just contain enough packages to run GROMACS, so many useful interactive programs are excluded.
+This means the container is small and great for running batch jobs, but makes it sparse for interactive sessions.
+Luckily, the container is built from an Ubuntu base, so we can install these extra packages easily.</p>
+<p>After your job is running, connect to it and load the AVX2 GROMACS environment</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># From your localhost</span>
+ngc<span class="w"> </span>batch<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;jobid&gt;
+
+<span class="c1"># Fix terminal size from inside job</span>
+resize
+
+<span class="c1"># Load GROMACS environment</span>
+.<span class="w"> </span>/usr/local/gromacs/avx2_256/bin/GMXRC.bash
+
+<span class="c1"># cd to the local DGX filesystem</span>
+<span class="nb">cd</span><span class="w"> </span>/raid
+</pre></div>
+</div>
+<section id="the-benchmem-benchmark">
+<h3>The benchMEM benchmark<a class="headerlink" href="#the-benchmem-benchmark" title="Link to this heading">¶</a></h3>
+<p>This tutorial will be using input files from <a class="reference external" href="https://www.mpinat.mpg.de/grubmueller/bench">bench</a>, a free GROMACS benchmark suite with a variety of sizes and run scripts.
+Specifically, we will be working with the benchMEM benchmark, which features a protein in membrane system surrounded by water, comprised of 82,000 atoms, and employs a 2 fs time step.
+This particular benchmark is well-suited for interactive exploration due to its relatively fast runtime.</p>
+<p>Download and unpack it with the following:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/7d7cd8eb3b1c34b3b6f54de0d93a59e6/downloading_data.sh"><code class="xref download docutils literal notranslate"><span class="pre">downloading_data.sh</span></code></a></span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download benchMEM benchmark from https://www.mpinat.mpg.de/grubmueller/bench</span>
+
+curl<span class="w"> </span>-sL<span class="w"> </span>https://www.mpinat.mpg.de/benchMEM<span class="w"> </span>-o<span class="w"> </span>benchMEM.zip
+unzip<span class="w"> </span>benchMEM.zip
+
+<span class="c1"># should now have benchMEM.tpr file</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="running-the-benchmem-benchmark">
+<h3>Running the benchMEM benchmark<a class="headerlink" href="#running-the-benchmem-benchmark" title="Link to this heading">¶</a></h3>
+<p>Now that the benchMEM benchmark is downloaded, we can run it as follows:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/44618a110ec5b8464c992026b051d313/run_1gpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_1gpu.sh</span></code></a></span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Runs benchMEM with 1 process, 8 threads, for 10k steps on GPU 0</span>
+<span class="c1"># Simulation output is written to /tmp/out (deleted)</span>
+<span class="c1"># Log is written to 1gpu.log</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span>-ntmpi<span class="w"> </span><span class="m">1</span><span class="w"> </span>-ntomp<span class="w"> </span><span class="m">8</span><span class="w"> </span>-npme<span class="w"> </span><span class="m">0</span><span class="w"> </span>-s<span class="w"> </span>benchMEM.tpr<span class="w"> </span>-cpt<span class="w"> </span><span class="m">1440</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>-nsteps<span class="w"> </span><span class="m">10000</span><span class="w"> </span>-v<span class="w"> </span>-noconfout<span class="w"> </span>-nb<span class="w"> </span>gpu<span class="w"> </span>-dlb<span class="w"> </span>yes<span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>-bonded<span class="w"> </span>gpu<span class="w"> </span>-e<span class="w"> </span>/tmp/out<span class="w"> </span>-g<span class="w"> </span>1gpu.log
+</pre></div>
+</div>
+</div>
+<p>The final performance is printed in nanoseconds per day (ns/day). If you think of the simulation as a movie, ns/day is the length and not the walltime of the job, so a higher ns/day is better.</p>
+<p>Since the interactive job we submitted has two GPUs, which you can check with <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code>, we can scale this run across both with:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/2fc4e9a0203698fcff0d112298a58bc5/run_2gpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_2gpu.sh</span></code></a></span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Runs benchMEM with 2 processes, 8 threads each (16 total), for 10k steps on GPUs 0 and 1</span>
+<span class="c1"># Simulation output is written to /dev/null (deleted)</span>
+<span class="c1"># Log is written to 2gpu.log</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span>-ntmpi<span class="w"> </span><span class="m">2</span><span class="w"> </span>-ntomp<span class="w"> </span><span class="m">8</span><span class="w"> </span>-npme<span class="w"> </span><span class="m">0</span><span class="w"> </span>-s<span class="w"> </span>benchMEM.tpr<span class="w"> </span>-cpt<span class="w"> </span><span class="m">1440</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>-nsteps<span class="w"> </span><span class="m">10000</span><span class="w"> </span>-v<span class="w"> </span>-noconfout<span class="w"> </span>-nb<span class="w"> </span>gpu<span class="w"> </span>-dlb<span class="w"> </span>yes<span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">01</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>-bonded<span class="w"> </span>gpu<span class="w"> </span>-e<span class="w"> </span>/tmp/out<span class="w"> </span>-g<span class="w"> </span>2gpu.log
+</pre></div>
+</div>
+</div>
+<p>Because this is a small simulation, you should notice that running benchMEM on two GPUs results in a lower ns/day.</p>
+</section>
+<section id="benchmem-and-gpu-utilization">
+<h3>benchMEM and GPU utilization<a class="headerlink" href="#benchmem-and-gpu-utilization" title="Link to this heading">¶</a></h3>
+<p>While these tasks are running, you can look at the telemetry for this BCP job to get an idea of how much of the GPU is being utilized.
+If you’re not using BCP, you can also use <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> as follows:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/3f0a2c4de89874453761ad25dce02ed3/monitor_1gpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">monitor_1gpu.sh</span></code></a></span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Kill child processes on exit</span>
+<span class="nb">trap</span><span class="w"> </span><span class="s1">&#39;pkill -P $$&#39;</span><span class="w"> </span>SIGINT<span class="w"> </span>SIGTERM<span class="w"> </span>EXIT
+
+<span class="c1"># Start capturing utilization to CSV file in the background</span>
+nvidia-smi<span class="w"> </span>-i<span class="w"> </span><span class="m">0</span><span class="w"> </span>--query-gpu<span class="o">=</span>timestamp,name,utilization.gpu,memory.used<span class="w"> </span>--format<span class="o">=</span>csv<span class="w"> </span>-l<span class="w"> </span><span class="m">5</span><span class="w"> </span>&gt;<span class="w"> </span>utilization.csv<span class="w"> </span><span class="p">&amp;</span>
+
+<span class="c1"># Runs benchMEM with 1 process, 8 threads, for 10k steps on GPU 0</span>
+<span class="c1"># Simulation output is written to /tmp/out (deleted)</span>
+<span class="c1"># Log is written to 1gpu.log</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span>-ntmpi<span class="w"> </span><span class="m">1</span><span class="w"> </span>-ntomp<span class="w"> </span><span class="m">8</span><span class="w"> </span>-npme<span class="w"> </span><span class="m">0</span><span class="w"> </span>-s<span class="w"> </span>benchMEM.tpr<span class="w"> </span>-cpt<span class="w"> </span><span class="m">1440</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>-nsteps<span class="w"> </span><span class="m">10000</span><span class="w"> </span>-v<span class="w"> </span>-noconfout<span class="w"> </span>-nb<span class="w"> </span>gpu<span class="w"> </span>-dlb<span class="w"> </span>yes<span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">	</span>-bonded<span class="w"> </span>gpu<span class="w"> </span>-e<span class="w"> </span>/tmp/out<span class="w"> </span>-g<span class="w"> </span>monitor_1gpu.log
+</pre></div>
+</div>
+</div>
+<p>This script starts by querying the GPU utilization and memory usage every 5 seconds and write it out to the file <code class="docutils literal notranslate"><span class="pre">utilization.csv</span></code>.</p>
+</section>
+<section id="optional-exercises">
+<h3>Optional Exercises<a class="headerlink" href="#optional-exercises" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>What happens to performance if you increase the number of steps?</p></li>
+<li><p>What happens to performance if you run on the CPU?</p></li>
+<li><p>Monitor GPU utilization when using two GPUs</p></li>
+</ul>
+</section>
+</section>
+<section id="nvidia-mps-and-benefits">
+<h2>NVIDIA MPS and benefits<a class="headerlink" href="#nvidia-mps-and-benefits" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://docs.nvidia.com/deploy/mps/index.html">NVIDIA Multi-Process Service</a> (MPS) is a feature that allows multiple CUDA applications to share the same GPU, improving system utilization and reducing the overhead of context switching between applications.
+By providing a single, unified address space for all MPS clients, MPS enables efficient sharing of GPU resources, making it ideal for scenarios where multiple applications need to access the GPU simultaneously.</p>
+<p>If you remember, the utilization of the benchMEM simulation wasn’t very good.
+Due to the small size of the benchMEM simulation (82k atoms) and the capability of modern GPU infrastructure, the A100 GPUs used in this tutorial did not have very good utilization.
+This means that if you ran a bunch of benchMEM simulations on the GPU, the hardware would mostly be idle.</p>
+<p>Usually, utilization is improved in the code at the application level by a developer.
+Different (larger) inputs can also improve hardware utilization.
+If you’re studying the simulation of small molecules, hardware utilization can be improved by running multiple simulations on the same GPU.
+Multiple applications on the same GPU, but MPS improves performance by making context switching more efficient.</p>
+<p>To illustrate this with an example, lets run four benchMEM simulations at a time on GPU 0 with and without MPS using the following code:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/6d8de6ec552d7dad4670c4ff68393e12/4sim_1gpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">4sim_1gpu.sh</span></code></a></span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Variable of shared arguments</span>
+<span class="nv">GMX_ARGS</span><span class="o">=</span><span class="s2">&quot;-ntmpi 1 -ntomp 8 -npme 0 -s benchMEM.tpr -cpt 1440 -nsteps 10000 -v -noconfout -nb gpu -dlb yes -bonded gpu&quot;</span>
+
+<span class="c1"># without MPS</span>
+<span class="c1"># unique log and ouptput files</span>
+<span class="c1"># processes are backgrounded and stdout sent to /dev/null</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out1<span class="w"> </span>-g<span class="w"> </span>1gpu_sim1-4.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out2<span class="w"> </span>-g<span class="w"> </span>1gpu_sim2-4.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out3<span class="w"> </span>-g<span class="w"> </span>1gpu_sim3-4.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out4<span class="w"> </span>-g<span class="w"> </span>1gpu_sim4-4.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+<span class="c1"># wait for processes to complete</span>
+<span class="nb">wait</span>
+
+<span class="c1"># with MPS</span>
+nvidia-cuda-mps-control<span class="w"> </span>-d
+<span class="c1"># unique log and ouptput files</span>
+<span class="c1"># processes are backgrounded and stdout sent to /dev/null</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out1<span class="w"> </span>-g<span class="w"> </span>1gpu_sim1-4_mps.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out2<span class="w"> </span>-g<span class="w"> </span>1gpu_sim2-4_mps.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out3<span class="w"> </span>-g<span class="w"> </span>1gpu_sim3-4_mps.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out4<span class="w"> </span>-g<span class="w"> </span>1gpu_sim4-4_mps.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+<span class="c1"># wait for processes to complete</span>
+<span class="nb">wait</span>
+<span class="c1"># stop MPS server</span>
+<span class="nb">echo</span><span class="w"> </span>quit<span class="w"> </span><span class="p">|</span><span class="w"> </span>nvidia-cuda-mps-control
+</pre></div>
+</div>
+</div>
+<p>To make it easier to compare throughput performance from the generated log files, use the <a class="reference download internal" download="" href="../_downloads/e6eac87fa1b3f79f0ee34cbdcf1349e3/calc_throughput.sh"><code class="xref download docutils literal notranslate"><span class="pre">calc_throughput.sh</span></code></a> script as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate throughput WITHOUT MPS</span>
+$<span class="w"> </span>bash<span class="w"> </span>calc_throughput.sh<span class="w"> </span>1gpu_sim*-4.log
+
+1gpu_sim1-4.log<span class="w"> </span>1gpu_sim2-4.log<span class="w"> </span>1gpu_sim3-4.log<span class="w"> </span>1gpu_sim4-4.log
+1gpu_sim1-4.log:Performance:<span class="w">    </span><span class="m">41</span>.402
+1gpu_sim2-4.log:Performance:<span class="w">    </span><span class="m">39</span>.433
+1gpu_sim3-4.log:Performance:<span class="w">    </span><span class="m">51</span>.208
+1gpu_sim4-4.log:Performance:<span class="w">    </span><span class="m">41</span>.574
+Total<span class="w"> </span>throughput:<span class="w"> </span><span class="m">173</span>.617
+
+<span class="c1"># Calculate throughput WITH MPS</span>
+$<span class="w"> </span>bash<span class="w"> </span>calc_throughput.sh<span class="w"> </span>1gpu_sim*-4_mps.log
+
+1gpu_sim1-4_mps.log<span class="w"> </span>1gpu_sim2-4_mps.log<span class="w"> </span>1gpu_sim3-4_mps.log<span class="w"> </span>1gpu_sim4-4_mps.log
+1gpu_sim1-4_mps.log:Performance:<span class="w">        </span><span class="m">45</span>.262
+1gpu_sim2-4_mps.log:Performance:<span class="w">        </span><span class="m">44</span>.495
+1gpu_sim3-4_mps.log:Performance:<span class="w">        </span><span class="m">53</span>.269
+1gpu_sim4-4_mps.log:Performance:<span class="w">        </span><span class="m">44</span>.811
+Total<span class="w"> </span>throughput:<span class="w"> </span><span class="m">187</span>.837
+</pre></div>
+</div>
+<p>You’ll notice total throughput (ns/day) is higher when using MPS to share the GPU. In the next section, we’ll figure out what the maximum throughput can be on the A100.</p>
+<section id="id1">
+<h3>Optional Exercises<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>How is GPU utilization when running these concurrent simulations?</p></li>
+</ul>
+</section>
+</section>
+<section id="for-and-mps">
+<h2>FOR and MPS<a class="headerlink" href="#for-and-mps" title="Link to this heading">¶</a></h2>
+<p>In the previous section, we ran each GROMACS processes individually as a separate line in the bash script.
+This can also be done in a <code class="docutils literal notranslate"><span class="pre">for</span></code> loop if you’re looping over files or a range:</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/09c3335be5c4f79cdcdcabe1b5bb4f89/Nsim_1gpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">Nsim_1gpu.sh</span></code></a></span><a class="headerlink" href="#id11" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># Number of cores in job</span>
+<span class="nv">NCORES</span><span class="o">=</span><span class="m">22</span>
+<span class="c1"># Number of tasks to run concurrently</span>
+<span class="nv">NP</span><span class="o">=</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="nv">8</span><span class="si">}</span>
+
+<span class="c1"># Variable of shared arguments</span>
+<span class="nv">GMX_ARGS</span><span class="o">=</span><span class="s2">&quot;-ntmpi 1 -ntomp </span><span class="k">$((</span><span class="w"> </span><span class="nv">$NCORES</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nv">$NP</span><span class="w"> </span><span class="k">))</span><span class="s2"> -npme 0 -s benchMEM.tpr -cpt 1440 -nsteps 10000 -v -noconfout -nb gpu -dlb yes -bonded gpu&quot;</span>
+
+<span class="c1"># without MPS</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running </span><span class="si">${</span><span class="nv">NP</span><span class="si">}</span><span class="s2"> simulations concurrently without MPS&quot;</span>
+<span class="c1"># Spawn NP processes and wait for them to complete</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nv">$NP</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">	</span>gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out<span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="w"> </span>-g<span class="w"> </span>1gpu_sim<span class="si">${</span><span class="nv">i</span><span class="si">}</span>-<span class="si">${</span><span class="nv">NP</span><span class="si">}</span>.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+<span class="k">done</span>
+<span class="c1"># wait for processes to complete</span>
+<span class="nb">wait</span>
+
+<span class="c1"># with MPS</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running </span><span class="si">${</span><span class="nv">NP</span><span class="si">}</span><span class="s2"> simulations concurrently with MPS&quot;</span>
+nvidia-cuda-mps-control<span class="w"> </span>-d
+<span class="c1"># Spawn NP processes and wait for them to complete</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nv">$NP</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">	</span>gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out<span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="w"> </span>-g<span class="w"> </span>1gpu_sim<span class="si">${</span><span class="nv">i</span><span class="si">}</span>-<span class="si">${</span><span class="nv">NP</span><span class="si">}</span>_mps.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="p">&amp;</span>
+<span class="k">done</span>
+<span class="c1"># wait for processes to complete</span>
+<span class="nb">wait</span>
+<span class="c1"># stop MPS server</span>
+<span class="nb">echo</span><span class="w"> </span>quit<span class="w"> </span><span class="p">|</span><span class="w"> </span>nvidia-cuda-mps-control
+</pre></div>
+</div>
+</div>
+<p>By default, this script will run 8 concurrent GROMACS tasks at the same time, but that can also be controlled at runtime with an integer argument.
+For example, you can run 5 tasks at at a time with</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>Nsim_1gpu.sh<span class="w"> </span><span class="m">5</span>
+</pre></div>
+</div>
+<p>Using the <a class="reference download internal" download="" href="../_downloads/e6eac87fa1b3f79f0ee34cbdcf1349e3/calc_throughput.sh"><code class="xref download docutils literal notranslate"><span class="pre">calc_throughput.sh</span></code></a> script to determine the total throughput, take some time to identify the optimal number of processes to run at a time.</p>
+<section id="id2">
+<h3>Optional Exercises<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Try visualizing the throughput results (N x throughput) in your favorite plotting program (excel counts)</p></li>
+</ul>
+</section>
+</section>
+<section id="xargs-and-mps">
+<h2>XARGS and MPS<a class="headerlink" href="#xargs-and-mps" title="Link to this heading">¶</a></h2>
+<p>In the previous example, we used FOR loops to launch GROMACS processes in the background and waited for them to complete.
+This worked great since we were just experimenting with</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">xargs</span></code> program can be thought of as a “map” operation, where a list of inputs is given and a function is applied to each one.
+This is often used to process file contents line by line, but it can also be used with a FOR loop in a script if the loop prints out the command.</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/d3a05a25173e90a98ec4de0f41f546f7/xargs.sh"><code class="xref download docutils literal notranslate"><span class="pre">xargs.sh</span></code></a></span><a class="headerlink" href="#id12" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Prepend a value to every line in a list</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">8</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span><span class="nv">$i</span><span class="p">;</span>
+<span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-L<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span>prepend
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">xargs</span></code> can also call a function in a subshell</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/d3a05a25173e90a98ec4de0f41f546f7/xargs.sh"><code class="xref download docutils literal notranslate"><span class="pre">xargs.sh</span></code></a></span><a class="headerlink" href="#id13" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Can also run a function</span>
+<span class="k">function</span><span class="w"> </span>times2<span class="w"> </span><span class="o">{</span>
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2"> * 2 =&quot;</span><span class="w"> </span><span class="k">$((</span><span class="w"> </span><span class="nv">$1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="k">))</span>
+<span class="w">	</span><span class="c1"># Simulates processing time</span>
+<span class="w">	</span>sleep<span class="w"> </span><span class="m">1</span>
+<span class="o">}</span>
+<span class="c1"># Export function</span>
+<span class="nb">export</span><span class="w"> </span>-f<span class="w"> </span>times2
+<span class="nb">time</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">8</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span><span class="nv">$i</span><span class="p">;</span>
+<span class="c1"># -I takes a whole line (-L 1 implied) and substitutes it as the matching symbol</span>
+<span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-I<span class="w"> </span><span class="o">{}</span><span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;times2 {}&#39;</span>
+</pre></div>
+</div>
+</div>
+<p>One of the cooler features, is that <code class="docutils literal notranslate"><span class="pre">xargs</span></code> can also run tasks in parallel with the <code class="docutils literal notranslate"><span class="pre">-P</span></code> argument</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/d3a05a25173e90a98ec4de0f41f546f7/xargs.sh"><code class="xref download docutils literal notranslate"><span class="pre">xargs.sh</span></code></a></span><a class="headerlink" href="#id14" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">time</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">8</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span><span class="nv">$i</span><span class="p">;</span>
+<span class="c1"># -I takes a whole line (-L 1 implied) and substitutes it as the matching symbol</span>
+<span class="c1"># Can also run in parallel</span>
+<span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-P<span class="w"> </span><span class="m">4</span><span class="w"> </span>-I<span class="w"> </span><span class="o">{}</span><span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;times2 {}&#39;</span>
+</pre></div>
+</div>
+</div>
+<p>You should notice that this should run 4x faster than the version that called each function sequentially because it runs 4 tasks at the same time.</p>
+<section id="xargs-on-1-gpu">
+<h3>XARGS on 1 GPU<a class="headerlink" href="#xargs-on-1-gpu" title="Link to this heading">¶</a></h3>
+<p>Now that we know how to run tasks in parallel in a function, we can apply that format to our GROMACS benchmark.
+In the snippet below, you’ll notice that we create variables <code class="docutils literal notranslate"><span class="pre">NP</span></code> for the number of tasks to run at a time (used by <code class="docutils literal notranslate"><span class="pre">-P</span></code> argument) and <code class="docutils literal notranslate"><span class="pre">NT</span></code> the number of tasks to generate.
+We then create the <code class="docutils literal notranslate"><span class="pre">run_gmx</span></code> function to run the benchmark, which takes one argument, <code class="docutils literal notranslate"><span class="pre">TID</span></code> the task ID.
+First, since this is a sub shell, we need to reload the GROMACS environment.
+Then, we can run the GROMACS benchmark along with some help text to know what’s running.</p>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/cdce97e06527722306b70df32b9a7a74/xargs_1gpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">xargs_1gpu.sh</span></code></a></span><a class="headerlink" href="#id15" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># Number of cores in job</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">NCORES</span><span class="o">=</span><span class="m">22</span>
+<span class="c1"># Number of tasks to run concurrently</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">NP</span><span class="o">=</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="nv">8</span><span class="si">}</span>
+<span class="c1"># Number of tasks in queue</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">NT</span><span class="o">=</span><span class="m">8</span>
+
+<span class="c1"># Variable of shared arguments</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GMX_ARGS</span><span class="o">=</span><span class="s2">&quot;-ntmpi 1 -ntomp </span><span class="k">$((</span><span class="w"> </span><span class="nv">$NCORES</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nv">$NP</span><span class="w"> </span><span class="k">))</span><span class="s2"> -npme 0 -s benchMEM.tpr -cpt 1440 -nsteps 10000 -v -noconfout -nb gpu -dlb yes -bonded gpu&quot;</span>
+
+<span class="c1"># Define and export function for running GMX</span>
+<span class="k">function</span><span class="w"> </span>run_gmx<span class="w"> </span><span class="o">{</span>
+<span class="w">	</span><span class="nv">TID</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">	</span><span class="c1"># Load GMX environment</span>
+<span class="w">	</span>.<span class="w"> </span>/usr/local/gromacs/avx2_256/bin/GMXRC.bash
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span>starting<span class="w"> </span>task<span class="w"> </span><span class="si">${</span><span class="nv">TID</span><span class="si">}</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>slot<span class="w"> </span><span class="si">${</span><span class="nv">SLOT</span><span class="si">}</span>
+<span class="w">	</span><span class="c1"># Task is not backgrounded</span>
+<span class="w">	</span>gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="m">0</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out<span class="si">${</span><span class="nv">TID</span><span class="si">}</span><span class="w"> </span>-g<span class="w"> </span>1gpu_sim<span class="si">${</span><span class="nv">TID</span><span class="si">}</span>-<span class="si">${</span><span class="nv">NP</span><span class="si">}</span>_xargs.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span>finished<span class="w"> </span>task<span class="w"> </span><span class="si">${</span><span class="nv">TID</span><span class="si">}</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>slot<span class="w"> </span><span class="si">${</span><span class="nv">SLOT</span><span class="si">}</span>
+<span class="o">}</span>
+<span class="nb">export</span><span class="w"> </span>-f<span class="w"> </span>run_gmx
+
+<span class="c1"># with MPS</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running </span><span class="si">${</span><span class="nv">NP</span><span class="si">}</span><span class="s2"> simulations concurrently with MPS&quot;</span>
+nvidia-cuda-mps-control<span class="w"> </span>-d
+<span class="c1"># Spawn NP processes and wait for them to complete</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nv">$NT</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span>run_gmx<span class="w"> </span><span class="nv">$i</span>
+<span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-P<span class="w"> </span><span class="si">${</span><span class="nv">NP</span><span class="si">}</span><span class="w"> </span>--process-slot-var<span class="o">=</span>SLOT<span class="w"> </span>-I<span class="w"> </span><span class="o">{}</span><span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;{}&#39;</span>
+<span class="c1"># stop MPS server</span>
+<span class="nb">echo</span><span class="w"> </span>quit<span class="w"> </span><span class="p">|</span><span class="w"> </span>nvidia-cuda-mps-control
+</pre></div>
+</div>
+</div>
+<p>Depending on the tasks you need to process, you may need to add additional arguments to this function to accept parameters or files you want to explore.</p>
+<section id="id3">
+<h4>Optional Exercises<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>If you increase the number of tasks, does this solution scale nicely?</p></li>
+<li><p>If you have time, try looking at the utilization</p></li>
+</ul>
+</section>
+</section>
+<section id="xargs-on-multiple-gpus">
+<h3>XARGS on multiple GPUs<a class="headerlink" href="#xargs-on-multiple-gpus" title="Link to this heading">¶</a></h3>
+<p>We can also do some math to calculate the GPU index based on the <code class="docutils literal notranslate"><span class="pre">SLOT</span></code> index.</p>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/b749d01e40f1201067951022b7922479/xargs_Ngpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">xargs_Ngpu.sh</span></code></a></span><a class="headerlink" href="#id16" title="Link to this code">¶</a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># Number of cores in job</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">NCORES</span><span class="o">=</span><span class="m">22</span>
+<span class="c1"># Number of tasks to run concurrently</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">NP</span><span class="o">=</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="nv">8</span><span class="si">}</span>
+<span class="c1"># Number of tasks in queue</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">NT</span><span class="o">=</span><span class="m">16</span>
+<span class="c1"># Number of GPUs</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">NG</span><span class="o">=</span><span class="m">2</span>
+
+<span class="c1"># Calculate total number of concurrent tasks</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TT</span><span class="o">=</span><span class="k">$((</span><span class="w"> </span><span class="nv">$NP</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nv">$NG</span><span class="w"> </span><span class="k">))</span>
+<span class="c1"># Variable of shared arguments</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GMX_ARGS</span><span class="o">=</span><span class="s2">&quot;-ntmpi 1 -ntomp </span><span class="k">$((</span><span class="w"> </span><span class="nv">$NCORES</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nv">$NP</span><span class="w"> </span><span class="k">))</span><span class="s2"> -npme 0 -s benchMEM.tpr -cpt 1440 -nsteps 10000 -v -noconfout -nb gpu -dlb yes -bonded gpu&quot;</span>
+
+<span class="c1"># Define and export function for running GMX</span>
+<span class="k">function</span><span class="w"> </span>run_gmx<span class="w"> </span><span class="o">{</span>
+<span class="w">	</span><span class="nv">TID</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">	</span><span class="nv">GPU</span><span class="o">=</span><span class="k">$((</span><span class="w"> </span><span class="nv">$SLOT</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="nv">$NG</span><span class="w"> </span><span class="k">))</span>
+<span class="w">	</span><span class="c1"># Load GMX environment</span>
+<span class="w">	</span>.<span class="w"> </span>/usr/local/gromacs/avx2_256/bin/GMXRC.bash
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span>starting<span class="w"> </span>task<span class="w"> </span><span class="si">${</span><span class="nv">TID</span><span class="si">}</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>slot<span class="w"> </span><span class="si">${</span><span class="nv">SLOT</span><span class="si">}</span><span class="w"> </span>on<span class="w"> </span>GPU<span class="w"> </span><span class="si">${</span><span class="nv">GPU</span><span class="si">}</span>
+<span class="w">	</span><span class="c1"># Task is not backgrounded</span>
+<span class="w">	</span>gmx<span class="w"> </span>mdrun<span class="w"> </span><span class="si">${</span><span class="nv">GMX_ARGS</span><span class="si">}</span><span class="w"> </span>-gpu_id<span class="w"> </span><span class="si">${</span><span class="nv">GPU</span><span class="si">}</span><span class="w"> </span>-e<span class="w"> </span>/tmp/out<span class="si">${</span><span class="nv">TID</span><span class="si">}</span><span class="w"> </span>-g<span class="w"> </span><span class="si">${</span><span class="nv">NG</span><span class="si">}</span>gpu_sim<span class="si">${</span><span class="nv">TID</span><span class="si">}</span>-<span class="si">${</span><span class="nv">TT</span><span class="si">}</span>_xargs.log<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span>finished<span class="w"> </span>task<span class="w"> </span><span class="si">${</span><span class="nv">TID</span><span class="si">}</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>slot<span class="w"> </span><span class="si">${</span><span class="nv">SLOT</span><span class="si">}</span>
+<span class="o">}</span>
+<span class="nb">export</span><span class="w"> </span>-f<span class="w"> </span>run_gmx
+
+<span class="c1"># with MPS</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running </span><span class="si">${</span><span class="nv">NP</span><span class="si">}</span><span class="s2"> simulations concurrently with MPS&quot;</span>
+nvidia-cuda-mps-control<span class="w"> </span>-d
+<span class="c1"># Spawn NP processes and wait for them to complete</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>seq<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="nv">$NT</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span>run_gmx<span class="w"> </span><span class="nv">$i</span>
+<span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-P<span class="w"> </span><span class="si">${</span><span class="nv">TT</span><span class="si">}</span><span class="w"> </span>--process-slot-var<span class="o">=</span>SLOT<span class="w"> </span>-I<span class="w"> </span><span class="o">{}</span><span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;{}&#39;</span>
+<span class="c1"># stop MPS server</span>
+<span class="nb">echo</span><span class="w"> </span>quit<span class="w"> </span><span class="p">|</span><span class="w"> </span>nvidia-cuda-mps-control
+</pre></div>
+</div>
+</div>
+<p>If we restricted the number of CPUs to 1 core per task, this would be about double the single-GPU performance.
+As an exercise, try changing the both scripts to allocate a single GPU per task to see if this is true.</p>
+</section>
+<section id="id4">
+<h3>Optional Exercises<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>If you increase the number of tasks, does the <code class="docutils literal notranslate"><span class="pre">xargs</span></code> solution scale nicely?</p></li>
+<li><p>Try looking at utilization while running xargs to make sure both GPUs are actually being used.</p></li>
+<li><p>Try changing both xargs scripts to allocate a single CPU per task to see if 2-GPU throughput is 2x that of 1-GPU.</p></li>
+</ul>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
+<p>After completing this tutorial, you should have learned the benefit of MPS when running multiple applications and how to efficiently process many tasks across multiple GPUs.</p>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
+<p>NVIDIA Developer Blog Posts:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://developer.nvidia.com/blog/maximizing-gromacs-throughput-with-multiple-simulations-per-gpu-using-mps-and-mig/">Maximizing GROMACS Throughput with Multiple Simulations per GPU Using MPS and MIG</a></p></li>
+<li><p><a class="reference external" href="https://developer.nvidia.com/blog/massively-improved-multi-node-nvidia-gpu-scalability-with-gromacs/">Massively Improved Multi-node NVIDIA GPU Scalability with GROMACS</a></p></li>
+</ul>
+<p>NVIDIA NGC Container:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://catalog.ngc.nvidia.com/orgs/hpc/containers/gromacs">GROMACS Container</a></p></li>
+</ul>
+<p>Documentation:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.nvidia.com/deploy/mps/index.html">NVIDIA MPS</a></p></li>
+<li><p><a class="reference external" href="https://www.mpinat.mpg.de/632182/bench.pdf">bench</a></p></li>
+<li><p><a class="reference external" href="https://manual.gromacs.org/">GROMACS</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../containers_on_slurm/01-introduction.html" class="btn btn-neutral float-left" title="GPU Containers on Slurm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../index_on_slurm/01.html" class="btn btn-neutral float-right" title="IndeX on Slurm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Greg Zynda.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

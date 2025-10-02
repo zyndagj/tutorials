@@ -1,0 +1,550 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parabricks on BCP Workshop &mdash; Tutorials  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=26c4c002" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Multi-Node on BCP" href="../multi-node_on_bcp/01-introduction.html" />
+    <link rel="prev" title="Parabricks Workshop" href="../parabricks/01-introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Tutorials
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../parabricks/01-introduction.html">Parabricks Workshop</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Parabricks on BCP Workshop</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#course-objectives">Course objectives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-to-clara-parabricks">Introduction to Clara Parabricks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#getting-clara-parabricks">Getting Clara Parabricks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#starting-your-parabricks-job">Starting Your Parabricks Job</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-used">Data Used</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dna-alignment-with-fq2bam">DNA alignment with fq2bam</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#indexing-the-reference-for-fq2bam">Indexing the reference for fq2bam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-fq2bam-on-one-gpu">Running fq2bam on one GPU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-fq2bam-on-two-gpus">Running fq2bam on two GPUs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-cpu-equivalent">Running the CPU equivalent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-exercises">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#calling-variants-with-haplotypecaller">Calling Variants with haplotypeCaller</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#indexing-the-reference-for-haplotypecaller">Indexing the reference for haplotypeCaller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-haplotypecaller">Running haplotypeCaller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Running the CPU equivalent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#genotyping-sample">Genotyping sample</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../multi-node_on_bcp/01-introduction.html">Multi-Node on BCP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_bcp/01-introduction.html">Containers on BCP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_slurm/01-introduction.html">GPU Containers on Slurm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gromacs_and_MPS/01-introduction.html">GROMACS and MPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index_on_slurm/01.html">IndeX on Slurm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Tutorials</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Parabricks on BCP Workshop</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/parabricks_on_bcp/01-introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="parabricks-on-bcp-workshop">
+<h1>Parabricks on BCP Workshop<a class="headerlink" href="#parabricks-on-bcp-workshop" title="Link to this heading">¶</a></h1>
+<p>This course introduces <a class="reference external" href="https://www.nvidia.com/en-us/clara/genomics/">NVIDIA Clara™ Parabricks®</a> for read alignment and variant calling to demonstrate the benefits of GPU acceleration.</p>
+<p><em>Last updated 7/18/2024</em></p>
+<section id="course-objectives">
+<h2>Course objectives<a class="headerlink" href="#course-objectives" title="Link to this heading">¶</a></h2>
+<p>As DNA sequencing has decreased in price, experiments have often been designed to use deeper coverage or more samples. This means more data is being produced and more time is spent on the bioinformatics analysis. CPU-based tools are commonly used for both read alignment and variant calling. However, significant time can be saved when GPU-accelerated tools are used. This will be demonstrated with NVIDIA Parabricks with the following steps:</p>
+<ul class="simple">
+<li><p>DNA alignment with fq2bam</p></li>
+<li><p>Calling variants with haplotypeCaller</p></li>
+<li><p>Potential downstream analyses</p></li>
+</ul>
+<p>This tutorial will show you how to run our core alignment tool, FQ2BAM, which allows you to align a FASTQ file according to GATK best practices at blazing speeds. This includes the gold-standard alignment tool BWA-MEM with inbuilt co-ordinate sorting of the output file, and optionally application of base-quality-score-recalibration and marking of duplicate reads.</p>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>NVIDIA GPU and driver greater than version 465.32.*</p></li>
+<li><p><a class="reference external" href="https://docs.docker.com/get-docker/">Docker</a> for building containers</p></li>
+<li><p><a class="reference external" href="https://www.nvidia.com/en-us/data-center/base-command/">Base Command Platform</a> for running the container on DGX Cloud</p></li>
+</ul>
+</section>
+<section id="introduction-to-clara-parabricks">
+<h2>Introduction to Clara Parabricks<a class="headerlink" href="#introduction-to-clara-parabricks" title="Link to this heading">¶</a></h2>
+<p>NVIDIA Clara™ Parabricks® is a software suite for the secondary analysis (alignment, variant calling) of DNA and RNA from short and long reads on GPU-accelerated hardware. On the most performant platforms, Clara Parabricks can analyze a typical whole human genome dataset in about 25 minutes, instead of 30 hours for other methods. It was designed to be easy to run while also matching the output from commonly used software, which means analyses can be reproduced even without GPUs.</p>
+<img alt="../_images/analysis_steps1.png" src="../_images/analysis_steps1.png" />
+<p>Parabricks v4 supports a variety of GPU-accelerated secondary analyses: alignment, preprocessing, variant calling, QC, and even some variant annotation (which lies in tertiary analysis). The chart below shows each pipeline supported in Parabricks v4.2.0-1, but take a look at <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/standalonetools.html">the documentation</a> for more information.</p>
+<img alt="../_images/pb_pipelines1.png" src="../_images/pb_pipelines1.png" />
+<section id="getting-clara-parabricks">
+<h3>Getting Clara Parabricks<a class="headerlink" href="#getting-clara-parabricks" title="Link to this heading">¶</a></h3>
+<p>Clara Parabricks is available as a container on NGC.</p>
+<p><a class="reference external" href="https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/clara-parabricks">https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/clara-parabricks</a></p>
+<p>This tutorial will be using <code class="docutils literal notranslate"><span class="pre">v4.3.1-1</span></code> of the container, and it can be pulled to your system as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Docker</span>
+docker<span class="w"> </span>pull<span class="w"> </span>nvcr.io/nvidia/clara/clara-parabricks:4.3.1-1
+</pre></div>
+</div>
+<p>We’ll also be using the CPU version of tools in Parabricks for performance comparisons,
+so I recommend incorporating them into the Parabricks container with the following Dockerfile.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/dda0088423f24984055d7f38eeda5179/Dockerfile"><code class="xref download docutils literal notranslate"><span class="pre">Dockerfile</span></code></a></span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>FROM nvcr.io/nvidia/clara/clara-parabricks:4.3.1-1
+
+ENV DEBIAN_FRONTEND=noninteractive 
+
+RUN echo &quot;#!/bin/bash\n\
+apt-get clean\n\
+[ -x \&quot;\$(command -v conda)\&quot; ] &amp;&amp; conda clean -tipsy\n\
+for dir in /tmp/* /var/tmp/* /home/jupyter/{.ccache,.cache/pip,conda-bld,.conda} /root/* /root/\.[^\.]* /var/lib/apt/lists/* /var/log/*; do\n\
+	[ -e \$dir ] &amp;&amp; rm -rf \$dir || true\n\
+done&quot; &gt; /usr/bin/docker-clean &amp;&amp; chmod a+rx /usr/bin/docker-clean &amp;&amp; docker-clean
+
+# Install dependencies
+RUN apt-get update \
+    &amp;&amp; apt-get install -yq --no-install-recommends \
+        unzip wget bzip2 ca-certificates git curl vim-nox less xterm \
+    &amp;&amp; docker-clean
+
+# Add conda env variables
+ENV MINICONDA_VERSION=py38_23.3.1-0 \
+    CONDA_DIR=/opt/conda
+ENV PATH=${CONDA_DIR}/bin:${PATH}
+# Download and install miniconda
+RUN mkdir $CONDA_DIR &amp;&amp; chmod -R a+rX $CONDA_DIR \
+    &amp;&amp; wget --quiet https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh \
+    &amp;&amp; bash Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh -f -b -p $CONDA_DIR \
+    &amp;&amp; rm Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh \
+    &amp;&amp; conda config --system --set auto_update_conda false \
+    &amp;&amp; conda config --system --set show_channel_urls true \
+    &amp;&amp; conda update -n base conda \
+    &amp;&amp; conda update --all --quiet --yes \
+    &amp;&amp; rm -rf ${CONDA_DIR}/pkgs/* \
+    &amp;&amp; docker-clean
+# Activate conda on login
+RUN ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+
+#https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/compatiblecpusoftwareversions.html
+
+RUN conda install -n base -c conda-forge mamba \
+	&amp;&amp; docker-clean
+
+RUN mamba install -y -n base -c conda-forge -c bioconda &#39;seqtk=1.3&#39; &#39;samtools=1.16.1&#39; &#39;gatk4=4.3.0.0&#39; &#39;bwa=0.7.15&#39; &#39;star=2.7.2a&#39; &#39;star-fusion=1.7.0&#39; \
+    &amp;&amp; docker-clean
+</pre></div>
+</div>
+</div>
+<p>The Dockerfile can be built as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>nvcr.io/&lt;NGC<span class="w"> </span>ORG&gt;/<span class="si">${</span><span class="nv">USER</span><span class="si">}</span>_parabricks_workshop:4.3.1-1<span class="w"> </span>.
+docker<span class="w"> </span>push
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Make sure your Docker already authenticated to NGC to push the container</p>
+</div>
+</section>
+<section id="starting-your-parabricks-job">
+<h3>Starting Your Parabricks Job<a class="headerlink" href="#starting-your-parabricks-job" title="Link to this heading">¶</a></h3>
+<p>After your container is pushed to NGC, make a workspace for parabricks</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ngc<span class="w"> </span>workspace<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span><span class="k">$(</span>USER<span class="k">)</span>_parabricks
+</pre></div>
+</div>
+<p>and then start a job on two GPUs for 3 hours as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ngc<span class="w"> </span>batch<span class="w"> </span>run<span class="w"> </span>--total-runtime<span class="w"> </span>3h<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-w<span class="w"> </span><span class="k">$(</span>USER<span class="k">)</span>_parabricks:/workspace:RW<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-n<span class="w"> </span>parabricks_workshop<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-i<span class="w"> </span><span class="k">$(</span>CONTAINER<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-in<span class="w"> </span>dgxa100.80g.2.norm<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--result<span class="w"> </span>/result<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-c<span class="w"> </span><span class="s1">&#39;sleep 3h&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="data-used">
+<h2>Data Used<a class="headerlink" href="#data-used" title="Link to this heading">¶</a></h2>
+<p>This tutorial will be using paired-end reads from the TDr-7 strain of <em>Arabidopsis thaliana</em> from the <a class="reference external" href="https://1001genomes.org/index.html">1001 Genomes project</a></p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.ebi.ac.uk/ena/browser/view/SRR519591">TDr-7</a></p></li>
+</ul>
+<p>The <em>A. thaliana</em> reference genome, <a class="reference external" href="https://www.arabidopsis.org/">TAIR10</a>, with “Chr” removed from chromosome names to match naming convention used by 1001 Genomes project.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download reference</span>
+curl<span class="w"> </span>https://www.arabidopsis.org/download_files/Genes/TAIR10_genome_release/TAIR10_chromosome_files/TAIR10_chr_all.fas.gz<span class="w"> </span><span class="p">|</span><span class="w"> </span>zcat<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;s/^&gt;Chr/&gt;/&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>TAIR10_chr_all.fasta
+<span class="c1"># Index with samtools</span>
+samtools<span class="w"> </span>faidx<span class="w"> </span>TAIR10_chr_all.fasta
+</pre></div>
+</div>
+<p>The <a class="reference external" href="https://figshare.com/articles/dataset/SNP_dataset_for_A_thaliana_1001_Genomes_project/5514403?backTo=/collections/_/3722743">SNPmatch database</a> for the 1001 Genomes Project.</p>
+<p>All downloads can be performed by running <a class="reference download internal" download="" href="../_downloads/87753466055938497ac2957d236f69d6/download_data.sh"><code class="xref download docutils literal notranslate"><span class="pre">download_data.sh</span></code></a></p>
+</section>
+<section id="dna-alignment-with-fq2bam">
+<h2>DNA alignment with fq2bam<a class="headerlink" href="#dna-alignment-with-fq2bam" title="Link to this heading">¶</a></h2>
+<p>Unless you’re starting with pre-aligned reads in a <code class="docutils literal notranslate"><span class="pre">.bam</span></code> file, the first step to many bioinformatics pipelines is alignment. Parabricks has the <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_fq2bam.html#man-fq2bam">fq2bam</a> pipeline for DNA (based on bwa mem) and the <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.2.0/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam">rna_fq2bam</a> pipeline for RNA (based on STAR). This tutorial uses DNA inputs and will focus on fq2bam.</p>
+<p>When fq2bam is run, reads (compressed or not) are aligned by GPU-bwa mem, alignments are sorted by coordinate, duplicates are marked, and Base Quality Score Recalibration (BQSR) is performed, and a final <code class="docutils literal notranslate"><span class="pre">.bam</span></code> file is output.</p>
+<img alt="https://docscontent.nvidia.com/dims4/default/b2cc884/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.us-west-2.amazonaws.com%2Fbrightspot%2Fsphinx%2F0000018b-6753-d717-adef-ffffd61b0000%2Fclara%2Fparabricks%2F4.2.0%2F_images%2Ffq2bam.png" src="https://docscontent.nvidia.com/dims4/default/b2cc884/2147483647/strip/true/crop/1230x402+0+0/resize/2460x804!/format/webp/quality/90/?url=https%3A%2F%2Fk3-prod-nvidia-docs.s3.us-west-2.amazonaws.com%2Fbrightspot%2Fsphinx%2F0000018b-6753-d717-adef-ffffd61b0000%2Fclara%2Fparabricks%2F4.2.0%2F_images%2Ffq2bam.png" />
+<p>Depending on how you need to process your sample, fq2bam has a <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_fq2bam.html#fq2bam-reference">lot of options</a>. Since the data used in this tutorial is paired-end, we’re going to be using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">ref</span> <span class="n">REF</span>             <span class="n">Path</span> <span class="n">to</span> <span class="n">the</span> <span class="n">reference</span> <span class="n">file</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+<span class="o">--</span><span class="ow">in</span><span class="o">-</span><span class="n">fq</span> <span class="p">[</span><span class="n">IN_FQ</span> <span class="p">[</span><span class="n">IN_FQ</span> <span class="o">...</span><span class="p">]]</span>
+                      <span class="n">Path</span> <span class="n">to</span> <span class="n">the</span> <span class="n">pair</span><span class="o">-</span><span class="n">ended</span> <span class="n">FASTQ</span> <span class="n">files</span> <span class="n">followed</span> <span class="n">by</span> <span class="n">optional</span> <span class="n">read</span> <span class="n">groups</span> <span class="k">with</span> <span class="n">quotes</span>
+<span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">bam</span> <span class="n">OUT_BAM</span>     <span class="n">Path</span> <span class="n">of</span> <span class="n">a</span> <span class="n">BAM</span><span class="o">/</span><span class="n">CRAM</span> <span class="n">file</span> <span class="n">after</span> <span class="n">Marking</span> <span class="n">Duplicates</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+<span class="o">--</span><span class="n">num</span><span class="o">-</span><span class="n">gpus</span> <span class="n">NUM_GPUS</span>   <span class="n">Number</span> <span class="n">of</span> <span class="n">GPUs</span> <span class="n">to</span> <span class="n">use</span> <span class="k">for</span> <span class="n">a</span> <span class="n">run</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">number</span> <span class="n">detected</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="indexing-the-reference-for-fq2bam">
+<h3>Indexing the reference for fq2bam<a class="headerlink" href="#indexing-the-reference-for-fq2bam" title="Link to this heading">¶</a></h3>
+<p>Parabricks does require the the reference genome be indexed with bwa before it can run fq2bam. This function was not ported to GPU, so you’ll need to run this with the CPU version of the code.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bwa<span class="w"> </span>index<span class="w"> </span>TAIR10_chr_all.fasta
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For the sake of time, the reference genome we’ll be using was already indexed.
+This will need to be done for any other genomes you use.</p>
+</div>
+</section>
+<section id="running-fq2bam-on-one-gpu">
+<h3>Running fq2bam on one GPU<a class="headerlink" href="#running-fq2bam-on-one-gpu" title="Link to this heading">¶</a></h3>
+<p>By default, Parabricks will use all GPUs detected on your system. However, that can be controlled with the <code class="docutils literal notranslate"><span class="pre">--num-gpus</span></code> flag. Lets start with one and see how things run.</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/86d2631b2f172ee5879395e3588dee14/run_fq2bam.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_fq2bam.sh</span></code></a></span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+REF=input_files/TAIR10_chr_all.fasta
+
+TDR_1=input_files/TDr-7_10M_R1.fastq
+TDR_2=input_files/TDr-7_10M_R2.fastq
+
+# Align TDr-7 reads
+time pbrun fq2bam --ref $REF --in-fq $TDR_1 $TDR_2 --out-bam TDr-7_10M_pb.bam --num-gpus 1
+</pre></div>
+</div>
+</div>
+</section>
+<section id="running-fq2bam-on-two-gpus">
+<h3>Running fq2bam on two GPUs<a class="headerlink" href="#running-fq2bam-on-two-gpus" title="Link to this heading">¶</a></h3>
+<p>Now run the same pipeline on two GPUs. If you only requested a single GPU through your scheduler, you may need to start a new job.</p>
+<p>Is there a larger effect on certain phases?</p>
+</section>
+<section id="running-the-cpu-equivalent">
+<h3>Running the CPU equivalent<a class="headerlink" href="#running-the-cpu-equivalent" title="Link to this heading">¶</a></h3>
+<p>For every workflow in Clara Parabricks, an equivalent CPU workflow is provided to reproduce results. <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_fq2bam.html#compatible-cpu-based-bwa-mem-gatk4-commands">fq2bam is no exception</a>, and the below example takes those commands and wraps them in a bash function.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/6480c782ed317a01c3eae4e0b1b9b6ae/run_fq2bam_cpu.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_fq2bam_cpu.sh</span></code></a></span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+#https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/compatiblecpusoftwareversions.html
+
+REF=input_files/TAIR10_chr_all.fasta
+
+TDR_1=input_files/TDr-7_10M_R1.fastq
+TDR_2=input_files/TDr-7_10M_R2.fastq
+
+# Number of threads for GATK to use
+OMP_NUM_THREADS=8
+
+function fq2bam_pe {
+        # https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_fq2bam.html#man-fq2bam
+        REF=$1; FQ1=$2; FQ2=$3; PREFIX=$4
+        # Align and sort reads
+        bwa mem -t 32 -K 10000000 \
+                -R &#39;@RG\tID:sample_rg1\tLB:lib1\tPL:bar\tSM:sample\tPU:sample_rg1&#39; \
+                $REF $FQ1 $FQ2 | gatk SortSam \
+                        --java-options -Xmx30g --MAX_RECORDS_IN_RAM 5000000 \
+                        -I /dev/stdin -O ${PREFIX}_sorted.bam --SORT_ORDER coordinate
+        
+        # Mark duplicates
+        gatk MarkDuplicates --java-options -Xmx30g \
+                -I ${PREFIX}_sorted.bam \
+                -O ${PREFIX}_sorted_marked.bam \
+                -M ${PREFIX}_metrics.txt
+        rm ${PREFIX}_sorted.bam
+        # Index the bam file
+        samtools index ${PREFIX}_sorted.bam
+}
+
+# Align Bay-0 reads
+time fq2bam_pe $REF $TDR_1 $TDR_2 TDr-7_10M_cpu
+
+# Each took about 8 minutes to run on 16 CPUs
+</pre></div>
+</div>
+</div>
+<p>If you compare the size of the <code class="docutils literal notranslate"><span class="pre">.bam</span></code> files created by Parabricks and the CPU pipeline, you’ll notice that the CPU pipeline are larger.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>ls<span class="w"> </span>-lh<span class="w"> </span>*bam
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>u.gz28467<span class="w"> </span>u.gz28467<span class="w"> </span><span class="m">1</span>.6G<span class="w"> </span>Mar<span class="w">  </span><span class="m">7</span><span class="w"> </span><span class="m">01</span>:48<span class="w"> </span>TDr-7_10M_cpu_sorted_marked.bam
+-rw-rw-r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>u.gz28467<span class="w"> </span>u.gz28467<span class="w"> </span><span class="m">1</span>.4G<span class="w"> </span>Mar<span class="w">  </span><span class="m">7</span><span class="w"> </span><span class="m">01</span>:35<span class="w"> </span>TDr-7_10M_pb.bam
+</pre></div>
+</div>
+<p>This is due to compression levels. If you compare the bam files with samtools, they contain the same number of alignments.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>samtools<span class="w"> </span>flagstat<span class="w"> </span>TDr-7_10M_pb.bam
+<span class="m">20022096</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>total<span class="w"> </span><span class="o">(</span>QC-passed<span class="w"> </span>reads<span class="w"> </span>+<span class="w"> </span>QC-failed<span class="w"> </span>reads<span class="o">)</span>
+<span class="m">20000000</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>primary
+<span class="m">0</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>secondary
+<span class="m">22096</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>supplementary
+<span class="m">3608170</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>duplicates
+<span class="m">3608170</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>primary<span class="w"> </span>duplicates
+<span class="m">19033358</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>mapped<span class="w"> </span><span class="o">(</span><span class="m">95</span>.06%<span class="w"> </span>:<span class="w"> </span>N/A<span class="o">)</span>
+<span class="m">19011262</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>primary<span class="w"> </span>mapped<span class="w"> </span><span class="o">(</span><span class="m">95</span>.06%<span class="w"> </span>:<span class="w"> </span>N/A<span class="o">)</span>
+
+$<span class="w"> </span>samtools<span class="w"> </span>flagstat<span class="w"> </span>TDr-7_10M_cpu_sorted_marked.bam
+<span class="m">20022096</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>total<span class="w"> </span><span class="o">(</span>QC-passed<span class="w"> </span>reads<span class="w"> </span>+<span class="w"> </span>QC-failed<span class="w"> </span>reads<span class="o">)</span>
+<span class="m">20000000</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>primary
+<span class="m">0</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>secondary
+<span class="m">22096</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>supplementary
+<span class="m">3608170</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>duplicates
+<span class="m">3608170</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>primary<span class="w"> </span>duplicates
+<span class="m">19033358</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>mapped<span class="w"> </span><span class="o">(</span><span class="m">95</span>.06%<span class="w"> </span>:<span class="w"> </span>N/A<span class="o">)</span>
+<span class="m">19011262</span><span class="w"> </span>+<span class="w"> </span><span class="m">0</span><span class="w"> </span>primary<span class="w"> </span>mapped<span class="w"> </span><span class="o">(</span><span class="m">95</span>.06%<span class="w"> </span>:<span class="w"> </span>N/A<span class="o">)</span>
+</pre></div>
+</div>
+</section>
+<section id="optional-exercises">
+<h3>Optional Exercises<a class="headerlink" href="#optional-exercises" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Have you tried using a different number of GPUs?</p></li>
+<li><p>What was the speedup when using a GPU?</p></li>
+<li><p>What happens if your input reads are compressed?</p></li>
+<li><p>Are the reads the same if you view them?</p></li>
+<li><p><a class="reference external" href="https://docs.nvidia.com/clara/parabricks/latest/bestperformance.html#best-performance-for-fq2bam-fq2bamfast">Try performance recommendations for fq2bam</a></p></li>
+</ul>
+</section>
+</section>
+<section id="calling-variants-with-haplotypecaller">
+<h2>Calling Variants with haplotypeCaller<a class="headerlink" href="#calling-variants-with-haplotypecaller" title="Link to this heading">¶</a></h2>
+<p>The Parabricks haplotypeCaller is a re-implementation of the <a class="reference external" href="https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller">GATK HaplotypeCaller</a>, which is used to call germline (inherited) SNPs and indels through the local re-assembly of haplotypes and identify genotypes.</p>
+<p>Like humans, <a class="reference external" href="https://www.pnas.org/doi/abs/10.1073/pnas.92.24.10831">A. thaliana is diploid</a> and has two copies of each chromosome, so at any given location across the genome, all aligned bases are the same (homozygous), or about half of the reads have one base and half have another (heterozygous). The chloroplast (C) is haploid, similar to the sex chromosomes in humans, and cannot be heterozygous.</p>
+<img alt="https://docscontent.nvidia.com/sphinx/0000018b-6753-d717-adef-ffffd61b0000/clara/parabricks/4.2.0/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg" src="https://docscontent.nvidia.com/sphinx/0000018b-6753-d717-adef-ffffd61b0000/clara/parabricks/4.2.0/_images/parabricks-web-graphics-1259949-r2-haplotypecaller.svg" />
+<p>Similar to fq2bam, the haplotypeCaller pipeline in Parabricks has <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_haplotypecaller.html#specifying-haplotype-caller-options">many options</a>, but we’ll only need to use these:</p>
+<blockquote>
+<div><dl class="option-list">
+<dt><kbd><span class="option">--ref <var>REF</var></span></kbd></dt>
+<dd><p>Path to the reference file. (default: None)</p>
+</dd>
+<dt><kbd><span class="option">--in-bam <var>IN_BAM</var></span></kbd></dt>
+<dd><p>Path to the input BAM/CRAM file for variant calling. The argument may also be a local folder containing several bams; each will be processed by 1 GPU in batch mode. (default: None)</p>
+</dd>
+<dt><kbd><span class="option">--out-variants <var>OUT_VARIANTS</var></span></kbd></dt>
+<dd><p>Path of the vcf/g.vcf/gvcf.gz file after variant calling. The argument may also be a local folder in batch mode. (default: None)</p>
+</dd>
+<dt><kbd><span class="option">--num-gpus <var>NUM_GPUS</var></span></kbd></dt>
+<dd><p>Number of GPUs to use for a run. (default: number detected)</p>
+</dd>
+</dl>
+</div></blockquote>
+<section id="indexing-the-reference-for-haplotypecaller">
+<h3>Indexing the reference for haplotypeCaller<a class="headerlink" href="#indexing-the-reference-for-haplotypecaller" title="Link to this heading">¶</a></h3>
+<p>Parabricks does require the the reference genome be indexed with <code class="docutils literal notranslate"><span class="pre">gatk</span> <span class="pre">CreateSequenceDictionary</span></code> and <code class="docutils literal notranslate"><span class="pre">samtools</span> <span class="pre">faidx</span></code> before it can run haplotypeCaller. This function was not ported to GPU, so you’ll need to run this with the CPU version of the code.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>gatk<span class="w"> </span>CreateSequenceDictionary<span class="w"> </span>-R<span class="w"> </span>TAIR10_chr_all.fasta<span class="p">;</span><span class="w"> </span>samtools<span class="w"> </span>faidx<span class="w"> </span>TAIR10_chr_all.fasta
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For the sake of time, the reference genome we’ll be using was already indexed.
+This will need to be done for any other genomes you use.</p>
+</div>
+</section>
+<section id="running-haplotypecaller">
+<h3>Running haplotypeCaller<a class="headerlink" href="#running-haplotypecaller" title="Link to this heading">¶</a></h3>
+<p>HaplotypeCaller takes the <code class="docutils literal notranslate"><span class="pre">.bam</span></code> files created by fq2bam as input, and calls variants on the aligned reads.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/669b8497304d6b39bed97677fa037b6d/run_pb_haplo.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_pb_haplo.sh</span></code></a></span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+REF=input_files/TAIR10_chr_all.fasta
+
+TDR_BAM=TDr-7_10M_pb.bam
+
+# Call variants on TDr-7 bam file
+time pbrun haplotypecaller --ref $REF --in-bam $TDR_BAM --out-variants TDr-7_10M_pb.vcf
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Alternatively, both fq2bam and haplotypeCaller can be run with the <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_germline.html#man-germline">germline pipeline</a>.</p>
+</div>
+</section>
+<section id="id1">
+<h3>Running the CPU equivalent<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>The <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_haplotypecaller.html#compatible-gatk4-command">CPU equivalent of haplotypeCaller</a> only requires a single call to GATK, but it’s much more time intensive than the Parabricks version. Once again, the commands have been wrapped in a bash function for easy usage.</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/190eef02f3df98dc3b1c32ebf44790b7/run_cpu_haplo.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_cpu_haplo.sh</span></code></a></span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+REF=input_files/TAIR10_chr_all.fasta
+
+TDR_BAM=TDr-7_10M_pb.bam
+
+# Number of threads for GATK to use
+OMP_NUM_THREADS=8
+
+function haplo_se {
+	REF=$1; BAM=$2; PREFIX=$3
+	gatk HaplotypeCaller \
+		--java-options -Xmx30g \
+		--input $BAM \
+		--output ${PREFIX}_cpu.vcf \
+		--reference ${REF} \
+		--native-pair-hmm-threads 16
+}
+
+# Call variants on TDr-7 bam file
+time haplo_se $REF $TDR_BAM TDr-7_10M
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h3>Optional Exercises<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Run the germline pipeline</p></li>
+<li><p>How much is runtime affected by the number of GPUs?</p></li>
+<li><p>Try running <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_deepvariant.html#man-deepvariant">DeepVariant</a></p></li>
+<li><p>Try <a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/tutorials/dvtraining.html">re-training DeepVariant</a></p></li>
+</ul>
+</section>
+</section>
+<section id="genotyping-sample">
+<h2>Genotyping sample<a class="headerlink" href="#genotyping-sample" title="Link to this heading">¶</a></h2>
+<p>Now that we have a <code class="docutils literal notranslate"><span class="pre">.vcf</span></code> file of all variants, we’re ready to perform some “tertiary” analyses. One common one is sample identification based on genotype. In humans, your specific alleles, or variants, could be used to determine your ancestry. In plants, you could determine what variety of a crop you sequenced.</p>
+<p>For our example, we’re going to verify the identity of the sample we’ve been working with. The 1001 Genomes project actually has a web portal called <a class="reference external" href="http://arageno.gmi.oeaw.ac.at/">AraGeno</a> for identifying samples based on the called SNPs, but we’re going to run <a class="reference external" href="https://github.com/Gregor-Mendel-Institute/SNPmatch">SNPmatch</a> manually.</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/19c66311e6e2c8ed36aa9be2bc8cda52/run_snpmatch.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_snpmatch.sh</span></code></a></span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+VCF=TDr-7_10M_pb.vcf
+
+RM=input_files/1001genomes_snp-short-indel_only_ACGTN.BIALLELIC.hdf5
+CM=input_files/1001genomes_snp-short-indel_only_ACGTN.BIALLELIC.acc.hdf5
+
+snpmatch inbred -i $VCF -d $RM -e $CM -o TDr-7_10M_pb_snpmatch
+</pre></div>
+</div>
+</div>
+<p>This will then create a <code class="docutils literal notranslate"><span class="pre">.matches.json</span></code> file, which will have an accession ID. Find this ID in the <a class="reference external" href="https://1001genomes.org/accessions.html">1001 Genomes accessions list</a> and see if it matches TDr-7.</p>
+<section id="id3">
+<h3>Optional Exercises<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Try genotyping another sample from <a class="reference external" href="https://www.ebi.ac.uk/ena/browser/view/SRP012869">HERE</a></p></li>
+<li><p>Run your own data</p></li>
+</ul>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
+<p>Try the RNA-seq pipelines:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_rna_fq2bam.html#man-rna-fq2bam">rna_fq2bam</a></p></li>
+<li><p><a class="reference external" href="https://docs.nvidia.com/clara/parabricks/4.3.1/documentation/tooldocs/man_starfusion.html#man-starfusion">starfusion</a></p></li>
+</ul>
+<p>Register for NVIDIA Deep Learning Institutes:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.nvidia.com/gtc/session-catalog/?tab.catalogallsessionstab=16566177511100015Kus&amp;search=parabricks#/session/1669934478047001d6Ot">Training DeepVariant Models using Parabricks* [DLIT52115]</a></p></li>
+<li><p><a class="reference external" href="https://www.nvidia.com/en-us/on-demand/session/gtcfall22-dlit41350/?playlistId=playList-c395267f-7c85-4a96-90bb-574392cbd162">Variant Calling on Whole Exome Data using Parabricks</a></p></li>
+</ul>
+<p>Other packages for genomics analyses:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/scverse/rapids_singlecell">Rapids_singlecell</a>: A GPU-accelerated tool for scRNA analysis.</p></li>
+<li><p><a class="reference external" href="https://rapids.ai/">RAPIDS</a>: GPU accelerated data science</p></li>
+<li><p><a class="reference external" href="https://github.com/muellan/metacache/blob/master/docs/gpu_version.md">Metacache-GPU</a>: memory efficient, fast &amp; precise taxnomomic classification system for metagenomic read mapping</p></li>
+<li><p><a class="reference external" href="https://docs.nvidia.com/bionemo-framework/latest/notebooks/geneformer_cellxgene_tutorial.html">BioNeMo Geneformer</a>: inferencing for single cell downstream tasks</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../parabricks/01-introduction.html" class="btn btn-neutral float-left" title="Parabricks Workshop" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../multi-node_on_bcp/01-introduction.html" class="btn btn-neutral float-right" title="Multi-Node on BCP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Greg Zynda.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

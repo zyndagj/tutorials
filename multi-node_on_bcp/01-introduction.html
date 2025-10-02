@@ -1,0 +1,843 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Node on BCP &mdash; Tutorials  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=26c4c002" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Containers on BCP" href="../containers_on_bcp/01-introduction.html" />
+    <link rel="prev" title="Parabricks on BCP Workshop" href="../parabricks_on_bcp/01-introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Tutorials
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../parabricks/01-introduction.html">Parabricks Workshop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parabricks_on_bcp/01-introduction.html">Parabricks on BCP Workshop</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Multi-Node on BCP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#objectives">Objectives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-to-distributed-environments">Introduction to distributed environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mpi">MPI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pytorch-ddp">PyTorch DDP</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optional-exercises">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pytorch-lightning">PyTorch Lightning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Optional Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pytorch-ray-train">Pytorch + Ray Train</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_bcp/01-introduction.html">Containers on BCP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers_on_slurm/01-introduction.html">GPU Containers on Slurm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gromacs_and_MPS/01-introduction.html">GROMACS and MPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index_on_slurm/01.html">IndeX on Slurm</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Tutorials</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Multi-Node on BCP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/multi-node_on_bcp/01-introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="multi-node-on-bcp">
+<h1>Multi-Node on BCP<a class="headerlink" href="#multi-node-on-bcp" title="Link to this heading">¶</a></h1>
+<p>This tutorial introduces ways to run multi-node applications on <a class="reference external" href="https://docs.nvidia.com/base-command-platform/user-guide/latest/index.html">NVIDIA Base Command Platform</a> (BCP).</p>
+<section id="objectives">
+<h2>Objectives<a class="headerlink" href="#objectives" title="Link to this heading">¶</a></h2>
+<p>Run multi-node applications using the following:</p>
+<ul class="simple">
+<li><p>Introduction to distributed environments</p></li>
+<li><p>MPI</p></li>
+<li><p>PyTorch DDP</p></li>
+<li><p>PyTorch Lightning</p></li>
+<li><p>PyTorch + Ray Train</p></li>
+</ul>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.nvidia.com/en-us/data-center/dgx-cloud/">DGX Cloud</a> instance running BCP</p></li>
+<li><p>Pre-authenticated <a class="reference external" href="https://docs.nvidia.com/base-command-platform/user-guide/latest/index.html#introduction-to-the-ngc-cli">NGC CLI</a></p></li>
+</ul>
+</section>
+<section id="introduction-to-distributed-environments">
+<h2>Introduction to distributed environments<a class="headerlink" href="#introduction-to-distributed-environments" title="Link to this heading">¶</a></h2>
+<p>Multi-node, or distributed, computing is a model of computation that takes the tasks from an algorithm that can be run independently and executes them across multiple computers.
+In the deep learning world, the simplest version of this is the data-distributed parallel model, where a dataset is split across GPUs allocated to the job and a single model is trained in collaboration by all the GPUs.</p>
+<p>While DGXs and DGX Cloud were designed for multi-gpu computing, a single process can’t span across computers, so code still needs to be written to coordinate the processing on each system.</p>
+<p>To learn some basics about working in distributed environments, lets start a 2-node job and explore</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/07e3bf9ab72e8b80e0c411cd520c2d8e/interactive_2node.sh"><code class="xref download docutils literal notranslate"><span class="pre">interactive_2node.sh</span></code></a></span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Make a workspace
+ngc workspace create --name ${USER}_tutorial
+
+# Launch a 2-node job with the workspace mounted
+ngc batch run --name &quot;N2-test&quot; --total-runtime 1h \
+        --instance dgxa100.80g.8.norm \
+        --commandline &quot;jupyter lab --ip=0.0.0.0 --allow-root \
+            --no-browser --NotebookApp.token=&#39;&#39; \
+            --notebook-dir=/ --NotebookApp.allow_origin=&#39;*&#39;&quot; \
+        --result /results --array-type &quot;PYTORCH&quot; --replicas &quot;2&quot; \
+        --workspace ${USER}_tutorial:/workspace:RW \
+        --image &quot;nvidia/pytorch:23.03-py3&quot; --port 8888
+</pre></div>
+</div>
+</div>
+<p>In this job, we’ll be using <code class="docutils literal notranslate"><span class="pre">bcprun</span></code> to launch our distributed processes.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">bcprun help text</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bcprun</span> <span class="p">(</span><span class="n">NGC</span> <span class="n">multi</span><span class="o">-</span><span class="n">node</span> <span class="n">run</span> <span class="n">utility</span><span class="p">)</span> <span class="n">version</span> <span class="mf">1.2</span>                                                                    <span class="p">[</span><span class="mi">61</span><span class="o">/</span><span class="mi">1911</span><span class="p">]</span>
+<span class="n">usage</span><span class="p">:</span> <span class="n">bcprun</span> <span class="p">[</span><span class="o">--</span><span class="n">nnodes</span> <span class="o">&lt;</span><span class="n">n</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">npernode</span> <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">env</span> <span class="o">&lt;</span><span class="n">e</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">workdir</span> <span class="o">&lt;</span><span class="n">w</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cmd</span> <span class="o">&lt;</span><span class="n">command</span><span class="o">-</span><span class="n">line</span><span class="o">&gt;</span><span class="p">]</span>
+             <span class="p">[</span><span class="o">--</span><span class="k">async</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">debug</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">help</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">binding</span> <span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="p">]</span>             
+                                                                                                                            
+<span class="n">required</span> <span class="n">arguments</span><span class="p">:</span>                                                                                                         
+  <span class="o">-</span><span class="n">c</span> <span class="o">&lt;</span><span class="n">c</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">--</span><span class="n">cmd</span> <span class="o">&lt;</span><span class="n">c</span><span class="o">&gt;</span>
+                    <span class="n">Provide</span> <span class="n">a</span> <span class="n">command</span> <span class="n">to</span> <span class="n">run</span><span class="o">.</span> <span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">string</span><span class="p">)</span>                                                                
+                    <span class="n">Default</span> <span class="n">value</span><span class="p">:</span> <span class="p">(</span><span class="n">none</span><span class="p">)</span>                                                                                   
+                    <span class="n">Example</span><span class="p">:</span> <span class="o">--</span><span class="n">cmd</span> <span class="s1">&#39;python train.py&#39;</span>                                                                        
+                                                                                                                            
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>                                                                                                         
+  <span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">n</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">--</span><span class="n">nnodes</span> <span class="o">&lt;</span><span class="n">n</span><span class="o">&gt;</span>                                                                                                      
+                    <span class="n">Number</span> <span class="n">of</span> <span class="n">nodes</span> <span class="n">to</span> <span class="n">run</span> <span class="n">on</span><span class="o">.</span> <span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">integer</span><span class="p">)</span>                       
+                    <span class="n">Range</span><span class="p">:</span> <span class="nb">min</span> <span class="n">value</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">max</span> <span class="n">value</span><span class="p">:</span> <span class="n">R</span><span class="p">,</span>                                                                      
+                    <span class="n">where</span> <span class="n">R</span> <span class="ow">is</span> <span class="nb">max</span> <span class="n">number</span> <span class="n">of</span> <span class="n">replicas</span> <span class="n">requested</span> <span class="n">by</span> <span class="n">the</span> <span class="n">NGC</span> <span class="n">job</span><span class="o">.</span>                
+                    <span class="n">Default</span> <span class="n">value</span><span class="p">:</span> <span class="n">R</span>                          
+                    <span class="n">Example</span><span class="p">:</span> <span class="o">--</span><span class="n">nnodes</span> <span class="mi">2</span>
+  <span class="o">-</span><span class="n">p</span> <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">--</span><span class="n">npernode</span> <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+                    <span class="n">Number</span> <span class="n">of</span> <span class="n">tasks</span> <span class="n">per</span> <span class="n">node</span> <span class="n">to</span> <span class="n">run</span><span class="o">.</span> <span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">integer</span><span class="p">)</span>
+                    <span class="n">Range</span><span class="p">:</span> <span class="nb">min</span> <span class="n">value</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">max</span> <span class="n">value</span><span class="p">:</span> <span class="p">(</span><span class="n">none</span><span class="p">)</span>
+                    <span class="n">Default</span> <span class="n">value</span><span class="p">:</span> <span class="n">environment</span> <span class="n">variable</span> <span class="n">NGC_NTASKS_PER_NODE</span><span class="p">,</span> <span class="k">if</span>
+                    <span class="nb">set</span><span class="p">,</span> <span class="n">otherwise</span> <span class="mf">1.</span>
+                    <span class="n">Example</span><span class="p">:</span> <span class="o">--</span><span class="n">npernode</span> <span class="mi">8</span>
+  <span class="o">-</span><span class="n">e</span> <span class="o">&lt;</span><span class="n">e</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">--</span><span class="n">env</span> <span class="o">&lt;</span><span class="n">e</span><span class="o">&gt;</span>
+                    <span class="n">Environment</span> <span class="n">variables</span> <span class="n">to</span> <span class="nb">set</span> <span class="k">with</span> <span class="nb">format</span> <span class="s1">&#39;key=value&#39;</span><span class="o">.</span> <span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">string</span><span class="p">)</span>
+                    <span class="n">Each</span> <span class="n">variable</span> <span class="n">assignment</span> <span class="n">requires</span> <span class="n">a</span> <span class="n">separate</span> <span class="o">-</span><span class="n">e</span><span class="o">/--</span><span class="n">env</span> <span class="n">flag</span><span class="o">.</span>
+                    <span class="n">Default</span> <span class="n">value</span><span class="p">:</span> <span class="p">(</span><span class="n">none</span><span class="p">)</span>
+                    <span class="n">Example</span><span class="p">:</span> <span class="o">--</span><span class="n">env</span> <span class="s1">&#39;var1=value1&#39;</span> <span class="o">--</span><span class="n">env</span> <span class="s1">&#39;var2=value2&#39;</span>
+  <span class="o">-</span><span class="n">w</span> <span class="o">&lt;</span><span class="n">w</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">--</span><span class="n">workdir</span> <span class="o">&lt;</span><span class="n">w</span><span class="o">&gt;</span>
+                    <span class="n">Base</span> <span class="n">directory</span> <span class="kn">from</span><span class="w"> </span><span class="nn">which</span> <span class="n">to</span> <span class="n">run</span> <span class="o">&lt;</span><span class="n">cmd</span><span class="o">&gt;.</span> <span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">string</span><span class="p">)</span>
+                    <span class="n">May</span> <span class="n">include</span> <span class="n">environment</span> <span class="n">variables</span> <span class="n">defined</span> <span class="k">with</span> <span class="o">--</span><span class="n">env</span><span class="o">.</span>
+                    <span class="n">Default</span> <span class="n">value</span><span class="p">:</span> <span class="n">environment</span> <span class="n">variable</span> <span class="n">PWD</span> <span class="p">(</span><span class="n">current</span> <span class="n">working</span> <span class="n">directory</span><span class="p">)</span>
+                    <span class="n">Example</span><span class="p">:</span> <span class="o">--</span><span class="n">workdir</span> <span class="s1">&#39;$WORK_HOME/scripts&#39;</span> <span class="o">--</span><span class="n">env</span> <span class="s1">&#39;WORK_HOME=/mnt/workspace&#39;</span>
+  <span class="o">-</span><span class="n">l</span> <span class="o">&lt;</span><span class="n">l</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">--</span><span class="n">launcher</span> <span class="o">&lt;</span><span class="n">l</span><span class="o">&gt;</span>
+                    <span class="n">Run</span> <span class="o">&lt;</span><span class="n">cmd</span><span class="o">&gt;</span> <span class="n">using</span> <span class="n">an</span> <span class="n">external</span> <span class="n">launcher</span> <span class="n">program</span><span class="o">.</span> <span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">string</span><span class="p">)</span>
+                    <span class="n">Supported</span> <span class="n">launchers</span><span class="p">:</span> <span class="n">mpirun</span><span class="p">,</span> <span class="n">horovodrun</span>
+                    <span class="o">-</span> <span class="n">mpirun</span><span class="p">:</span> <span class="n">maps</span> <span class="n">to</span> <span class="n">OpenMPI</span> <span class="n">options</span> <span class="p">(</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">open</span><span class="o">-</span><span class="n">mpi</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="p">)</span>
+                    <span class="o">-</span> <span class="n">horovodrun</span><span class="p">:</span> <span class="n">maps</span> <span class="n">to</span> <span class="n">Horovod</span> <span class="n">options</span> <span class="p">(</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">horovod</span><span class="o">.</span><span class="n">ai</span><span class="o">/</span><span class="p">)</span>
+                    <span class="n">Note</span><span class="p">:</span> <span class="n">This</span> <span class="n">option</span> <span class="n">assumes</span> <span class="n">the</span> <span class="n">launcher</span> <span class="n">exists</span> <span class="ow">and</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">PATH</span><span class="o">.</span>
+                    <span class="n">Launcher</span> <span class="n">specific</span> <span class="n">arguments</span> <span class="p">(</span><span class="ow">not</span> <span class="n">part</span> <span class="n">of</span> <span class="n">bcprun</span> <span class="n">options</span><span class="p">)</span> <span class="n">can</span> <span class="n">be</span> <span class="n">provided</span> <span class="k">as</span> <span class="n">a</span> <span class="n">suffix</span><span class="o">.</span> <span class="n">E</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="o">--</span><span class="n">launcher</span> <span class="s1">&#39;mpirun --allow-run-as-root&#39;</span>
+                    <span class="n">Default</span> <span class="n">value</span><span class="p">:</span> <span class="p">(</span><span class="n">none</span><span class="p">)</span>
+  <span class="o">-</span><span class="n">log</span> <span class="o">&lt;</span><span class="n">log</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">--</span><span class="n">logdir</span> <span class="o">&lt;</span><span class="n">log</span><span class="o">&gt;</span>
+                    <span class="n">Directory</span> <span class="n">that</span> <span class="n">stores</span> <span class="n">bcprun</span><span class="o">.</span><span class="n">log</span><span class="o">.</span> <span class="n">Also</span><span class="p">,</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">case</span> <span class="n">of</span> <span class="n">PyTorch</span> <span class="n">applications</span><span class="p">,</span> <span class="n">it</span> <span class="n">stores</span> <span class="n">the</span> <span class="n">logs</span> <span class="n">per</span> <span class="n">rank</span>
+ <span class="ow">in</span> <span class="n">each</span> <span class="n">node</span><span class="o">.</span> <span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">string</span><span class="p">)</span>
+                    <span class="n">Default</span> <span class="n">value</span><span class="p">:</span> <span class="n">resultset</span> <span class="n">mount</span> <span class="n">path</span> <span class="n">per</span> <span class="n">node</span> <span class="p">(</span><span class="n">env</span><span class="p">:</span> <span class="n">NGC_RESULT_DIR</span><span class="p">)</span>
+  <span class="o">-</span><span class="n">a</span><span class="p">,</span> <span class="o">--</span><span class="k">async</span>
+                    <span class="n">Run</span> <span class="k">with</span> <span class="n">asynchronous</span> <span class="n">failure</span> <span class="n">support</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span> <span class="n">a</span> <span class="n">child</span> <span class="n">process</span> <span class="n">of</span> <span class="n">bcprun</span> <span class="n">can</span> <span class="n">exit</span> <span class="n">on</span> <span class="n">failure</span> <span class="n">without</span> <span class="n">halting</span> <span class="n">the</span> <span class="n">program</span><span class="o">.</span>
+                    <span class="n">The</span> <span class="n">program</span> <span class="n">will</span> <span class="k">continue</span> <span class="k">while</span> <span class="n">at</span> <span class="n">least</span> <span class="n">one</span> <span class="n">child</span> <span class="ow">is</span> <span class="n">running</span><span class="o">.</span>
+                    <span class="n">The</span> <span class="n">default</span> <span class="n">semantics</span> <span class="n">of</span> <span class="n">bcprun</span> <span class="ow">is</span> <span class="n">to</span> <span class="n">halt</span> <span class="n">the</span> <span class="n">program</span> <span class="n">when</span> <span class="nb">any</span> <span class="n">child</span> <span class="n">process</span> <span class="n">launched</span> <span class="n">by</span> <span class="n">bcprun</span> <span class="n">exits</span> <span class="k">with</span> <span class="n">error</span><span class="o">.</span>
+   
+  <span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="o">--</span><span class="n">binding</span>
+                    <span class="n">Bind</span> <span class="n">process</span> <span class="n">to</span> <span class="n">cpu</span><span class="o">-</span><span class="n">cores</span><span class="o">.</span>
+
+                    <span class="n">The</span> <span class="n">following</span> <span class="n">numa</span> <span class="n">binding</span> <span class="n">options</span> <span class="n">are</span> <span class="n">available</span><span class="o">.</span>
+                    <span class="o">-</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span> <span class="n">Processes</span> <span class="n">are</span> <span class="n">bound</span> <span class="n">to</span> <span class="n">cpus</span> <span class="n">within</span> <span class="n">a</span> <span class="n">NUMA</span> <span class="n">node</span><span class="o">.</span> <span class="n">On</span> <span class="n">GPU</span><span class="o">-</span><span class="n">enabled</span> <span class="n">compute</span> <span class="n">nodes</span><span class="p">,</span>
+                    <span class="n">a</span> <span class="n">process</span> <span class="ow">is</span> <span class="n">bound</span> <span class="n">to</span> <span class="nb">all</span> <span class="n">the</span> <span class="n">cpus</span> <span class="n">of</span> <span class="n">the</span> <span class="n">affined</span> <span class="n">NUMA</span> <span class="n">node</span> <span class="p">(</span><span class="n">mapping</span> <span class="n">local</span> <span class="n">rank</span> <span class="n">to</span> <span class="n">GPU</span> <span class="nb">id</span><span class="p">),</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">ranks</span> <span class="ow">is</span> <span class="n">limited</span> <span class="n">to</span> <span class="n">the</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">GPUs</span><span class="o">.</span>
+                    <span class="n">Example</span><span class="p">:</span> <span class="n">Given</span> <span class="mi">2</span> <span class="n">NUMA</span> <span class="n">nodes</span> <span class="n">N</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="n">each</span> <span class="k">with</span> <span class="mi">4</span> <span class="n">GPUs</span> <span class="ow">and</span> <span class="mi">32</span> <span class="n">CPUs</span> <span class="n">C</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">31</span><span class="p">,</span><span class="mi">32</span><span class="o">-</span><span class="mi">63</span><span class="p">},</span> <span class="mi">8</span> <span class="n">processes</span> <span class="n">P</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">7</span><span class="p">}</span> <span class="n">will</span> <span class="n">be</span> <span class="n">mapped</span> <span class="k">as</span><span class="p">:</span> <span class="n">P</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">3</span><span class="p">}:</span><span class="n">N0</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">31</span><span class="p">},</span> <span class="n">P</span><span class="p">{</span><span class="mi">4</span><span class="o">-</span><span class="mi">7</span><span class="p">}:</span><span class="n">N1</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">32</span><span class="o">-</span><span class="mi">63</span><span class="p">}</span>
+
+                    <span class="o">-</span> <span class="s1">&#39;exclusive&#39;</span><span class="p">:</span> <span class="n">Processes</span> <span class="n">are</span> <span class="n">bound</span> <span class="n">to</span> <span class="n">exclusive</span> <span class="n">sets</span> <span class="n">of</span> <span class="n">cpus</span> <span class="n">within</span> <span class="n">a</span> <span class="n">NUMA</span> <span class="n">node</span><span class="o">.</span>
+                    <span class="n">On</span> <span class="n">GPU</span><span class="o">-</span><span class="n">enabled</span> <span class="n">compute</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">a</span> <span class="n">process</span> <span class="ow">is</span> <span class="n">bound</span> <span class="n">to</span> <span class="n">an</span> <span class="n">exclusive</span> <span class="n">cpu</span> <span class="nb">set</span> <span class="n">within</span> <span class="n">the</span> <span class="n">affined</span> <span class="n">NUMA</span> <span class="n">node</span> <span class="p">(</span><span class="n">mapping</span> <span class="n">local</span> <span class="n">rank</span> <span class="n">to</span> <span class="n">GPU</span> <span class="nb">id</span><span class="p">),</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">ranks</span> <span class="ow">is</span> <span class="n">limited</span> <span class="n">to</span> <span class="n">the</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">GPUs</span><span class="o">.</span>
+                    <span class="n">Example</span><span class="p">:</span> <span class="n">Given</span> <span class="mi">2</span> <span class="n">NUMA</span> <span class="n">nodes</span> <span class="n">N</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">each</span> <span class="k">with</span> <span class="mi">4</span> <span class="n">GPUs</span> <span class="ow">and</span> <span class="mi">32</span> <span class="n">CPUs</span> <span class="n">C</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">31</span><span class="p">,</span><span class="mi">32</span><span class="o">-</span><span class="mi">63</span><span class="p">},</span>
+                    <span class="mi">8</span> <span class="n">processes</span> <span class="n">P</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">7</span><span class="p">}</span> <span class="n">will</span> <span class="n">be</span> <span class="n">mapped</span> <span class="k">as</span><span class="p">:</span> <span class="n">P0</span><span class="p">:</span><span class="n">N0</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">7</span><span class="p">},</span> <span class="n">P1</span><span class="p">:</span><span class="n">N0</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">8</span><span class="o">-</span><span class="mi">15</span><span class="p">},</span> <span class="n">P2</span><span class="p">:</span><span class="n">N0</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">16</span><span class="o">-</span><span class="mi">23</span><span class="p">},</span>
+                    <span class="n">P3</span><span class="p">:</span><span class="n">N0</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">24</span><span class="o">-</span><span class="mi">31</span><span class="p">},</span> <span class="n">P4</span><span class="p">:</span><span class="n">N1</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">32</span><span class="o">-</span><span class="mi">39</span><span class="p">},</span> <span class="n">P5</span><span class="p">:</span><span class="n">N1</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">40</span><span class="o">-</span><span class="mi">47</span><span class="p">},</span> <span class="n">P6</span><span class="p">:</span><span class="n">N1</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">48</span><span class="o">-</span><span class="mi">55</span><span class="p">},</span> <span class="n">P7</span><span class="p">:</span><span class="n">N1</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">56</span><span class="o">-</span><span class="mi">63</span><span class="p">}</span>
+
+                    <span class="o">-</span> <span class="s1">&#39;core-complex&#39;</span><span class="p">:</span> <span class="n">Processes</span> <span class="n">are</span> <span class="n">bound</span> <span class="n">to</span> <span class="n">a</span> <span class="n">core</span><span class="o">-</span><span class="nb">complex</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span> <span class="n">cpus</span> <span class="n">sharing</span> <span class="n">a</span> <span class="n">last</span><span class="o">-</span><span class="n">level</span> <span class="n">cache</span><span class="o">.</span>
+                    <span class="n">On</span> <span class="n">GPU</span><span class="o">-</span><span class="n">enabled</span> <span class="n">compute</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">a</span> <span class="n">process</span> <span class="ow">is</span> <span class="n">bound</span> <span class="n">to</span> <span class="n">a</span> <span class="n">core</span><span class="o">-</span><span class="nb">complex</span> <span class="n">of</span> <span class="n">the</span>
+                    <span class="n">affined</span> <span class="n">NUMA</span> <span class="n">node</span> <span class="p">(</span><span class="n">mapping</span> <span class="n">local</span> <span class="n">rank</span> <span class="n">to</span> <span class="n">GPU</span> <span class="nb">id</span><span class="p">),</span> <span class="ow">and</span>
+                    <span class="n">the</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">ranks</span> <span class="ow">is</span> <span class="n">limited</span> <span class="n">to</span> <span class="n">the</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">GPUs</span><span class="o">.</span>
+                    <span class="n">Example</span><span class="p">:</span> <span class="n">Given</span> <span class="mi">2</span> <span class="n">NUMA</span> <span class="n">nodes</span> <span class="n">N</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="n">each</span> <span class="k">with</span> <span class="mi">2</span> <span class="n">GPUs</span> <span class="ow">and</span> <span class="mi">4</span> <span class="n">core</span><span class="o">-</span><span class="n">complexes</span> <span class="n">X</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">-</span><span class="mi">7</span><span class="p">},</span>
+                    <span class="mi">4</span> <span class="n">processes</span> <span class="n">P</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">3</span><span class="p">}</span> <span class="n">will</span> <span class="n">be</span> <span class="n">mapped</span> <span class="k">as</span><span class="p">:</span> <span class="n">P0</span><span class="p">:</span><span class="n">N0</span><span class="p">:</span><span class="n">X0</span><span class="p">,</span> <span class="n">P1</span><span class="p">:</span><span class="n">N0</span><span class="p">:</span><span class="n">X1</span><span class="p">,</span> <span class="n">P2</span><span class="p">:</span><span class="n">N1</span><span class="p">:</span><span class="n">X4</span><span class="p">,</span> <span class="n">P3</span><span class="p">:</span><span class="n">N1</span><span class="p">:</span><span class="n">X5</span>
+
+                    <span class="o">-</span> <span class="s1">&#39;socket&#39;</span><span class="p">:</span> <span class="n">Processes</span> <span class="n">are</span> <span class="n">bound</span> <span class="n">to</span> <span class="n">cpus</span> <span class="n">within</span> <span class="n">a</span> <span class="n">socket</span><span class="o">.</span> <span class="n">On</span> <span class="n">GPU</span><span class="o">-</span><span class="n">enabled</span> <span class="n">compute</span> <span class="n">nodes</span><span class="p">,</span>
+                    <span class="n">a</span> <span class="n">process</span> <span class="ow">is</span> <span class="n">bound</span> <span class="n">to</span> <span class="n">the</span> <span class="n">cpus</span> <span class="n">of</span> <span class="n">the</span> <span class="n">socket</span> <span class="n">containing</span> <span class="n">the</span> <span class="n">affined</span> <span class="n">NUMA</span> <span class="n">node</span> <span class="p">(</span><span class="n">mapping</span> <span class="n">local</span> <span class="n">rank</span> <span class="n">to</span> <span class="n">GPU</span> <span class="nb">id</span><span class="p">),</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">ranks</span> <span class="ow">is</span> <span class="n">limited</span> <span class="n">to</span> <span class="n">the</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">GPUs</span><span class="o">.</span>
+                    <span class="n">Example</span><span class="p">:</span> <span class="n">Given</span> <span class="mi">2</span> <span class="n">Sockets</span> <span class="n">S</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">each</span> <span class="k">with</span> <span class="mi">4</span> <span class="n">GPUs</span> <span class="ow">and</span> <span class="mi">64</span> <span class="n">CPUs</span> <span class="n">C</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">63</span><span class="p">,</span><span class="mi">64</span><span class="o">-</span><span class="mi">127</span><span class="p">},</span>
+                    <span class="mi">8</span> <span class="n">processes</span> <span class="n">P</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">7</span><span class="p">}</span> <span class="n">will</span> <span class="n">be</span> <span class="n">mapped</span> <span class="k">as</span><span class="p">:</span> <span class="n">P</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">3</span><span class="p">}:</span><span class="n">S0</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">0</span><span class="o">-</span><span class="mi">63</span><span class="p">},</span> <span class="n">P</span><span class="p">{</span><span class="mi">4</span><span class="o">-</span><span class="mi">7</span><span class="p">}:</span><span class="n">S1</span><span class="p">:</span><span class="n">C</span><span class="p">{</span><span class="mi">64</span><span class="o">-</span><span class="mi">127</span><span class="p">}</span>
+
+                    <span class="n">Note</span><span class="p">:</span>
+                    <span class="o">--</span><span class="n">binding</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">only</span> <span class="n">applicable</span> <span class="n">when</span> <span class="n">arraytype</span> <span class="ow">is</span> <span class="n">PYTORCH</span><span class="o">.</span>
+
+  <span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="o">--</span><span class="n">debug</span>
+                    <span class="n">Print</span> <span class="n">debug</span> <span class="n">info</span> <span class="ow">and</span> <span class="n">enable</span> <span class="n">verbose</span> <span class="n">mode</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">j</span><span class="p">,</span> <span class="o">--</span><span class="n">jsonlogs</span>
+                    <span class="n">Print</span> <span class="n">the</span> <span class="n">per</span><span class="o">-</span><span class="n">node</span> <span class="n">aggregated</span> <span class="n">logs</span> <span class="ow">in</span> <span class="n">JSON</span> <span class="nb">format</span> <span class="n">to</span> <span class="n">joblog</span><span class="o">.</span><span class="n">log</span>
+  <span class="o">-</span><span class="n">no_redirect</span><span class="p">,</span> <span class="o">--</span><span class="n">no_redirect</span>
+                    <span class="n">Print</span> <span class="n">the</span> <span class="n">logs</span> <span class="n">to</span> <span class="n">stdout</span><span class="o">/</span><span class="n">stderr</span> <span class="n">instead</span> <span class="n">of</span> <span class="n">logging</span> <span class="n">to</span> <span class="n">files</span>
+  <span class="o">-</span><span class="n">v</span><span class="p">,</span> <span class="o">--</span><span class="n">version</span>
+                    <span class="n">Print</span> <span class="n">version</span> <span class="n">info</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>
+                    <span class="n">Print</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span><span class="o">.</span>
+
+<span class="n">Note</span><span class="p">:</span>
+<span class="mf">1.</span><span class="n">Local</span> <span class="n">rank</span> <span class="ow">is</span> <span class="n">passed</span> <span class="n">to</span> <span class="n">the</span> <span class="n">python</span> <span class="n">script</span> <span class="n">using</span> <span class="n">flag</span> <span class="n">argument</span> <span class="o">--</span><span class="n">local</span><span class="o">-</span><span class="n">rank</span>
+  <span class="k">for</span> <span class="n">PyTorch</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="mf">1.10</span><span class="o">.</span> <span class="n">For</span> <span class="nb">all</span> <span class="n">PyTorch</span> <span class="n">versions</span> <span class="o">&gt;=</span> <span class="mf">1.10</span><span class="p">,</span> <span class="n">the</span> <span class="o">--</span><span class="n">local_rank</span>
+  <span class="n">flag</span> <span class="n">argument</span> <span class="n">will</span> <span class="n">NOT</span> <span class="n">be</span> <span class="n">passed</span> <span class="n">to</span> <span class="n">the</span> <span class="n">python</span> <span class="n">script</span> <span class="n">by</span> <span class="n">default</span><span class="o">.</span>
+  <span class="n">If</span> <span class="n">you</span> <span class="n">depend</span> <span class="n">on</span> <span class="n">parsing</span> <span class="o">--</span><span class="n">local</span><span class="o">-</span><span class="n">rank</span> <span class="ow">in</span>  <span class="n">your</span> <span class="n">script</span> <span class="k">for</span> <span class="n">PyTorch</span> <span class="n">versions</span> <span class="o">&gt;=</span> <span class="mf">1.10</span><span class="p">,</span>
+  <span class="n">you</span> <span class="n">can</span> <span class="n">override</span> <span class="n">the</span> <span class="n">default</span> <span class="n">behavior</span> <span class="n">by</span> <span class="n">setting</span> <span class="n">environment</span> <span class="n">variable</span> <span class="n">NGC_PYTORCH_USE_ENV</span><span class="o">=</span><span class="mf">0.</span>
+  <span class="n">Conversely</span><span class="p">,</span> <span class="n">setting</span> <span class="n">environment</span> <span class="n">variable</span> <span class="n">NGC_PYTORCH_USE_ENV</span><span class="o">=</span><span class="mi">1</span> <span class="k">for</span> <span class="n">PyTorch</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="mf">1.10</span>
+  <span class="n">will</span> <span class="n">suppress</span> <span class="n">passing</span> <span class="o">--</span><span class="n">local</span><span class="o">-</span><span class="n">rank</span> <span class="n">flag</span> <span class="n">argument</span><span class="o">.</span>
+<span class="mf">2.</span><span class="n">Environment</span> <span class="n">variable</span> <span class="n">LOCAL_RANK</span> <span class="ow">is</span> <span class="n">always</span> <span class="nb">set</span> <span class="n">regardless</span> <span class="n">of</span> <span class="n">PyTorch</span> <span class="n">version</span><span class="o">.</span>
+  <span class="n">Reading</span> <span class="n">LOCAL_RANK</span> <span class="kn">from</span><span class="w"> </span><span class="nn">environment</span> <span class="n">variable</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">recommended</span> <span class="n">method</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<p>Once your job is running, connect to the jupyter portal or <code class="docutils literal notranslate"><span class="pre">ngc</span> <span class="pre">batch</span> <span class="pre">exec</span></code> into the job and work through the following:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/a0c76904a83a326fdab7d01fcbeeec6d/explore_2node.sh"><code class="xref download docutils literal notranslate"><span class="pre">explore_2node.sh</span></code></a></span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Print out a message</span>
+<span class="c1">#mpirun --allow-run-as-root echo hello</span>
+<span class="n">bcprun</span> <span class="o">-</span><span class="n">no_redirect</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;echo hello&quot;</span>
+
+<span class="c1"># Print out the hostname of each process</span>
+<span class="c1">#mpirun --allow-run-as-root hostname</span>
+<span class="n">bcprun</span> <span class="o">-</span><span class="n">no_redirect</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;hostname&quot;</span>
+
+<span class="c1"># Run two processes per node</span>
+<span class="c1">#mpirun -npernode 1 --allow-run-as-root hostname</span>
+<span class="n">bcprun</span> <span class="o">-</span><span class="n">no_redirect</span> <span class="o">-</span><span class="n">p</span> <span class="mi">2</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;hostname&quot;</span>
+
+<span class="c1"># Install a python package and load it</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">lightning</span>
+<span class="n">bcprun</span> <span class="o">-</span><span class="n">no_redirect</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;python test.py&quot;</span>
+
+<span class="c1"># Install the package on all nodes and then try loading it</span>
+<span class="n">bcprun</span> <span class="o">-</span><span class="n">no_redirect</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;pip install lightning&quot;</span>
+<span class="n">bcprun</span> <span class="o">-</span><span class="n">no_redirect</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;python test.py&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>Traditionally, multi-node applications utilized Message Passing Interface (MPI) implementations like <a class="reference external" href="https://mvapich.cse.ohio-state.edu/">MVAPICH</a> for collective operations like broadcast, reduce, and allreduce. Many high performance computing applications still use it, so this tutorial will start with how to run applications with the MPI launcher, <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>.</p>
+</section>
+<section id="mpi">
+<h2>MPI<a class="headerlink" href="#mpi" title="Link to this heading">¶</a></h2>
+<p>MPI requires environment variables to be populated on each node. Schedulers like SLURM automatically populate these variables so MPI knows how many processes and threads to spawn, and how to communicate with other processes. On DGX Cloud with BCP, those variables get set by specifying the <code class="docutils literal notranslate"><span class="pre">--array-type</span> <span class="pre">&quot;MPI&quot;</span></code> argument when spawning a job.</p>
+<p>Multi-node or distributed computing will enable huge speedups by allowing GPUs across multiple computers, or nodes, to cooperate when working when training deep learning models by allowing your program to
+While DGXs and DGX Cloud was designed for distributed computing, code still needs to be written to communicate</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>--allow-run-as-root<span class="w"> </span>-x<span class="w"> </span><span class="nv">IBV_DRIVERS</span><span class="o">=</span>/usr/lib/libibverbs/libmlx5<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-np<span class="w"> </span><span class="si">${</span><span class="nv">NGC_ARRAY_SIZE</span><span class="si">}</span><span class="w"> </span>-npernode<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;all_reduce_perf_mpi -b 64M -e 4G -f 2 -c 0 -n 100 -g </span><span class="si">${</span><span class="nv">NGC_GPUS_PER_NODE</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>This can also be run with <code class="docutils literal notranslate"><span class="pre">bcprun</span></code> as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">NGC_ARRAY_TYPE</span><span class="o">=</span>MPIJob<span class="w"> </span>bcprun<span class="w"> </span>-no_redirect<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--launcher<span class="w"> </span><span class="s1">&#39;mpirun --allow-run-as-root&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-c<span class="w"> </span><span class="s2">&quot;all_reduce_perf_mpi -b 64M -e 4G -f 2 -c 0 -n 100 -g </span><span class="si">${</span><span class="nv">NGC_GPUS_PER_NODE</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>You’ll notice that both the <code class="docutils literal notranslate"><span class="pre">mpirun</span></code> and <code class="docutils literal notranslate"><span class="pre">bcprun</span></code> commands are using two environment variables to help make these scripts generally applicable for jobs of various sizes.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>NGC_ARRAY_SIZE<span class="w">    </span>-<span class="w"> </span>Number<span class="w"> </span>of<span class="w"> </span>nodes<span class="w"> </span>allocated<span class="w"> </span>to<span class="w"> </span>job
+NGC_GPUS_PER_NODE<span class="w"> </span>-<span class="w"> </span>Number<span class="w"> </span>of<span class="w"> </span>GPUs<span class="w"> </span>allocated<span class="w"> </span>per<span class="w"> </span>node
+</pre></div>
+</div>
+<p>This was a 2 node job with 8 gpus per node, and we can double-check these values with</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>env<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;(NODE|SIZE)=&quot;</span>
+<span class="nv">NGC_ARRAY_SIZE</span><span class="o">=</span><span class="m">2</span>
+<span class="nv">NGC_GPUS_PER_NODE</span><span class="o">=</span><span class="m">8</span>
+</pre></div>
+</div>
+</section>
+<section id="pytorch-ddp">
+<h2>PyTorch DDP<a class="headerlink" href="#pytorch-ddp" title="Link to this heading">¶</a></h2>
+<p>PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/nn.html#module-torch.nn.parallel">DistributedDataParallel</a> (DDP) implements data parallelism at the module level, allowing training to take place across multiple devices or compute nodes.
+DDP uses collective communications in the torch.distributed package to synchronize gradients and buffers.</p>
+<p>To learn how to run PyTorch DDP training scripts and understand how scale affects the data processed by each rank, we’re going to use the following code.</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/b0eab7ebb4ef72cebac137be73c2d9f6/pt_ddp_example.py"><code class="xref download docutils literal notranslate"><span class="pre">pt_ddp_example.py</span></code></a></span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Adapted from https://github.com/pytorch/examples/blob/main/distributed/ddp-tutorial-series/multinode.py</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataLoader</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.multiprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">DistributedSampler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">DistributedDataParallel</span> <span class="k">as</span> <span class="n">DDP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_process_group</span><span class="p">,</span> <span class="n">destroy_process_group</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">ddp_setup</span><span class="p">():</span>
+    <span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;nccl&quot;</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_device</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;LOCAL_RANK&quot;</span><span class="p">]))</span>
+
+<span class="c1"># Added this class becase datautils no longer exists</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyTrainDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">)]</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Trainer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+        <span class="n">train_data</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">,</span>
+        <span class="n">snapshot_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;LOCAL_RANK&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;RANK&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_rank</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span> <span class="o">=</span> <span class="n">train_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs_run</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_path</span> <span class="o">=</span> <span class="n">snapshot_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">DDP</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">device_ids</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">local_rank</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot_path</span><span class="p">):</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;cuda:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">local_rank</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">snapshot_path</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">loc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;MODEL_STATE&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs_run</span> <span class="o">=</span> <span class="n">snapshot</span><span class="p">[</span><span class="s2">&quot;EPOCHS_RUN&quot;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resuming training from snapshot at Epoch </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs_run</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">):</span>
+        <span class="n">b_sz</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[GPU</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_rank</span><span class="si">}</span><span class="s2">] Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2"> | Batchsize: </span><span class="si">{</span><span class="n">b_sz</span><span class="si">}</span><span class="s2"> | Steps: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">set_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">:</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_rank</span><span class="p">)</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_rank</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_batch</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs_run</span><span class="p">,</span> <span class="n">max_epochs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load_train_objs</span><span class="p">():</span>
+    <span class="n">train_set</span> <span class="o">=</span> <span class="n">MyTrainDataset</span><span class="p">(</span><span class="mi">2048</span><span class="o">*</span><span class="mi">2048</span><span class="p">)</span>  <span class="c1"># load your dataset</span>
+    <span class="c1"># Make layers for model</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span><span class="mi">2048</span><span class="p">)]</span>
+    <span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span><span class="mi">2048</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">13</span><span class="p">)]</span>
+    <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">train_set</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_dataloader</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">pin_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="c1"># Scales steps with number of workers</span>
+        <span class="n">sampler</span><span class="o">=</span><span class="n">DistributedSampler</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">total_epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">snapshot_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;snapshot.pt&quot;</span><span class="p">):</span>
+    <span class="n">ddp_setup</span><span class="p">()</span>
+    <span class="n">dataset</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span> <span class="o">=</span> <span class="n">load_train_objs</span><span class="p">()</span>
+    <span class="n">train_data</span> <span class="o">=</span> <span class="n">prepare_dataloader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">snapshot_path</span><span class="p">)</span>
+    <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">total_epochs</span><span class="p">)</span>
+    <span class="n">destroy_process_group</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;simple distributed training job&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--epochs&#39;</span><span class="p">,</span> <span class="n">defaut</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Total epochs to train the model&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--batch_size&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Input batch size on each device (default: 512)&#39;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    
+    <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The data is random, so this is just a “noise in, noise out” model that is large enough to not instantly finish.</p>
+<section id="optional-exercises">
+<h3>Optional Exercises<a class="headerlink" href="#optional-exercises" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>What happens if you run on 4 GPUs?</p></li>
+<li><p>Try increasing the batch size</p></li>
+</ul>
+</section>
+</section>
+<section id="pytorch-lightning">
+<h2>PyTorch Lightning<a class="headerlink" href="#pytorch-lightning" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://lightning.ai/docs/pytorch/stable/">PyTorch Lightning</a> is a high-level framework for building and training PyTorch models with simplicity and scalability.</p>
+<p>We can adapt the <a class="reference internal" href="#pytorch-ddp">PyTorch DDP</a> example for PyTorch Lightning as follows:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/8ecf393c960ce36d250bbd8eab52d9df/ptl_ddp_example.py"><code class="xref download docutils literal notranslate"><span class="pre">ptl_ddp_example.py</span></code></a></span><a class="headerlink" href="#id7" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataLoader</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">lightning</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">L</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">argparse</span>
+
+<span class="c1"># Added this class becase datautils no longer exists</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyTrainDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">)]</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">LanguageModel</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span><span class="mi">2048</span><span class="p">)]</span>
+        <span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span><span class="mi">2048</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">13</span><span class="p">)]</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+        <span class="nb">input</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;simple distributed training job&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--epochs&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Total epochs to train the model&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--batch_size&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Input batch size on each device (default: 512)&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-N&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of nodes&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of gpus per node&#39;</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    
+    <span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">MyTrainDataset</span><span class="p">(</span><span class="mi">2048</span><span class="o">*</span><span class="mi">2048</span><span class="p">),</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">LanguageModel</span><span class="p">()</span>
+
+    <span class="c1"># Trainer</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span><span class="n">max_epochs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span> <span class="n">devices</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">accelerator</span><span class="o">=</span><span class="s2">&quot;gpu&quot;</span><span class="p">,</span> <span class="n">num_nodes</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>You’ve probably noticed that the PyTorch Lightning version of this script is much shorter.
+PyTorch Lightning was designed to hide things like logging, distributed communication, data loading, and more in the background so it’s easier to just design models, utilize accelerators, and scale.</p>
+<p>Similarly to DDP, this script can then be launched with the following:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/74a2029714a9b7464dcb573024c0007e/run_ptl.sh"><code class="xref download docutils literal notranslate"><span class="pre">run_ptl.sh</span></code></a></span><a class="headerlink" href="#id8" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+# Set address for main process
+export NGC_MASTER_ADDR=launcher-svc-${NGC_JOB_ID}
+
+# Launch PTL script on all nodes and GPUs in job
+bcprun -no_redirect -n ${NGC_ARRAY_SIZE} -p ${NGC_GPUS_PER_NODE} -c &quot;python ptl_ddp_example.py -N ${NGC_ARRAY_SIZE} -p ${NGC_GPUS_PER_NODE}&quot;
+</pre></div>
+</div>
+</div>
+<p>Just notice that the main process URL, which is the hostname, needs to be set.</p>
+<p>When run this is run on 2 nodes with 8 GPUs each, you’ll see the following output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ bcprun -no_redirect -n 2 -p 8 -c &quot;python ptl_ddp_example.py -N 2 -p 8&quot;
+
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your
+ application as needed.
+*****************************************
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your
+ application as needed.
+*****************************************
+Initializing distributed: GLOBAL_RANK: 2, MEMBER: 3/16
+Initializing distributed: GLOBAL_RANK: 1, MEMBER: 2/16
+Initializing distributed: GLOBAL_RANK: 7, MEMBER: 8/16            
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+Initializing distributed: GLOBAL_RANK: 5, MEMBER: 6/16
+Initializing distributed: GLOBAL_RANK: 0, MEMBER: 1/16
+Initializing distributed: GLOBAL_RANK: 3, MEMBER: 4/16
+Initializing distributed: GLOBAL_RANK: 10, MEMBER: 11/16
+Initializing distributed: GLOBAL_RANK: 8, MEMBER: 9/16
+Initializing distributed: GLOBAL_RANK: 14, MEMBER: 15/16
+Initializing distributed: GLOBAL_RANK: 6, MEMBER: 7/16
+Initializing distributed: GLOBAL_RANK: 4, MEMBER: 5/16
+Initializing distributed: GLOBAL_RANK: 15, MEMBER: 16/16
+Initializing distributed: GLOBAL_RANK: 9, MEMBER: 10/16
+Initializing distributed: GLOBAL_RANK: 12, MEMBER: 13/16
+Initializing distributed: GLOBAL_RANK: 13, MEMBER: 14/16
+----------------------------------------------------------------------------------------------------
+distributed_backend=nccl
+All distributed processes registered. Starting with 16 processes
+----------------------------------------------------------------------------------------------------
+
+Initializing distributed: GLOBAL_RANK: 11, MEMBER: 12/16
+LOCAL_RANK: 5 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 6 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 3 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 4 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 7 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 2 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 1 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 4 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 3 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 6 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 1 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 5 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 2 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+LOCAL_RANK: 7 - CUDA_VISIBLE_DEVICES: [0,1,2,3,4,5,6,7]
+
+  | Name  | Type       | Params
+-------------------------------------
+0 | model | Sequential | 55.6 M
+-------------------------------------
+55.6 M    Trainable params
+0         Non-trainable params
+55.6 M    Total params
+222.464   Total estimated model params size (MB)
+/usr/local/lib/python3.8/dist-packages/lightning/pytorch/trainer/connectors/data_connector.py:441: The &#39;train_dataloader&#39; does not have many workers which may be a bottleneck. Consider 
+increasing the value of the `num_workers` argument` to `num_workers=30` in the `DataLoader` to improve performance.
+Epoch 4: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 512/512 [00:03&lt;00:00, 129.19it/s, v_num=2, train_loss=-]
+`Trainer.fit` stopped: `max_epochs=5` reached.
+Epoch 4: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 512/512 [00:04&lt;00:00, 119.64it/s, v_num=2, train_loss=-]
+Cleaning up
+Cleaning up
+</pre></div>
+</div>
+<section id="id2">
+<h3>Optional Exercises<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>What happens if you run on 4 GPUs?</p></li>
+<li><p>Try decreasing the batch size</p></li>
+</ul>
+</section>
+</section>
+<section id="pytorch-ray-train">
+<h2>Pytorch + Ray Train<a class="headerlink" href="#pytorch-ray-train" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://docs.ray.io/en/latest/index.html">Ray</a> is an open source framework to build and scale ML and Python applications.
+At it’s core, it contains collective operations that can be run on Ray “clusters”, or collections of worker processes.</p>
+<p>To use Ray across multiple nodes, a Ray cluster needs to first be started across the nodes.
+I recommend using the following helper script to start these processes in a BCP environment</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/3712f30fe7fa315015aeb4b560f5f794/start_ray_cluster.sh"><code class="xref download docutils literal notranslate"><span class="pre">start_ray_cluster.sh</span></code></a></span><a class="headerlink" href="#id9" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+
+if [ &quot;$NGC_ARRAY_SIZE&quot; -gt &quot;1&quot; ]; then
+  export NGC_MASTER_ADDR=launcher-svc-${NGC_JOB_ID}
+fi
+
+export PORT=6379
+
+if [ &quot;$NGC_REPLICA_ID&quot; -eq &quot;0&quot; ]; then
+	ray start --head --node-ip-address=${NGC_MASTER_ADDR} --port=${PORT}
+else
+	sleep 10
+	ray start --address=${NGC_MASTER_ADDR} --port=${PORT}
+fi
+</pre></div>
+</div>
+</div>
+<p>and the <code class="docutils literal notranslate"><span class="pre">bcprun</span></code> command to run the script on each node:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bcprun<span class="w"> </span>-no_redirect<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;bash start_ray_cluster.sh&#39;</span>
+</pre></div>
+</div>
+<p>This first starts the main process on the head node and then worker processes across all other nodes after sleeping for 10 seconds.
+Once the cluster is started, you’re able to submit jobs for execution on the cluster simply by utilizing the Ray library.</p>
+<p>To illustrate this, the <a class="reference external" href="https://docs.ray.io/en/latest/train/examples/pytorch/torch_fashion_mnist_example.html">Train a PyTorch Model on Fashion MNIST</a> example was modified to accept an argument for the number of workers</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text"><a class="reference download internal" download="" href="../_downloads/abede53874a43d21da7cbf0c8e72910e/ray%2Bpt.py"><code class="xref download docutils literal notranslate"><span class="pre">ray+pt.py</span></code></a></span><a class="headerlink" href="#id10" title="Link to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># https://docs.ray.io/en/latest/train/examples/pytorch/torch_fashion_mnist_example.html</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">filelock</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileLock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torchvision</span><span class="w"> </span><span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">transforms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torchvision.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Normalize</span><span class="p">,</span> <span class="n">ToTensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray.train</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.train</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScalingConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.train.torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">TorchTrainer</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_dataloaders</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+    <span class="c1"># Transform to normalize the input images</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">ToTensor</span><span class="p">(),</span> <span class="n">Normalize</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,))])</span>
+
+    <span class="k">with</span> <span class="n">FileLock</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/data.lock&quot;</span><span class="p">)):</span>
+        <span class="c1"># Download training data from open datasets</span>
+        <span class="n">training_data</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">FashionMNIST</span><span class="p">(</span>
+            <span class="n">root</span><span class="o">=</span><span class="s2">&quot;~/data&quot;</span><span class="p">,</span>
+            <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Download test data from open datasets</span>
+        <span class="n">test_data</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">FashionMNIST</span><span class="p">(</span>
+            <span class="n">root</span><span class="o">=</span><span class="s2">&quot;~/data&quot;</span><span class="p">,</span>
+            <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Create data loaders</span>
+    <span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">training_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">test_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">test_dataloader</span>
+
+
+<span class="c1"># Model Definition</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NeuralNetwork</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NeuralNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear_relu_stack</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">28</span> <span class="o">*</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_relu_stack</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">logits</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">train_func_per_worker</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+    <span class="n">lr</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">]</span>
+    <span class="n">epochs</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;batch_size_per_worker&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Get dataloaders inside the worker training function</span>
+    <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">test_dataloader</span> <span class="o">=</span> <span class="n">get_dataloaders</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+
+    <span class="c1"># [1] Prepare Dataloader for distributed training</span>
+    <span class="c1"># Shard the datasets among workers and move batches to the correct device</span>
+    <span class="c1"># =======================================================================</span>
+    <span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">torch</span><span class="o">.</span><span class="n">prepare_data_loader</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)</span>
+    <span class="n">test_dataloader</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">torch</span><span class="o">.</span><span class="n">prepare_data_loader</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">NeuralNetwork</span><span class="p">()</span>
+
+    <span class="c1"># [2] Prepare and wrap your model with DistributedDataParallel</span>
+    <span class="c1"># Move the model to the correct GPU/CPU device</span>
+    <span class="c1"># ============================================================</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">torch</span><span class="o">.</span><span class="n">prepare_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+
+    <span class="c1"># Model training loop</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ray</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">get_context</span><span class="p">()</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Required for the distributed sampler to shuffle properly across epochs.</span>
+            <span class="n">train_dataloader</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">set_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Train Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">test_loss</span><span class="p">,</span> <span class="n">num_correct</span><span class="p">,</span> <span class="n">num_total</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Test Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+                <span class="n">test_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="n">num_total</span> <span class="o">+=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">num_correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+        <span class="n">test_loss</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">)</span>
+        <span class="n">accuracy</span> <span class="o">=</span> <span class="n">num_correct</span> <span class="o">/</span> <span class="n">num_total</span>
+
+        <span class="c1"># [3] Report metrics to Ray Train</span>
+        <span class="c1"># ===============================</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">metrics</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">test_loss</span><span class="p">,</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">})</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">train_fashion_mnist</span><span class="p">(</span><span class="n">num_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">use_gpu</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">global_batch_size</span> <span class="o">=</span> <span class="mi">32</span>
+
+    <span class="n">train_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
+        <span class="s2">&quot;epochs&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s2">&quot;batch_size_per_worker&quot;</span><span class="p">:</span> <span class="n">global_batch_size</span> <span class="o">//</span> <span class="n">num_workers</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Configure computation resources</span>
+    <span class="n">scaling_config</span> <span class="o">=</span> <span class="n">ScalingConfig</span><span class="p">(</span><span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">use_gpu</span><span class="o">=</span><span class="n">use_gpu</span><span class="p">)</span>
+
+    <span class="c1"># Initialize a Ray TorchTrainer</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">TorchTrainer</span><span class="p">(</span>
+        <span class="n">train_loop_per_worker</span><span class="o">=</span><span class="n">train_func_per_worker</span><span class="p">,</span>
+        <span class="n">train_loop_config</span><span class="o">=</span><span class="n">train_config</span><span class="p">,</span>
+        <span class="n">scaling_config</span><span class="o">=</span><span class="n">scaling_config</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># [4] Start distributed training</span>
+    <span class="c1"># Run `train_func_per_worker` on all workers</span>
+    <span class="c1"># =============================================</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training result: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;PyTorch MNIST Example&quot;</span><span class="p">,</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--num-workers&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of Ray workers to use for training.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">train_fashion_mnist</span><span class="p">(</span><span class="n">num_workers</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The script can then be run across 2 nodes (16 GPUs) with the following command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>ray+pt.py<span class="w"> </span>--num-workers<span class="o">=</span><span class="m">16</span>
+</pre></div>
+</div>
+<p>This can also scale with your job size by using the <code class="docutils literal notranslate"><span class="pre">NGC_*</span></code> environment variables to calculate the number of GPUs in your job.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>ray+pt.py<span class="w"> </span>--num-workers<span class="o">=</span><span class="k">$((</span><span class="w"> </span><span class="nv">$NGC_ARRAY_SIZE</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nv">$NGC_GPUS_PER_NODE</span><span class="w"> </span><span class="k">))</span>
+</pre></div>
+</div>
+<p>Once you’re done, you can stop the ray cluster with</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ray<span class="w"> </span>stop<span class="w"> </span>-f
+</pre></div>
+</div>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html">PyTorch DDP Tutorial</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../parabricks_on_bcp/01-introduction.html" class="btn btn-neutral float-left" title="Parabricks on BCP Workshop" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../containers_on_bcp/01-introduction.html" class="btn btn-neutral float-right" title="Containers on BCP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Greg Zynda.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
