@@ -330,10 +330,10 @@ NVDB fp8   37                    1.2
 ZARR       14                    202 (all time steps)
 ========== ===================== =======================
 
-Exporting visuals and create animations
+Exporting visuals and creating animations
 -----------------------------------------
 
-
+TBD
 
 Launching multi-node rendering jobs
 -------------------------------------
